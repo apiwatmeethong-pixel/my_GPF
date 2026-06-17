@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My GPF Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    
+    <style>
+      :root {
+        --primary-bg: #f4f7f6; --card-bg: #ffffff; --text-main: #2c3e50; --text-muted: #7f8c8d;
+        --primary-color: #3498db; --gold-color: #f39c12; --reit-color: #8e44ad; --daily-color: #e67e22; --thai-color: #e74c3c;
+      }
+      body { font-family: 'Prompt', sans-serif; background-color: var(--primary-bg); color: var(--text-main); margin: 0; padding: 0; }
+      
+      /* --- สไตล์สำหรับหน้า Login --- */
+      #login-page {
+        display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #f4f7f6, #e0eafc);
+      }
+      .login-card {
+        background: var(--card-bg); padding: 40px 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 90%; max-width: 350px; text-align: center;
+      }
+      .login-card h2 { margin-top: 0; color: #2c3e50; font-weight: 600; margin-bottom: 25px; }
+      .login-input {
+        width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #dfe6e9; border-radius: 10px; font-family: 'Prompt'; font-size: 14px; box-sizing: border-box; outline: none; transition: 0.3s;
+      }
+      .login-input:focus { border-color: var(--primary-color); box-shadow: 0 0 5px rgba(52, 152, 219, 0.3); }
+      .login-btn {
+        width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 10px; font-family: 'Prompt'; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s;
+      }
+      .login-btn:hover { background: #2980b9; transform: translateY(-2px); }
+      .login-msg { margin-top: 15px; font-size: 13px; color: #e74c3c; min-height: 20px; }
+
+      /* --- สไตล์ของระบบหลัก --- */
+      #main-app { display: none; padding: 15px; padding-bottom: 80px; }
+      h2.app-title { text-align: center; font-weight: 600; font-size: 22px; margin-bottom: 20px; color: #1a252f; }
+      h3 { margin-top: 0; font-size: 16px; font-weight: 600; color: #34495e; margin-bottom: 12px; }
+      
+      .card { background: var(--card-bg); padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 20px; }
+      
+      .summary-box { text-align: center; background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); color: white; }
+      .summary-box h3 { color: #e0e0e0; font-weight: 400; font-size: 14px; margin-bottom: 5px; }
+      .total-money { font-size: clamp(32px, 8vw, 46px); font-weight: 700; margin: 10px 0; color: #00FFD1; }
+      .total-ytd { font-size: 16px; font-weight: 600; background: rgba(255,255,255,0.15); padding: 6px 18px; border-radius: 30px; display: inline-block; }
+
+      .checkbox-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+      .checkbox-container label { background: #f8f9fa; border: 1px solid #dee2e6; padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 400; color: #495057; cursor: pointer; }
+      .custom-plan-label { background: linear-gradient(135deg, #f2994a, #f2c94c) !important; color: #fff !important; font-weight: 600 !important; border: none !important;}
+
+      .table-responsive { overflow-x: auto; border-radius: 10px; }
+      table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 400px; }
+      th, td { padding: 12px 10px; border-bottom: 1px solid #f1f2f6; text-align: right; font-size: 13px; }
+      th { background-color: #f8f9fa; color: var(--text-muted); font-weight: 600; font-size: 12px; white-space: nowrap; }
+      td:first-child, th:first-child { text-align: left; } 
+      .positive { color: #27ae60; font-weight: 600; background: rgba(39, 174, 96, 0.1); padding: 4px 8px; border-radius: 6px; }
+      .negative { color: #e74c3c; font-weight: 600; background: rgba(231, 76, 60, 0.1); padding: 4px 8px; border-radius: 6px; }
+      .neutral { color: #7f8c8d; font-size: 11px; }
+
+      .page { display: none; animation: fadeIn 0.3s; }
+      .page.active { display: block; }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+      .nav-bottom { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000; }
+      .nav-item { flex: 1; text-align: center; padding: 12px 0; color: var(--text-muted); cursor: pointer; font-size: 11px; font-weight: 500; transition: 0.2s; }
+      .nav-item.active { color: var(--primary-color); font-weight: 600; }
+      .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; }
+      
+      .logout-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--text-muted); font-family: 'Prompt'; font-size: 14px; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+
+    <div id="login-page">
+      <div class="login-card">
+        <h2><i class="fas fa-lock" style="color: var(--primary-color);"></i> เข้าสู่ระบบ</h2>
+        <input type="text" id="username" class="login-input" placeholder="ชื่อผู้ใช้งาน (User)">
+        <input type="password" id="password" class="login-input" placeholder="รหัสผ่าน (Password)">
+        <button class="login-btn" onclick="login()">เข้าสู่ระบบ</button>
+        <div id="login-msg" class="login-msg"></div>
+      </div>
+    </div>
+
+    <div id="main-app">
+      <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> ออกจากระบบ</button>
+      <h2 id="main_title" class="app-title">📈 My GPF Portfolio</h2>
+
+      <div id="page-portfolio" class="page active">
+        <div class="card summary-box">
+          <h3>มูลค่าพอร์ต กบข. ของฉัน (บาท)</h3>
+          <div id="total_money" class="total-money">กำลังคำนวณ... ⏳</div>
+          <div id="total_ytd" class="total-ytd"></div>
+        </div>
+        <div class="card">
+          <h3>📌 เลือกแผนเพื่อเปรียบเทียบ</h3>
+          <div id="checkboxes" class="checkbox-container"></div>
+          <div id="chart_div" style="height: 350px;"></div>
+        </div>
+        <div class="card">
+          <h3>📋 ข้อมูล NAV ล่าสุด</h3>
+          <div class="table-responsive"><div id="table_div"></div></div>
+        </div>
+      </div>
+
+      <div id="page-daily" class="page">
+        <div class="card summary-box" style="background: linear-gradient(135deg, #e67e22, #d35400);">
+          <h3>เปลี่ยนแปลงล่าสุด (เทียบเมื่อวาน)</h3>
+          <div id="daily_change_money" class="total-money" style="color:#fff;">0.00</div>
+          <div id="daily_change_pct" class="total-ytd" style="background: rgba(0,0,0,0.2);">0.00%</div>
+        </div>
+        <div class="card">
+          <h3 style="color: var(--daily-color);"><i class="fas fa-chart-bar"></i> กราฟแท่งกำไร/ขาดทุนรายวัน</h3>
+          <div id="daily_chart_div" style="height: 300px;">กำลังโหลด...</div>
+        </div>
+        <div class="card">
+          <h3>📋 เจาะลึกรายวัน (Daily Breakdown)</h3>
+          <div class="table-responsive"><div id="daily_table_div">กำลังโหลด...</div></div>
+        </div>
+      </div>
+
+      <div id="page-thaistock" class="page">
+        <div class="card">
+          <h3 style="color: var(--thai-color);"><i class="fas fa-chart-line"></i> คาดการณ์ NAV หุ้นไทย</h3>
+          <div id="thaistock_chart_div" style="height: 350px;">กำลังโหลด...</div>
+        </div>
+        <div class="card">
+          <h3>📋 สรุปผลต่างล่าสุด (NAV_Diff)</h3>
+          <div class="table-responsive"><div id="thaistock_table_div">กำลังโหลด...</div></div>
+        </div>
+      </div>
+
+      <div id="page-gold" class="page">
+        <div class="card">
+          <h3 style="color: var(--gold-color);"><i class="fas fa-coins"></i> คาดการณ์ NAV ทองคำ</h3>
+          <div id="gold_chart_div" style="height: 350px;">กำลังโหลด...</div>
+        </div>
+        <div class="card">
+          <h3>📋 สรุปผลต่างล่าสุด (NAV_Diff)</h3>
+          <div class="table-responsive"><div id="gold_table_div">กำลังโหลด...</div></div>
+        </div>
+      </div>
+
+      <div id="page-reit" class="page">
+        <div class="card">
+          <h3 style="color: var(--reit-color);"><i class="fas fa-city"></i> คาดการณ์ NAV อสังหาฯ (REIT)</h3>
+          <div id="reit_chart_div" style="height: 350px;">กำลังโหลด...</div>
+        </div>
+        <div class="card">
+          <h3>📋 สรุปผลต่างล่าสุด (NAV_Diff)</h3>
+          <div class="table-responsive"><div id="reit_table_div">กำลังโหลด...</div></div>
+        </div>
+      </div>
+
+      <div class="nav-bottom">
+        <div class="nav-item active" onclick="switchPage('portfolio', this)"><i class="fas fa-chart-pie"></i> รวม</div>
+        <div class="nav-item" onclick="switchPage('daily', this)"><i class="fas fa-calendar-day"></i> รายวัน</div>
+        <div class="nav-item" onclick="switchPage('thaistock', this)"><i class="fas fa-chart-line"></i> หุ้นไทย</div>
+        <div class="nav-item" onclick="switchPage('gold', this)"><i class="fas fa-coins"></i> ทองคำ</div>
+        <div class="nav-item" onclick="switchPage('reit', this)"><i class="fas fa-city"></i> อสังหาฯ</div>
+      </div>
+    </div>
+
+    <script>
+      google.charts.load('current', {'packages':['corechart']});
+      
+      // ⚠️ ใส่ URL ของ API Web App ของคุณที่นี่
+      const API_URL = "https://script.google.com/macros/s/AKfycbwK791xZg6NEhcRwaUwmlcj4-iCvTzBr3A7TxfSvluzuU2cszzkWAOXOdyiAyVGriu4UQ/exec";
+
+      let currentUser = ""; 
+      let customPlanName = '🚀 พอร์ตจริงของฉัน (บาท)';
+      
+      var globalHeaders = [], ytdData = [], myUnits = {};
+      var goldDataRaw = [], reitDataRaw = [], thaiStockDataRaw = [];
+      var dailyRecords = []; 
+
+      // ========================== ระบบ Login ==========================
+      function login() {
+        var u = document.getElementById('username').value.trim();
+        var p = document.getElementById('password').value.trim();
+        var msgBox = document.getElementById('login-msg');
+
+        if(u === "" || p === "") {
+          msgBox.innerHTML = "กรุณากรอกข้อมูลให้ครบถ้วน";
+          return;
+        }
+
+        msgBox.innerHTML = "กำลังตรวจสอบข้อมูล... <i class='fas fa-spinner fa-spin'></i>";
+
+        fetch(API_URL + "?action=login&user=" + encodeURIComponent(u) + "&pass=" + encodeURIComponent(p))
+          .then(res => res.json())
+          .then(data => {
+            if(data.status === "success") {
+              currentUser = data.username;
+              customPlanName = "🚀 พอร์ตของ " + data.fname; // เปลี่ยนชื่อพอร์ตตามคนล็อคอิน
+              
+              // ซ่อนหน้า Login โชว์หน้าแอป
+              document.getElementById('login-page').style.display = "none";
+              document.getElementById('main-app').style.display = "block";
+              
+              // ดึงข้อมูลพอร์ตของ User คนนี้
+              fetchData();
+            } else {
+              msgBox.innerHTML = data.message;
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            msgBox.innerHTML = "การเชื่อมต่อขัดข้อง กรุณาลองใหม่";
+          });
+      }
+
+      function logout() {
+        currentUser = "";
+        document.getElementById('username').value = "";
+        document.getElementById('password').value = "";
+        document.getElementById('login-msg').innerHTML = "";
+        document.getElementById('main-app').style.display = "none";
+        document.getElementById('login-page').style.display = "flex";
+      }
+
+      // ========================== ดึงข้อมูลหลัก ==========================
+      function fetchData() {
+        // 1. ดึงข้อมูลพอร์ต (แนบ user ไปให้ API กรองด้วย)
+        fetch(API_URL + "?action=getNavData&user=" + encodeURIComponent(currentUser))
+          .then(response => response.json())
+          .then(data => processData(data))
+          .catch(err => console.error("พอร์ต Error:", err));
+
+        // 2. ดึงข้อมูลหุ้นไทย
+        fetch(API_URL + "?action=getThaiStockData")
+          .then(response => response.json())
+          .then(data => processThaiStockData(data))
+          .catch(err => console.error("หุ้นไทย Error:", err));
+
+        // 3. ดึงข้อมูลทองคำ
+        fetch(API_URL + "?action=getGoldData")
+          .then(response => response.json())
+          .then(data => processGoldData(data))
+          .catch(err => console.error("ทองคำ Error:", err));
+
+        // 4. ดึงข้อมูลอสังหาฯ
+        fetch(API_URL + "?action=getReitData")
+          .then(response => response.json())
+          .then(data => processReitData(data))
+          .catch(err => console.error("อสังหา Error:", err));
+      }
+
+      // ========================== ฟังก์ชันจัดรูปแบบและวาดกราฟ (เหมือนเดิม) ==========================
+      function formatShortDate(raw) {
+        if (!raw) return '';
+        var str = String(raw).trim();
+        if (str === 'T+1' || str === 'T+2') return str; 
+        if (str.includes('-')) {
+            var parts = str.split('-');
+            if (parts.length >= 3) return parts[2].substring(0, 2).padStart(2, '0') + '/' + parts[1].padStart(2, '0');
+        }
+        if (str.includes('/')) {
+            var parts = str.split('/');
+            if (parts.length >= 2) return parts[0].substring(0, 2).padStart(2, '0') + '/' + parts[1].substring(0, 2).padStart(2, '0');
+        }
+        var d = new Date(raw);
+        if (!isNaN(d.getTime())) return d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth() + 1).toString().padStart(2, '0');
+        return str.substring(0, 5); 
+      }
+
+      function switchPage(pageId, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + pageId).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        el.classList.add('active');
+        
+        var titles = { 
+          'portfolio': '📈 My GPF Portfolio', 
+          'daily': '📅 Daily Profit/Loss',
+          'thaistock': '🇹🇭 Thai Stock Forecast',
+          'gold': '🪙 Gold NAV Forecast', 
+          'reit': '🏢 REIT NAV Forecast' 
+        };
+        document.getElementById('main_title').innerHTML = titles[pageId];
+
+        if(pageId === 'portfolio' && ytdData.length > 0) updateDashboard();
+        if(pageId === 'daily' && dailyRecords.length > 0) drawDailyDashboard();
+        if(pageId === 'thaistock' && thaiStockDataRaw.length > 0) drawThaiStockDashboard();
+        if(pageId === 'gold' && goldDataRaw.length > 0) drawGoldDashboard();
+        if(pageId === 'reit' && reitDataRaw.length > 0) drawReitDashboard();
+      }
+
+      // ฟังก์ชันพอร์ต
+      function processData(response) {
+        try {
+            if (!response || !response.data) return;
+            globalHeaders = response.headers;
+            var data = response.data.filter(row => row[0] && String(row[0]).trim() !== '');
+            if(data.length === 0) return;
+
+            myUnits = response.myUnits;
+            globalHeaders.push(customPlanName);
+
+            for (var i = 0; i < data.length; i++) {
+              var dailyTotalMoney = 0;
+              for (var plan in myUnits) {
+                var planIdx = globalHeaders.indexOf(plan);
+                if (planIdx !== -1) {
+                  var navPrice = parseFloat(data[i][planIdx]) || 0;
+                  dailyTotalMoney += (navPrice * myUnits[plan]);
+                }
+              }
+              data[i].push(dailyTotalMoney); 
+            }
+
+            var lastRowRaw = data[data.length - 1][0];
+            var currentYearStr = "";
+            var tempD = new Date(lastRowRaw);
+            if (!isNaN(tempD.getTime())) currentYearStr = String(tempD.getFullYear());
+            else if (String(lastRowRaw).includes('/')) {
+                var parts = String(lastRowRaw).split('/');
+                if (parts.length >= 3) currentYearStr = parts[2].substring(0, 4);
+            }
+            
+            ytdData = data.filter(row => String(row[0]).includes(currentYearStr));
+            if (ytdData.length === 0) ytdData = data; 
+
+            dailyRecords = [];
+            var customIdx = globalHeaders.indexOf(customPlanName);
+            
+            for(var i = 1; i < ytdData.length; i++) {
+                var todayVal = parseFloat(ytdData[i][customIdx]);
+                var ydayVal = parseFloat(ytdData[i-1][customIdx]);
+                var diff = todayVal - ydayVal;
+                var pct = ydayVal > 0 ? (diff / ydayVal) * 100 : 0;
+                
+                var planDiffs = {};
+                for(var plan in myUnits) {
+                    var pIdx = globalHeaders.indexOf(plan);
+                    if (pIdx !== -1) {
+                        var pToday = parseFloat(ytdData[i][pIdx]);
+                        var pYday = parseFloat(ytdData[i-1][pIdx]);
+                        planDiffs[plan] = pYday > 0 ? ((pToday - pYday) / pYday) * 100 : 0;
+                    }
+                }
+                dailyRecords.push({ date: formatShortDate(ytdData[i][0]), total: todayVal, diff: diff, pct: pct, planDiffs: planDiffs });
+            }
+
+            updateSummaryBox();
+            createCheckboxes();
+        } catch(e) { console.error("Data Error: ", e); }
+      }
+
+      function updateSummaryBox() {
+        if(ytdData.length === 0) return;
+        var customIdx = globalHeaders.indexOf(customPlanName);
+        var baseValue = parseFloat(ytdData[0][customIdx]); 
+        var latestValue = parseFloat(ytdData[ytdData.length - 1][customIdx]); 
+        
+        document.getElementById('total_money').innerHTML = '฿ ' + latestValue.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        var ytdPct = baseValue > 0 ? ((latestValue - baseValue) / baseValue) * 100 : 0;
+        document.getElementById('total_ytd').innerHTML = (ytdPct >= 0 ? '▲ +' : '▼ ') + ytdPct.toFixed(2) + '% (YTD)';
+
+        if(dailyRecords.length > 0) {
+            var latestDay = dailyRecords[dailyRecords.length - 1];
+            var sign = latestDay.diff >= 0 ? '+' : '';
+            document.getElementById('daily_change_money').innerHTML = sign + latestDay.diff.toLocaleString('th-TH', { maximumFractionDigits: 2 }) + ' ฿';
+            document.getElementById('daily_change_pct').innerHTML = sign + latestDay.pct.toFixed(2) + '%';
+        }
+      }
+
+      function createCheckboxes() {
+        var container = document.getElementById('checkboxes');
+        var html = '';
+        var defaultChecked = [customPlanName, 'แผนหุ้นไทย', 'แผนทองคำ'];
+        for (var i = 1; i < globalHeaders.length; i++) {
+          var planName = globalHeaders[i];
+          var isChecked = defaultChecked.includes(planName) ? 'checked' : '';
+          var labelClass = planName === customPlanName ? 'class="custom-plan-label"' : '';
+          html += `<label ${labelClass}><input type="checkbox" value="${planName}" ${isChecked} onchange="updateDashboard()"> ${planName.replace('แผนการลงทุน','')}</label>`;
+        }
+        container.innerHTML = html;
+        updateDashboard(); 
+      }
+
+      function updateDashboard() {
+        var checkboxes = document.querySelectorAll('#checkboxes input:checked');
+        var selectedPlans = Array.from(checkboxes).map(cb => cb.value);
+        var chartData = new google.visualization.DataTable();
+        chartData.addColumn('string', 'วันที่');
+        var planIndices = [], baseValues = [];
+
+        selectedPlans.forEach(plan => {
+          chartData.addColumn('number', plan.replace('แผนการลงทุน',''));
+          planIndices.push(globalHeaders.indexOf(plan));
+          baseValues.push(parseFloat(ytdData[0][globalHeaders.indexOf(plan)])); 
+        });
+
+        for (var i = 0; i < ytdData.length; i++) {
+          var rowData = [formatShortDate(ytdData[i][0])];
+          for (var j = 0; j < selectedPlans.length; j++) {
+            var baseVal = baseValues[j];
+            rowData.push(baseVal > 0 ? (parseFloat(ytdData[i][planIndices[j]]) - baseVal) / baseVal : 0);
+          }
+          chartData.addRow(rowData);
+        }
+
+        var options = {
+          fontName: 'Prompt', lineWidth: 3, pointsVisible: true, pointSize: 4,
+          colors: ['#f39c12', '#3498db', '#e74c3c', '#2ecc71', '#9b59b6'], 
+          legend: { position: 'top', textStyle: {fontSize: 12} },
+          vAxis: { format: '#,##0.00%', textStyle: {color: '#7f8c8d'} },
+          hAxis: { textStyle: {color: '#7f8c8d'}, slantedText: true, slantedTextAngle: 45 },
+          chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent'
+        };
+        new google.visualization.LineChart(document.getElementById('chart_div')).draw(chartData, options);
+        drawTable(selectedPlans, planIndices, baseValues);
+      }
+
+      function drawTable(selectedPlans, planIndices, baseValues) {
+        var html = '<table><thead><tr><th>แผนการลงทุน</th><th>NAV ล่าสุด</th><th>% YTD</th></tr></thead><tbody>';
+        var latestRow = ytdData[ytdData.length - 1];
+        for (var i = 0; i < selectedPlans.length; i++) {
+          var planName = selectedPlans[i];
+          var baseVal = baseValues[i];
+          var latestVal = parseFloat(latestRow[planIndices[i]]);
+          var ytdPct = baseVal > 0 ? ((latestVal - baseVal) / baseVal) * 100 : 0;
+          var displayLatest = planName === customPlanName ? '฿' + latestVal.toLocaleString('th-TH', {maximumFractionDigits:2}) : latestVal.toFixed(4);
+          var rowClass = planName === customPlanName ? ' class="custom-row"' : '';
+          
+          html += `<tr${rowClass}>
+            <td>${planName.replace('แผนกองทุน', '')}</td>
+            <td>${displayLatest}</td>
+            <td><span class="${ytdPct >= 0 ? 'positive' : 'negative'}">${ytdPct >= 0 ? '+' : ''}${ytdPct.toFixed(2)}%</span></td>
+          </tr>`;
+        }
+        document.getElementById('table_div').innerHTML = html + '</tbody></table>';
+      }
+
+      // ฟังก์ชันรายวัน
+      function drawDailyDashboard() {
+        if(dailyRecords.length === 0) return;
+        var recentRecords = dailyRecords.slice(-20);
+        var dt = new google.visualization.DataTable();
+        dt.addColumn('string', 'วันที่');
+        dt.addColumn('number', 'เปลี่ยน (บาท)');
+        dt.addColumn({type: 'string', role: 'style'}); 
+        dt.addColumn({type: 'string', role: 'tooltip', p: {html: true}});
+
+        var winCount = 0, lossCount = 0;
+
+        recentRecords.forEach(r => {
+            if (r.diff >= 0) winCount++; else lossCount++;
+            var color = r.diff >= 0 ? 'color: #27ae60' : 'color: #e74c3c';
+            var sign = r.diff >= 0 ? '+' : '';
+            var tooltipHtml = `<div style="padding:10px; font-family:'Prompt';"><b>${r.date}</b><br/>มูลค่า: ฿${r.total.toLocaleString('th-TH', {maximumFractionDigits:2})}<br/>เปลี่ยน: ${sign}${r.diff.toLocaleString('th-TH', {maximumFractionDigits:2})} ฿ (${sign}${r.pct.toFixed(2)}%)</div>`;
+            dt.addRow([r.date, r.diff, color, tooltipHtml]);
+        });
+
+        var options = {
+            fontName: 'Prompt', legend: 'none',
+            vAxis: { textStyle: {color: '#7f8c8d'}, gridlines: {color: '#f1f2f6'} },
+            hAxis: { textStyle: {color: '#7f8c8d'}, slantedText: true, slantedTextAngle: 45 },
+            chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent', tooltip: {isHtml: true}
+        };
+        new google.visualization.ColumnChart(document.getElementById('daily_chart_div')).draw(dt, options);
+
+        var myPlanNames = Object.keys(myUnits);
+        var tableHtml = `
+            <div style="font-size: 12px; color: #7f8c8d; margin-bottom: 10px; text-align: left;">
+               📊 สถิติ 20 วันล่าสุด: <span style="color:#27ae60; font-weight:bold;">กำไร ${winCount} วัน</span> / <span style="color:#e74c3c; font-weight:bold;">ขาดทุน ${lossCount} วัน</span>
+            </div>
+            <table><thead><tr>
+                <th>วันที่</th>
+                <th>มูลค่าพอร์ต</th>
+                <th>+/- (฿)</th>
+                <th>+/- (%)</th>`;
+        
+        myPlanNames.forEach(p => {
+            var shortName = p.replace('แผน', '').replace('กองทุนรวม', '').replace('กองทุน', '');
+            if (shortName.length > 10) shortName = shortName.substring(0, 10) + '..';
+            tableHtml += `<th>${shortName}</th>`;
+        });
+        tableHtml += '</tr></thead><tbody>';
+
+        [...recentRecords].reverse().forEach(r => {
+            var sign = r.diff >= 0 ? '+' : '';
+            var classStr = r.diff > 0 ? 'positive' : (r.diff < 0 ? 'negative' : 'neutral');
+            
+            tableHtml += `<tr>
+                <td style="text-align:left">${r.date}</td>
+                <td>฿${r.total.toLocaleString('th-TH', {maximumFractionDigits:0})}</td>
+                <td><span class="${classStr}">${sign}${r.diff.toLocaleString('th-TH', {maximumFractionDigits:2})}</span></td>
+                <td><span class="${classStr}">${sign}${r.pct.toFixed(2)}%</span></td>`;
+            
+            myPlanNames.forEach(p => {
+                var pVal = r.planDiffs[p] || 0;
+                var pSign = pVal >= 0 ? '+' : '';
+                var pClass = pVal > 0 ? 'positive' : (pVal < 0 ? 'negative' : 'neutral');
+                var pDisplay = pVal === 0 ? '-' : `${pSign}${pVal.toFixed(2)}%`;
+                tableHtml += `<td><span class="${pClass}" style="font-size: 11px;">${pDisplay}</span></td>`;
+            });
+            tableHtml += `</tr>`;
+        });
+        document.getElementById('daily_table_div').innerHTML = tableHtml + '</tbody></table>';
+      }
+
+      // ฟังก์ชัน หุ้นไทย
+      function processThaiStockData(response) {
+        try {
+            if (!response || response.error) return;
+            var data = response.data.filter(row => row[0] && String(row[0]).trim() !== ''); 
+            if(data.length === 0) return;
+
+            var forecastData = [];
+            for (var i = 0; i < data.length; i++) {
+                if(String(data[i][0]).includes('วันที่') || String(data[i][0]).includes('Date')) continue; 
+                var dateStr = formatShortDate(data[i][0]);
+                var actualNav = parseFloat(String(data[i][12]).replace(/,/g, '')); 
+                var forecastNav = parseFloat(String(data[i][13]).replace(/,/g, '')); 
+                var diffVal = parseFloat(String(data[i][14]).replace(/,/g, '')); 
+
+                forecastData.push({ 
+                    date: dateStr, actual: isNaN(actualNav) ? null : actualNav, 
+                    forecast: isNaN(forecastNav) ? null : forecastNav, diff: isNaN(diffVal) ? null : diffVal 
+                });
+            }
+            thaiStockDataRaw = forecastData;
+            if(document.getElementById('page-thaistock').classList.contains('active')) drawThaiStockDashboard();
+        } catch(e) { console.error(e); }
+      }
+
+      function drawThaiStockDashboard() {
+        if(thaiStockDataRaw.length === 0) return;
+        document.getElementById('thaistock_chart_div').innerHTML = ""; 
+        var dt = new google.visualization.DataTable();
+        dt.addColumn('string', 'วันที่');
+        dt.addColumn('number', 'NAV จริง');
+        dt.addColumn('number', 'Forecast');
+
+        thaiStockDataRaw.forEach(row => { if (row.actual !== null || row.forecast !== null) dt.addRow([row.date, row.actual, row.forecast]); });
+
+        var options = {
+            fontName: 'Prompt', curveType: 'function', lineWidth: 3, pointsVisible: true, pointSize: 4,
+            colors: ['#e74c3c', '#f1c40f'], legend: { position: 'top' },
+            vAxis: { textStyle: {color: '#7f8c8d'} }, hAxis: { textStyle: {color: '#7f8c8d'}, slantedText: true, slantedTextAngle: 45 },
+            chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent'
+        };
+        new google.visualization.LineChart(document.getElementById('thaistock_chart_div')).draw(dt, options);
+
+        var tableHtml = '<table><thead><tr><th>วันที่</th><th>NAV จริง</th><th>Forecast</th><th>Diff</th></tr></thead><tbody>';
+        thaiStockDataRaw.slice(-15).reverse().forEach(row => {
+            var navRealStr = (row.actual === null) ? '-' : row.actual.toFixed(4);
+            var navForeStr = (row.forecast === null) ? '-' : row.forecast.toFixed(4);
+            var diffStr = (row.diff === null) ? '-' : (row.diff > 0 ? '+' : '') + row.diff.toFixed(4);
+            var diffClass = (row.diff === null) ? '' : (row.diff >= 0 ? 'positive' : 'negative');
+            tableHtml += `<tr><td style="text-align:left">${row.date}</td><td>${navRealStr}</td><td style="color:#f1c40f">${navForeStr}</td><td><span class="${diffClass}">${diffStr}</span></td></tr>`;
+        });
+        document.getElementById('thaistock_table_div').innerHTML = tableHtml + '</tbody></table>';
+      }
+
+      // ฟังก์ชัน ทองคำ
+      function processGoldData(response) {
+        try {
+            if (!response || response.error) return;
+            goldDataRaw = response.data.filter(row => row[0] && String(row[0]).trim() !== '');
+            if(document.getElementById('page-gold').classList.contains('active')) drawGoldDashboard();
+        } catch(e) { console.error(e); }
+      }
+
+      function drawGoldDashboard() {
+        if(goldDataRaw.length === 0) return;
+        document.getElementById('gold_chart_div').innerHTML = ""; 
+        var dt = new google.visualization.DataTable();
+        dt.addColumn('string', 'วันที่');
+        dt.addColumn('number', 'NAV จริง');
+        dt.addColumn('number', 'Forecast');
+
+        goldDataRaw.forEach(row => {
+            var dateStr = formatShortDate(row[0]); 
+            var navReal = parseFloat(row[3]); 
+            var navFore = parseFloat(row[4]); 
+            if (!isNaN(navReal) || !isNaN(navFore)) dt.addRow([dateStr, navReal, navFore]);
+        });
+
+        var options = {
+            fontName: 'Prompt', curveType: 'function', lineWidth: 3, pointsVisible: true, pointSize: 4,
+            colors: ['#f1c40f', '#3498db'], legend: { position: 'top' },
+            vAxis: { textStyle: {color: '#7f8c8d'} }, hAxis: { textStyle: {color: '#7f8c8d'}, slantedText: true, slantedTextAngle: 45 },
+            chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent'
+        };
+        new google.visualization.LineChart(document.getElementById('gold_chart_div')).draw(dt, options);
+
+        var tableHtml = '<table><thead><tr><th>วันที่</th><th>NAV จริง</th><th>Forecast</th><th>Diff</th></tr></thead><tbody>';
+        goldDataRaw.slice(-15).reverse().forEach(row => {
+            var dateStr = formatShortDate(row[0]); 
+            var navRealStr = isNaN(parseFloat(row[3])) ? '-' : parseFloat(row[3]).toFixed(4);
+            var navForeStr = isNaN(parseFloat(row[4])) ? '-' : parseFloat(row[4]).toFixed(4);
+            var diffVal = parseFloat(row[5]);
+            var diffStr = isNaN(diffVal) ? '-' : (diffVal > 0 ? '+' : '') + diffVal.toFixed(4);
+            var diffClass = isNaN(diffVal) ? '' : (diffVal >= 0 ? 'positive' : 'negative');
+            tableHtml += `<tr><td style="text-align:left">${dateStr}</td><td>${navRealStr}</td><td style="color:#3498db">${navForeStr}</td><td><span class="${diffClass}">${diffStr}</span></td></tr>`;
+        });
+        document.getElementById('gold_table_div').innerHTML = tableHtml + '</tbody></table>';
+      }
+
+      // ฟังก์ชัน อสังหาฯ (REIT)
+      function processReitData(response) {
+        try {
+            if (!response || response.error) return;
+            var data = response.data.filter(row => row[0] && String(row[0]).trim() !== ''); 
+            if(data.length === 0) return;
+
+            var reitForecastData = [];
+            for (var i = 0; i < data.length; i++) {
+                var dateStr = formatShortDate(data[i][0]);
+                var actualNav = parseFloat(String(data[i][1]).replace(/,/g, '')); 
+                var forecastNav = parseFloat(String(data[i][10]).replace(/,/g, '')); 
+                var diffVal = parseFloat(String(data[i][11]).replace(/,/g, '')); 
+
+                reitForecastData.push({ 
+                    date: dateStr, actual: isNaN(actualNav) ? null : actualNav, 
+                    forecast: isNaN(forecastNav) ? null : forecastNav, diff: isNaN(diffVal) ? null : diffVal 
+                });
+            }
+            reitDataRaw = reitForecastData;
+            if(document.getElementById('page-reit').classList.contains('active')) drawReitDashboard();
+        } catch(e) { console.error(e); }
+      }
+
+      function drawReitDashboard() {
+        if(reitDataRaw.length === 0) return;
+        document.getElementById('reit_chart_div').innerHTML = ""; 
+        var dt = new google.visualization.DataTable();
+        dt.addColumn('string', 'วันที่');
+        dt.addColumn('number', 'NAV จริง');
+        dt.addColumn('number', 'Forecast');
+
+        reitDataRaw.forEach(row => { if (row.actual !== null || row.forecast !== null) dt.addRow([row.date, row.actual, row.forecast]); });
+
+        var options = {
+            fontName: 'Prompt', curveType: 'function', lineWidth: 3, pointsVisible: true, pointSize: 4,
+            colors: ['#2ecc71', '#8e44ad'], legend: { position: 'top' },
+            vAxis: { textStyle: {color: '#7f8c8d'} }, hAxis: { textStyle: {color: '#7f8c8d'}, slantedText: true, slantedTextAngle: 45 },
+            chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent'
+        };
+        new google.visualization.LineChart(document.getElementById('reit_chart_div')).draw(dt, options);
+
+        var tableHtml = '<table><thead><tr><th>วันที่</th><th>NAV จริง</th><th>Forecast</th><th>Diff</th></tr></thead><tbody>';
+        reitDataRaw.slice(-15).reverse().forEach(row => {
+            var navRealStr = (row.actual === null) ? '-' : row.actual.toFixed(4);
+            var navForeStr = (row.forecast === null) ? '-' : row.forecast.toFixed(4);
+            var diffStr = (row.diff === null) ? '-' : (row.diff > 0 ? '+' : '') + row.diff.toFixed(4);
+            var diffClass = (row.diff === null) ? '' : (row.diff >= 0 ? 'positive' : 'negative');
+            tableHtml += `<tr><td style="text-align:left">${row.date}</td><td>${navRealStr}</td><td style="color:#8e44ad">${navForeStr}</td><td><span class="${diffClass}">${diffStr}</span></td></tr>`;
+        });
+        document.getElementById('reit_table_div').innerHTML = tableHtml + '</tbody></table>';
+      }
+
+      window.addEventListener('resize', function() {
+        if(document.getElementById('page-portfolio').classList.contains('active') && ytdData.length > 0) updateDashboard(); 
+        if(document.getElementById('page-daily').classList.contains('active') && dailyRecords.length > 0) drawDailyDashboard();
+        if(document.getElementById('page-thaistock').classList.contains('active') && thaiStockDataRaw.length > 0) drawThaiStockDashboard();
+        if(document.getElementById('page-gold').classList.contains('active') && goldDataRaw.length > 0) drawGoldDashboard();
+        if(document.getElementById('page-reit').classList.contains('active') && reitDataRaw.length > 0) drawReitDashboard();
+      });
+    </script>
+  </body>
+</html>
