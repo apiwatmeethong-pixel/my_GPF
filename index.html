@@ -192,16 +192,15 @@
           .then(data => {
             if(data.status === "success") {
               currentUser = data.username;
-              customPlanName = "🚀 พอร์ตของ " + data.fname; // เปลี่ยนชื่อพอร์ตตามคนล็อคอิน
+              customPlanName = "🚀 พอร์ตของ " + data.fname;
               
-              // ซ่อนหน้า Login โชว์หน้าแอป
               document.getElementById('login-page').style.display = "none";
               document.getElementById('main-app').style.display = "block";
               
-              // ดึงข้อมูลพอร์ตของ User คนนี้
               fetchData();
             } else {
-              msgBox.innerHTML = data.message;
+              // ✅ ดักจับ Error ทุกรูปแบบ ไม่ให้ขึ้น undefined อีก
+              msgBox.innerHTML = data.message || data.error || "เกิดข้อผิดพลาดในการเชื่อมต่อ API"; 
             }
           })
           .catch(err => {
