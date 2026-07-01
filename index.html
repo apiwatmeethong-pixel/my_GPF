@@ -163,6 +163,8 @@
 
       let currentUser = ""; 
       let customPlanName = '🚀 พอร์ตจริงของฉัน (บาท)';
+      // เติมตัวแปรนี้ไว้ด้านบนๆ ของ script คู่กับตัวแปร global อื่นๆ
+      let totalContributionSum = 0;
       var globalHeaders = [], ytdData = [], myUnits = {};
       var goldDataRaw = [], thaiStockDataRaw = [];
       var dailyRecords = []; 
@@ -207,20 +209,35 @@
                 <input type="number" step="any" id="input_plan_${i}" class="login-input" style="margin-bottom: 0;" value="${currentUnit}">
             </div>`;
         }
+       // ดึงชื่อแผนเดิมเสร็จแล้ว วางกล่องกรอกเงินนำส่งเพิ่มด้านล่างสุด
+        html += `
+        <div style="margin-top: 20px; border-top: 1px dashed #dfe6e9; padding-top: 15px; text-align: left;">
+            <label style="font-size: 13px; font-weight: 600; color: #e67e22; display: block; margin-bottom: 5px;">
+                <i class="fas fa-wallet"></i> เงินหักนำส่ง/เงินเติมเข้า กบข. ประจำเดือนนี้ (บาท)
+            </label>
+            <input type="number" id="input_monthly_cash" class="login-input" style="border-color: #e67e22; background: #fffaf5;" placeholder="กรอกเงินนำส่งประจำเดือน เช่น 3500" value="0">
+        </div>`;
         container.innerHTML = html;
       }
 
-      function savePortfolioData() {
+     function savePortfolioData() {
         let saveBtn = document.getElementById('save-btn');
         saveBtn.innerHTML = "กำลังบันทึก... <i class='fas fa-spinner fa-spin'></i>";
         saveBtn.disabled = true;
+
         let newPlans = [];
         for (let i = 1; i < globalHeaders.length - 1; i++) {
             let planName = globalHeaders[i];
             let val = parseFloat(document.getElementById('input_plan_' + i).value) || 0;
             newPlans.push({ plan: planName, units: val });
         }
-        let payload = { action: "savePortfolio", user: currentUser, data: newPlans };
+        
+        // 🆕 ดึงมูลค่าเงินนำส่งประจำเดือน
+        let monthlyCash = parseFloat(document.getElementById('input_monthly_cash').value) || 0;
+
+        // 🆕 พ่วง monthlyCash เข้าไปใน Payload
+        let payload = { action: "savePortfolio", user: currentUser, data: newPlans, monthlyCash: monthlyCash };
+
         fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -229,7 +246,7 @@
         .then(res => res.json())
         .then(res => {
             if(res.status === "success") {
-                alert("✅ บันทึกข้อมูลเรียบร้อยแล้ว!");
+                alert("✅ บันทึกพอร์ตและยอดเงินนำส่งเรียบร้อยแล้ว!");
                 fetchData();
                 switchPage('portfolio', document.querySelector('.nav-item.active')); 
             } else { alert("❌ เกิดข้อผิดพลาด: " + (res.message || "ไม่สามารถบันทึกได้")); }
@@ -277,7 +294,8 @@
             var data = response.data.filter(row => row[0] && String(row[0]).trim() !== '');
             if(data.length === 0) return;
 
-            myUnits = response.myUnits;
+          myUnits = response.myUnits;
+            totalContributionSum = response.totalContribution || 0; // 🆕 รับยอดเงินนำส่งสะสมทั้งหมด
             globalHeaders.push(customPlanName);
 
             for (var i = 0; i < data.length; i++) {
@@ -424,15 +442,19 @@
         document.getElementById('rank_table_div').innerHTML = tableHtml + '</tbody></table>';
       }
 
-      function updateSummaryBox() {
+     function updateSummaryBox() {
         if(ytdData.length === 0) return;
         var customIdx = globalHeaders.indexOf(customPlanName);
         var baseValue = parseFloat(ytdData[0][customIdx]); 
         var latestValue = parseFloat(ytdData[ytdData.length - 1][customIdx]); 
         
         document.getElementById('total_money').innerHTML = '฿ ' + latestValue.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        var ytdPct = baseValue > 0 ? ((latestValue - baseValue) / baseValue) * 100 : 0;
-        document.getElementById('total_ytd').innerHTML = (ytdPct >= 0 ? '▲ +' : '▼ ') + ytdPct.toFixed(2) + '% (YTD)';
+        
+        // 🆕 สูตรระดับกองทุนระดับโลก: หักเงินต้นสะสมที่เติมมาระหว่างปีออกก่อนคิด %
+        var trueProfit = latestValue - baseValue - totalContributionSum;
+        var trueYtdPct = (baseValue + totalContributionSum) > 0 ? (trueProfit / (baseValue + totalContributionSum)) * 100 : 0;
+        
+        document.getElementById('total_ytd').innerHTML = (trueYtdPct >= 0 ? '▲ +' : '▼ ') + trueYtdPct.toFixed(2) + '% (True YTD)';
 
         if(dailyRecords.length > 0) {
             var latestDay = dailyRecords[dailyRecords.length - 1];
