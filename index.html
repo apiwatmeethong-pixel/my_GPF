@@ -196,29 +196,35 @@
       }
 
       function openEditPage() {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('page-edit').classList.add('active');
-        document.getElementById('main_title').innerHTML = "📝 แก้ไขพอร์ตการลงทุน";
-        let container = document.getElementById('edit-form-container');
-        let html = '';
-        for (let i = 1; i < globalHeaders.length - 1; i++) {
-            let planName = globalHeaders[i];
-            let currentUnit = myUnits[planName] || 0;
-            html += `<div style="margin-bottom: 12px; text-align: left;">
-                <label style="font-size: 13px; font-weight: 500; color: #2c3e50; display: block; margin-bottom: 5px;">${planName}</label>
-                <input type="number" step="any" id="input_plan_${i}" class="login-input" style="margin-bottom: 0;" value="${currentUnit}">
-            </div>`;
-        }
-       // ดึงชื่อแผนเดิมเสร็จแล้ว วางกล่องกรอกเงินนำส่งเพิ่มด้านล่างสุด
-        html += `
-        <div style="margin-top: 20px; border-top: 1px dashed #dfe6e9; padding-top: 15px; text-align: left;">
-            <label style="font-size: 13px; font-weight: 600; color: #e67e22; display: block; margin-bottom: 5px;">
-                <i class="fas fa-wallet"></i> เงินหักนำส่ง/เงินเติมเข้า กบข. ประจำเดือนนี้ (บาท)
-            </label>
-            <input type="number" id="input_monthly_cash" class="login-input" style="border-color: #e67e22; background: #fffaf5;" placeholder="กรอกเงินนำส่งประจำเดือน เช่น 3500" value="0">
-        </div>`;
-        container.innerHTML = html;
-      }
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-edit').classList.add('active');
+  document.getElementById('main_title').innerHTML = "📝 แก้ไขพอร์ตการลงทุน";
+
+  let container = document.getElementById('edit-form-container');
+  
+  // 🔥 ย้ายกล่องกรอกเงินนำส่งมาไว้ด้านบนสุด (ก่อนเริ่มวนลูปแผน) เพื่อให้เห็นทันทีเมื่อกดเข้ามา
+  let html = `
+  <div style="margin-bottom: 25px; background: #fffaf5; border: 1px solid #e67e22; padding: 15px; border-radius: 12px; text-align: left;">
+      <label style="font-size: 14px; font-weight: 600; color: #e67e22; display: block; margin-bottom: 8px;">
+          <i class="fas fa-wallet"></i> เงินหักนำส่ง/เงินเติมเข้า กบข. ประจำเดือนนี้ (บาท)
+      </label>
+      <input type="number" id="input_monthly_cash" class="login-input" style="border-color: #e67e22; margin-bottom: 0;" placeholder="กรอกเงินนำส่งประจำเดือน เช่น 3500" value="0">
+  </div>
+  <h3 style="font-size: 14px; color: #7f8c8d; text-align: left; margin-bottom: 15px; border-bottom: 1px dashed #dfe6e9; padding-bottom: 5px;">📋 ระบุจำนวนหน่วยลงทุนประจำเดือน</h3>
+  `;
+
+  // วนลูปสร้างช่องกรอกหน่วยลงทุนของทั้ง 15 แผนต่อท้ายลงมา
+  for (let i = 1; i < globalHeaders.length - 1; i++) {
+      let planName = globalHeaders[i];
+      let currentUnit = myUnits[planName] || 0;
+      html += `<div style="margin-bottom: 12px; text-align: left;">
+          <label style="font-size: 13px; font-weight: 500; color: #2c3e50; display: block; margin-bottom: 5px;">${planName}</label>
+          <input type="number" step="any" id="input_plan_${i}" class="login-input" style="margin-bottom: 0;" value="${currentUnit}">
+      </div>`;
+  }
+
+  container.innerHTML = html;
+}
 
      function savePortfolioData() {
         let saveBtn = document.getElementById('save-btn');
