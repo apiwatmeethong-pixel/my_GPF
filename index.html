@@ -43,7 +43,6 @@
       .total-money { font-size: clamp(30px, 6vw, 44px); font-weight: 700; margin: 8px 0; color: #1b4f72; }
       .total-ytd { font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.6); padding: 6px 20px; border-radius: 30px; display: inline-block; color: #21618c; }
 
-      /* จัดการ Grid ให้ยืดหยุ่นรองรับ PC และ Mobile */
       .grid-2 { display: grid; grid-template-columns: 1fr; gap: 20px; }
       @media(min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
 
@@ -60,7 +59,7 @@
       .table-responsive { overflow-x: auto; border-radius: 14px; border: 1px solid #f2f4f4; }
       table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 400px; }
       th, td { padding: 12px 12px; border-bottom: 1px solid #f2f4f4; text-align: right; font-size: 13px; }
-      th { background-color: #f9faba; color: #5d6d7e; font-weight: 600; font-size: 12px; white-space: nowrap; text-align: right; }
+      th { background-color: #f8f9fa; color: #5d6d7e; font-weight: 600; font-size: 12px; white-space: nowrap; text-align: right; }
       td:first-child, th:first-child { text-align: left; } 
       .positive { color: #27ae60; font-weight: 600; background: #e8f8f5; padding: 4px 10px; border-radius: 8px; display: inline-block; }
       .negative { color: #e74c3c; font-weight: 600; background: #fdedec; padding: 4px 10px; border-radius: 8px; display: inline-block; }
@@ -192,6 +191,9 @@
     <script>
       google.charts.load('current', {'packages':['corechart']});
       
+      // ⚠️ 🔥 ยึดตำแหน่งลิงก์เชื่อมต่อ API หลังบ้านเข้ากับ Google Apps Script ให้สมบูรณ์
+      const API_URL = "https://script.google.com/macros/s/AKfycbxy6Lc-bDsxFSvROeUhChvNHB3BwrH5TjxD94cGB2UL5N9UHb3n2nUU2o_4aMv40EAjpg/exec";
+
       let currentUser = ""; 
       let customPlanName = '🚀 พอร์ตจริงของฉัน (บาท)';
       let totalContributionSum = 0; 
@@ -239,7 +241,6 @@
         let container = document.getElementById('edit-form-container');
         let html = '';
         
-        // ย้ายช่องกรอกเงินนำส่งประจำงวดขึ้นมาข้างบนสุดของฟอร์มหลัก
         html += `
         <div style="margin-bottom: 20px; background: #fffdf9; border: 1px dashed #fad7a0; padding: 15px; border-radius: 16px; text-align: left;">
             <label style="font-size: 13px; font-weight: 600; color: #e67e22; display: block; margin-bottom: 6px;">
@@ -334,7 +335,7 @@
         document.getElementById('page-' + pageId).classList.add('active');
         if(el) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
         
-        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กbข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🇹🇭 พยากรณ์ระบบหุ้นไทย', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
+        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🇹🇭 พยากรณ์ระบบหุ้นไทย', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
         document.getElementById('main_title').innerHTML = titles[pageId] || '';
 
         if(pageId === 'portfolio' && ytdData.length > 0) updateDashboard();
@@ -420,22 +421,17 @@
         }
       }
 
-      // =========================================================================
-      // 📊 หน้าฟังก์ชันวิเคราะห์ระบบงานสัดส่วน (พาสเทลโมเดิร์น)
-      // =========================================================================
       function drawAnalysisDashboard() {
         if (ytdData.length === 0) return;
         var customIdx = globalHeaders.indexOf(customPlanName);
         var latestRow = ytdData[ytdData.length - 1];
         var latestTotalValue = parseFloat(latestRow[customIdx]) || 0;
 
-        // ดึงชุดข้อมูลพ่นลงกล่องโปรไฟล์ ข้อมูลพื้นฐาน User
         document.getElementById('user_profile_name').innerText = userDisplayGlobalName;
         document.getElementById('user_profile_baseline').innerText = '฿' + yearlyBaselineSum.toLocaleString('th-TH', {minimumFractionDigits:2});
         document.getElementById('user_profile_contrib').innerText = '฿' + totalContributionSum.toLocaleString('th-TH', {minimumFractionDigits:2});
         document.getElementById('user_profile_current').innerText = '฿' + latestTotalValue.toLocaleString('th-TH', {minimumFractionDigits:2});
 
-        // 🟢 วาดกราฟวงกลมแสดงสัดส่วนพอร์ตที่แท้จริงแบบ Dynamic (Asset Allocation Pie Chart)
         var pieDataTable = new google.visualization.DataTable();
         pieDataTable.addColumn('string', 'แผนการลงทุน');
         pieDataTable.addColumn('number', 'มูลค่าครองทุนรวม');
@@ -462,7 +458,6 @@
         };
         new google.visualization.PieChart(document.getElementById('analysis_pie_chart_div')).draw(pieDataTable, pieOptions);
 
-        // 🔵 วาดสถิติกำไรขาดทุนเทียบเป็นรายเดือนแบบแท่ง
         var oneWeekRow = ytdData[Math.max(0, ytdData.length - 6)];
         var oneMonthRow = ytdData[Math.max(0, ytdData.length - 21)];
         var startYearRow = ytdData[0];
@@ -525,7 +520,7 @@
             if (monthlyData[m] && monthlyData[m].length > 0) {
                 var currentMonthClose = monthlyData[m][monthlyData[m].length - 1];
                 var diff = currentMonthClose - prevMonthClose;
-                var color = diff >= 0 ? 'color: #abc9af' : 'color: #f2b6b6'; // โทนแท่งพาสเทล
+                var color = diff >= 0 ? 'color: #abc9af' : 'color: #f2b6b6'; 
                 dtMonth.addRow([m, diff, color]);
                 prevMonthClose = currentMonthClose;
             }
@@ -539,7 +534,6 @@
         };
         new google.visualization.ColumnChart(document.getElementById('monthly_chart_div')).draw(dtMonth, optMonth);
 
-        // วาดตารางอันดับสถิติพาสเทล
         var tableHtml = '<table><thead><tr><th>ชื่อแผนกองทุน</th><th>1 สัปดาห์</th><th>1 เดือน</th><th>YTD สะสม</th></tr></thead><tbody>';
         sorted1M.forEach(r => {
             tableHtml += `<tr>
