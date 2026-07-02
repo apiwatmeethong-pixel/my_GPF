@@ -6,7 +6,9 @@
     <title>My GPF Portfolio Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- โหลดสคริปต์วาดกราฟและไลบรารีแปลงสแนปช็อตภาพหน้าจออัตโนมัติ -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%2290%22>📈</text></svg>">
     
     <style>
@@ -15,12 +17,12 @@
         --card-bg: #ffffff; 
         --text-main: #1c2833; 
         --text-muted: #7f8c8d;
-        --primary-color: #2ecc71;   /* เขียวสดใสพาสเทลเข้ม */
-        --gold-color: #f1c40f;      /* ทองอร่ามสดใส */
-        --daily-color: #e67e22;     /* ส้มสดใส */
-        --thai-color: #e74c3c;      /* แดงชมพูสดใส */
-        --analysis-color: #3498db;  /* ฟ้าสดใส */
-        --accent-purple: #9b59b6;   /* ม่วงสดใส */
+        --primary-color: #2ecc71;   /* เขียวสดใสคมชัด */
+        --gold-color: #f1c40f;      /* ทองสว่างเน้นตา */
+        --daily-color: #e67e22;     /* ส้มเด่นชัด */
+        --thai-color: #e74c3c;      /* แดงชมพูสด */
+        --analysis-color: #3498db;  /* ฟ้าสดใสเข้ม */
+        --accent-purple: #9b59b6;   /* ม่วงสดสว่าง */
       }
       body { font-family: 'Prompt', sans-serif; background-color: var(--primary-bg); color: var(--text-main); margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
       
@@ -78,7 +80,6 @@
       .logout-btn { position: absolute; top: 15px; right: 15px; background: #f2f4f4; border: none; color: #7f8c8d; font-family: 'Prompt'; padding: 6px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; transition: 0.2s; z-index: 5; }
       .logout-btn:hover { background: #e5e8e8; color: #c0392b; }
 
-      /* ปุ่มฟังก์ชันเพิ่มเติม ตาปิดข้อมูล & ปุ่มแชร์ */
       .action-icon-btn { background: #fff; border: 1px solid #d5dbdb; padding: 8px 14px; border-radius: 12px; font-size: 13px; font-family: 'Prompt'; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; color: #34495e; }
       .action-icon-btn:hover { background: #f2f4f4; border-color: #bdc3c7; }
       
@@ -88,7 +89,6 @@
   </head>
   <body>
 
-    <!-- หน้าจอล็อกอินเข้าระบบ -->
     <div id="login-page">
       <div class="login-card">
         <h2><i class="fas fa-shield-alt" style="color: var(--analysis-color);"></i> myGPF Quantum</h2>
@@ -99,7 +99,6 @@
       </div>
     </div>
 
-    <!-- ส่วนจัดแสดงระบบงานหลัก -->
     <div id="main-app">
       <button class="logout-btn" onclick="logout()"><i class="fas fa-power-off"></i> ออก</button>
       <h2 id="main_title" class="app-title">📈 My GPF Dashboard</h2>
@@ -170,38 +169,43 @@
 
       <!-- หน้า 5: 📊 เมนูวิเคราะห์อัจฉริยะ -->
       <div id="page-analysis" class="page">
-        <!-- ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน -->
-        <div id="share-profile-area" class="card" style="background: linear-gradient(135deg, #f4ecf7, #eaf2f8); border: 1px solid #d5f5e3;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <h3 style="color: #1b4f72; margin-bottom:0;"><i class="fas fa-user-circle"></i> ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน</h3>
-            <div style="display:flex; gap:6px;">
-              <button class="action-icon-btn" style="padding:4px 10px; font-size:12px;" onclick="togglePrivacy()"><i id="eye-icon-analysis" class="fas fa-eye"></i></button>
-              <button class="action-icon-btn" style="padding:4px 10px; font-size:12px; background:var(--primary-color); color:#fff; border:none;" onclick="shareToSocial()"><i class="fas fa-share-alt"></i> แชร์สถิติลง Line/FB</button>
+        <!-- 🆕 ครอบโดเมนโซนการแชร์ด้วย DIV เพื่อให้ html2canvas กวาดถ่ายรูปภาพได้ครบถ้วน -->
+        <div id="analysis-capture-zone" style="background: #f0f4f8; padding: 12px; border-radius: 28px; margin-bottom: 10px;">
+          
+          <!-- ส่วนหัวข้อมูลและโปรไฟล์ผู้ใช้ -->
+          <div id="share-profile-area" class="card" style="background: linear-gradient(135deg, #f4ecf7, #eaf2f8); border: 1px solid #d5f5e3; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <h3 style="color: #1b4f72; margin-bottom:0;"><i class="fas fa-user-circle"></i> ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน</h3>
+              <div style="display:flex; gap:6px;">
+                <button class="action-icon-btn" style="padding:4px 10px; font-size:12px;" onclick="togglePrivacy()"><i id="eye-icon-analysis" class="fas fa-eye"></i></button>
+                <button class="action-icon-btn" style="padding:4px 10px; font-size:12px; background:var(--primary-color); color:#fff; border:none; font-weight:600;" onclick="shareToSocial()"><i class="fas fa-share-alt"></i> แชร์สถิติลง Line/FB</button>
+              </div>
+            </div>
+            <div class="user-badge-container">
+              <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name">-</strong></div>
+              <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline">฿0.00</strong></div>
+              <div class="user-badge"><span>ยอดส่งสะสมเติมปีนี้</span><strong id="user_profile_contrib">฿0.00</strong></div>
+              <div class="user-badge"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current">฿0.00</strong></div>
+              <div class="user-badge" style="background: linear-gradient(135deg, #e8f8f5, #a9dfbf); border: 1px solid #2ecc71;"><span>ผลงานสะสมปีนี้ (True YTD)</span><strong id="user_profile_ytd" style="color:#196f3d; font-size:15px;">0.00%</strong></div>
             </div>
           </div>
-          <div class="user-badge-container">
-            <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name">-</strong></div>
-            <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline">฿0.00</strong></div>
-            <div class="user-badge"><span>ยอดส่งสะสมเติมปีนี้</span><strong id="user_profile_contrib">฿0.00</strong></div>
-            <div class="user-badge"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current">฿0.00</strong></div>
-            <!-- 🆕 เพิ่มกล่องสรุปอัตราเติบโต YTD ในโปรไฟล์ตามเงื่อนไข -->
-            <div class="user-badge" style="background: linear-gradient(135deg, #e8f8f5, #a9dfbf); border: 1px solid #2ecc71;"><span>ผลงานสะสมปีนี้ (True YTD)</span><strong id="user_profile_ytd" style="color:#196f3d; font-size:15px;">0.00%</strong></div>
-          </div>
-        </div>
 
-        <!-- 🆕 กล่องสัญญาณสรุป Tactical Switch (ต่อยอดจาก Momentum Tracker) -->
-        <div id="tactical_switch_panel" class="tactical-box"></div>
+          <!-- กล่องสัญญาณสรุป Tactical Switch -->
+          <div id="tactical_switch_panel" class="tactical-box"></div>
 
-        <div class="grid-2">
-          <div class="card">
-            <h3><i class="fas fa-chart-pie" style="color: var(--accent-purple);"></i> กราฟสัดส่วนการกระจายพอร์ตจริงประจำวัน</h3>
-            <div id="analysis_pie_chart_div" style="height: 280px;"></div>
+          <!-- ส่วนแสดงผลกราฟทั้ง 2 ตัวคู่กัน -->
+          <div class="grid-2">
+            <div class="card" style="margin-bottom:0;">
+              <h3><i class="fas fa-chart-pie" style="color: var(--accent-purple);"></i> กราฟสัดส่วนการกระจายพอร์ตจริงประจำวัน</h3>
+              <div id="analysis_pie_chart_div" style="height: 280px;"></div>
+            </div>
+            <div class="card" style="margin-bottom:0;">
+              <h3><i class="fas fa-chart-bar" style="color: var(--daily-color);"></i> แท่งแสดงอัตรากำไรขาดทุนสะสมแยกรายเดือน</h3>
+              <div id="monthly_chart_div" style="height: 280px;"></div>
+            </div>
           </div>
-          <div class="card">
-            <h3><i class="fas fa-chart-bar" style="color: var(--daily-color);"></i> แท่งแสดงอัตรากำไรขาดทุนสะสมแยกรายเดือน</h3>
-            <div id="monthly_chart_div" style="height: 280px;"></div>
-          </div>
-        </div>
+
+        </div> <!-- ปิด capture-zone -->
 
         <div class="card">
           <h3><i class="fas fa-bolt" style="color: var(--gold-color);"></i> ตารางสรุปจัดระดับความแข็งแกร่งสินทรัพย์ (Momentum Tracker)</h3>
@@ -223,7 +227,6 @@
     <script>
       google.charts.load('current', {'packages':['corechart']});
       
-      // ลิงก์เชื่อมต่อ API หลังบ้านเข้ากับ Google Apps Script
       const API_URL = "https://script.google.com/macros/s/AKfycbxy6Lc-bDsxFSvROeUhChvNHB3BwrH5TjxD94cGB2UL5N9UHb3n2nUU2o_4aMv40EAjpg/exec";
 
       let currentUser = ""; 
@@ -231,61 +234,64 @@
       let totalContributionSum = 0; 
       let yearlyBaselineSum = 0;
       let userDisplayGlobalName = "";
-      let isMasked = false; // 🆕 สถานะจำเปิด/ปิดการปกปิดข้อมูลความลับ ตัวอย่าง 10,XX5
+      let isMasked = false; 
       let globalTrueYtdPctText = "0.00%"; 
 
       var globalHeaders = [], ytdData = [], myUnits = {};
       var goldDataRaw = [], thaiStockDataRaw = [];
       var dailyRecords = []; 
 
-      // 🆕 ฟังก์ชันประมวลผลคำสั่งกรองการแปลงปกปิดตัวเลขความลับสไตล์กองทุน
       function maskValue(num, isCurrency = true) {
         if (!isMasked) {
           return isCurrency 
             ? '฿' + num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             : num.toFixed(4);
         }
-        
         let str = num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         if (str.length <= 4) return '฿X.XX';
-        
         let parts = str.split('.');
         let mainStr = parts[0]; 
-        // เปลี่ยนตัวเลขตรงกลางให้เป็นตัวอักษร X โดยยังเก็บตัวเลขหน้า 2 หลัก และหลักสุดท้ายก่อนทศนิยมไว้ตามเงื่อนไข (ตัวอย่าง: 10,XX5)
         let maskedMain = mainStr.substring(0, 2) + mainStr.substring(2, mainStr.length - 1).replace(/[0-9,.]/g, 'X') + mainStr.substring(mainStr.length - 1);
         return isCurrency ? '฿' + maskedMain + '.' + parts[1] : maskedMain + '.' + parts[1];
       }
 
+      // 🆕 ฟังก์ชันกดแชร์แบบทริกเกอร์คู่: ก็อปปี้ข้อความ + รันระบบแคปรูปภาพโซนโปรไฟล์และกราฟ
+      function shareToSocial() {
+        let latestValue = parseFloat(ytdData[ytdData.length - 1][globalHeaders.indexOf(customPlanName)]) || 0;
+        let reportText = `📊 รายงานสรุปพอร์ตการลงทุน กบข. ประจำวันนี้\n👤 นักลงทุน: ${userDisplayGlobalName}\n📈 ผลงานประจำปี (True YTD): ${globalTrueYtdPctText}\n💰 มูลค่าพอร์ตรวมสุทธิ: ${maskValue(latestValue)}\n💵 ยอดนำส่งสะสมปีนี้: ${maskValue(totalContributionSum)}\n💼 ตรวจสอบผ่านระบบคัมภีร์ทุนส่วนบุคคล`;
+        
+        // ขั้นตอนที่ 1: คัดลอกข้อความลงคลิปบอร์ด
+        navigator.clipboard.writeText(reportText);
+
+        // ขั้นตอนที่ 2: รัน html2canvas บันทึกรูปการ์ดสรุปข้อมูลรวมกราฟทั้ง 2 ตัว
+        let captureZone = document.getElementById('analysis-capture-zone');
+        
+        html2canvas(captureZone, {
+          useCORS: true,
+          backgroundColor: "#f0f4f8",
+          scale: 2 // ดันความละเอียดคูณ 2 เพื่อให้ภาพกราฟและตัวอักษรคมชัดสูง ไม่แตกเบลอ
+        }).then(canvas => {
+          let link = document.createElement('a');
+          link.download = `GPF_Analysis_Report.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          
+          alert("📋 คัดลอกบทสรุปข้อความลงคลิปบอร์ด และสร้างไฟล์รูปภาพการ์ดวิเคราะห์ (รวมข้อมูลและกราฟทั้ง 2) ดาวน์โหลดเข้าเครื่องคุณ James เรียบร้อยแล้วครับ! สามารถกดส่งเปิดวางโพสต์ลง LINE/FB ต่อได้ทันทีครับ 🚀");
+        }).catch(err => {
+          console.error(err);
+          alert("คัดลอกข้อความสำเร็จ แต่ระบบจำลองภาพขัดข้องชั่วคราว");
+        });
+      }
+
       function togglePrivacy() {
         isMasked = !isMasked;
-        // อัปเดตรูปไอคอนลูกตาหน้าจอหลัก
         let eyeIcons = ['eye-icon-main', 'eye-icon-analysis'];
         eyeIcons.forEach(id => {
           let el = document.getElementById(id);
-          if(el) {
-            if(isMasked) { el.className = "fas fa-eye-slash"; } 
-            else { el.className = "fas fa-eye"; }
-          }
+          if(el) { el.className = isMasked ? "fas fa-eye-slash" : "fas fa-eye"; }
         });
-        
-        // สั่งรีเฟรชอัปเดตหน้าจอทั้งหมดเพื่อโหลดการพรางตัวเลข
         updateSummaryBox();
-        if(ytdData.length > 0) {
-          updateDashboard();
-          drawAnalysisDashboard();
-        }
-      }
-
-      // 🆕 ฟังก์ชันกดแชร์ข้อมูลสรุปแปลงเป็น Text Report คัดลอกลงคลิปบอร์ดสำหรับวางแชร์ใน Line / Facebook
-      function shareToSocial() {
-        let latestValue = parseFloat(ytdData[ytdData.length - 1][globalHeaders.indexOf(customPlanName)]) || 0;
-        let reportText = `📊 รายงานสรุปพอร์ตการลงทุน กบข. ประจำวันนี้\n👤 นักลงทุน: ${userDisplayGlobalName}\n📈 ผลงานประจำปี (True YTD): ${globalTrueYtdPctText}\n💰 มูลค่าพอร์ตรวมสุทธิ: ${maskValue(latestValue)}\n💵 ยอดนำส่งสะสมปีนี้: ${maskValue(totalContributionSum)}\n💼 ปลอดภัย แม่นยำ ตรวจสอบผ่านระบบ Quantum Portal`;
-        
-        navigator.clipboard.writeText(reportText).then(() => {
-          alert("📋 คัดลอกรายงานสรุปสถิติพอร์ตเรียบร้อยแล้ว! คุณ James สามารถเปิดแอป Line หรือ Facebook เพื่อกดวาง (Paste) และแคปหน้าจอนี้แชร์ต่อได้ทันทีครับ");
-        }).catch(err => {
-          alert("ไม่สามารถเข้าถึงสิทธิ์คัดลอกระบบอัตโนมัติได้ สามารถแคปรูปภาพหน้าจอนี้เพื่อแชร์ต่อได้เช่นกันครับ");
-        });
+        if(ytdData.length > 0) { updateDashboard(); drawAnalysisDashboard(); }
       }
 
       function login() {
@@ -319,7 +325,6 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById('page-edit').classList.add('active');
         document.getElementById('main_title').innerHTML = "📝 แก้ไขพอร์ตการลงทุน";
-        
         document.getElementById('input_baseline_amount').value = yearlyBaselineSum;
         
         let container = document.getElementById('edit-form-container');
@@ -518,7 +523,6 @@
         document.getElementById('user_profile_current').innerText = maskValue(latestTotalValue);
         document.getElementById('user_profile_ytd').innerText = globalTrueYtdPctText;
 
-        // วาดกราฟพายส่วนแบ่งสินทรัพย์จริงตามเวลาปัจจุบัน
         var pieDataTable = new google.visualization.DataTable();
         pieDataTable.addColumn('string', 'แผนการลงทุน');
         pieDataTable.addColumn('number', 'มูลค่าครองทุนรวม');
@@ -564,7 +568,6 @@
 
         var sorted1M = [...rankings].sort((a, b) => b.mPct - a.mPct);
         
-        // 🆕 5. กล่องสัญญาณสรุป Tactical Switch (คำนวณจาก Momentum ทะลุขีดจำกัด)
         let topM = sorted1M[0];
         let btmM = sorted1M[sorted1M.length - 1];
         let tacticalHtml = `
@@ -615,17 +618,19 @@
             if (monthlyData[m] && monthlyData[m].length > 0) {
                 var currentMonthClose = monthlyData[m][monthlyData[m].length - 1];
                 var diff = currentMonthClose - prevMonthClose;
-                var color = diff >= 0 ? 'color: var(--primary-color)' : 'color: var(--thai-color)'; 
+                // 🔥 แก้บั๊กกราฟแท่งรายเดือน: เปลี่ยนจากตัวแปร CSS เป็นการใส่รหัสสี Hex โดยตรง เพื่อให้ Engine ตัววาดภาพยอมเรนเดอร์แท่งสี
+                var color = diff >= 0 ? 'color: #2ecc71' : 'color: #e74c3c'; 
                 dtMonth.addRow([m, diff, color]);
                 prevMonthClose = currentMonthClose;
             }
         });
 
+        // ปรับปรุงค่าขอบซ้าย (left: 70) ป้องกันตัวเลขหลักหมื่นถูกพับบีบตัวอักษรกลืนหาย
         var optMonth = {
             fontName: 'Prompt', legend: 'none',
             vAxis: { textStyle: {color: '#7f8c8d', fontSize:11}, gridlines: {color: '#f2f4f4'} },
             hAxis: { textStyle: {color: '#7f8c8d', fontSize:11} },
-            chartArea: { width: '82%', height: '75%', top: 15, bottom: 40 }, backgroundColor: 'transparent'
+            chartArea: { width: '82%', height: '75%', top: 20, bottom: 45, left: 70 }, backgroundColor: 'transparent'
         };
         new google.visualization.ColumnChart(document.getElementById('monthly_chart_div')).draw(dtMonth, optMonth);
 
@@ -681,22 +686,28 @@
         drawTable(selectedPlans, planIndices, baseValues);
       }
 
-      // 🛠️ แก้ไขบั๊กตัวเลขด้านล่างไม่ตรงกับด้านบน: เปลี่ยนจากการแสดงค่าราคา NAV เปล่าๆ มาเป็นการเอาไปคูณหน่วยลงทุนจริง (NAV * Units)
+      // 🛠️ แก้ไขบั๊กข้อมูลตารางไม่ตรง: บังคับให้แถวพอร์ตของ James คำนวณแบบ True YTD (หักเงินนำส่งแล้ว) เพื่อให้สถิติตัวเลขล้อตรงกันกับหน้าจอบน 100%
       function drawTable(selectedPlans, planIndices, baseValues) {
         var html = '<table><thead><tr><th>แผนงานลงทุน</th><th>มูลค่ารวมครองพอร์ตปัจจุบัน (บาท)</th><th>ผลงาน % YTD</th></tr></thead><tbody>';
         var latestRow = ytdData[ytdData.length - 1];
         for (var i = 0; i < selectedPlans.length; i++) {
           var planName = selectedPlans[i], baseVal = baseValues[i], latestVal = parseFloat(latestRow[planIndices[i]]);
+          
+          // คำนวณอัตรา YTD เริ่มต้น
           var ytdPct = baseVal > 0 ? ((latestVal - baseVal) / baseVal) * 100 : 0;
           
           var displayLatest = "";
           if (planName === customPlanName) {
-            displayLatest = maskValue(latestVal); // พอร์ตรวมสุทธิ
+            displayLatest = maskValue(latestVal); // ยอดรวมสุทธิพอร์ต
+            
+            // 🔥 ปลั๊กอินเปลี่ยนเงื่อนไขสิทธิ์เฉพาะแถวพอร์ตรวม ให้คำนวณแบบ True YTD สอดคล้องตัวกล่องข้อมูลหลัก
+            var baseValueTrue = yearlyBaselineSum > 0 ? yearlyBaselineSum : parseFloat(ytdData[0][planIndices[i]]);
+            var trueProfit = yearlyBaselineSum > 0 ? (latestVal - yearlyBaselineSum - totalContributionSum) : (latestVal - baseValueTrue - totalContributionSum);
+            ytdPct = baseValueTrue > 0 ? (trueProfit / baseValueTrue) * 100 : 0;
           } else {
-            // ดึงหน่วยลงทุนสะสมในแต่ละแผนมาคูณแปลงเป็นจำนวนเงินจริงเพื่อให้สอดคล้องและรวมได้ยอดตรงกัน 100%
             var planUnits = myUnits[planName] || 0;
             var planTotalMoneyValue = latestVal * planUnits;
-            displayLatest = maskValue(planTotalMoneyValue);
+            displayLatest = maskValue(planTotalMoneyValue); // ยอดเงินสดในแต่ละกองทุน
           }
           
           var rowClass = planName === customPlanName ? ' style="background:#fefde8; font-weight:600;"' : '';
