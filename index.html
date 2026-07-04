@@ -85,6 +85,10 @@
       
       .tactical-box { background: linear-gradient(135deg, #fef9e7, #fdf2e9); border: 1px dashed #f39c12; border-radius: 18px; padding: 15px; margin-bottom: 20px; text-align: left; }
       .tactical-title { font-size: 14px; font-weight: 700; color: #d35400; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+      
+      /* สไตล์ตกแต่งปุ่มเรียกใช้งาน AI พรีเมียม */
+      .ai-trigger-btn { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--accent-purple), var(--analysis-color)); color: #fff; border: none; padding: 10px 22px; border-radius: 16px; font-family: 'Prompt'; font-size: 13.5px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.25); transition: 0.3s; }
+      .ai-trigger-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(155, 89, 182, 0.4); }
     </style>
   </head>
   <body>
@@ -116,7 +120,7 @@
           </div>
         </div>
 
-        <!-- 🆕 ดึงกล่องโปรไฟล์ 6 ช่องทวีทรัพย์มาจำลองโชว์ที่หน้าแรก (พรางข้อมูลปิดตาได้พร้อมกัน) -->
+        <!-- กล่องโปรไฟล์ 6 ช่องทวีทรัพย์ประจำหน้าแรก -->
         <div class="card" style="background: linear-gradient(135deg, #f4ecf7, #eaf2f8); border: 1px solid #d5f5e3;">
           <h3 style="color: #1b4f72;"><i class="fas fa-user-circle"></i> ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน</h3>
           <div class="user-badge-container">
@@ -129,12 +133,10 @@
           </div>
         </div>
 
-        <!-- 🆕 ดึงกล่องผลวิเคราะห์สมองกล AI มาร่วมจัดแสดงที่หน้าแรกเพื่อความชัดเจนแบบเห็นทันตา -->
+        <!-- กล่องที่ปรึกษาอัจฉริยะ Gemini AI Insights หน้าแรก (เวอร์ชันติดตั้งปุ่มกดเซฟโควตา) -->
         <div class="card" style="background: linear-gradient(135deg, #fbf7fc, #f4ecf7); border-left: 5px solid var(--accent-purple); text-align: left;">
           <h3 style="color: var(--accent-purple); margin-bottom: 6px;"><i class="fas fa-robot"></i> 🤖 Quantum AI Portfolio Insights (Gemini Powered)</h3>
-          <div id="ai_analysis_text" style="font-size: 13.5px; line-height: 1.6; color: #2c3e50; font-weight: 500;">
-            กำลังเชื่อมต่อเครือข่ายประสาทเทียมเพื่อประมวลผลคัมภีร์ทุนส่วนบุคคล... ⚡
-          </div>
+          <div id="ai_analysis_text" style="padding: 5px 0;"></div>
         </div>
 
         <div class="card">
@@ -203,7 +205,6 @@
                 <button class="action-icon-btn" style="padding:4px 10px; font-size:12px; background:var(--primary-color); color:#fff; border:none; font-weight:600;" onclick="shareToSocial()"><i class="fas fa-share-alt"></i> แชร์สถิติลง Line/FB</button>
               </div>
             </div>
-            <!-- การจัดโครงสร้างแบบ 6 กล่องแบ่งสัดส่วนเด่นชัดบนแผงแชร์ -->
             <div class="user-badge-container">
               <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name_anal">-</strong></div>
               <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline_anal">฿0.00</strong></div>
@@ -217,12 +218,10 @@
           <!-- กล่องสัญญาณสรุป Tactical Switch -->
           <div id="tactical_switch_panel" class="tactical-box"></div>
 
-          <!-- กล่องที่ปรึกษาอัจฉริยะ Gemini AI Insights (Premium Pastel Purple Theme ในโซนแชร์) -->
+          <!-- กล่องที่ปรึกษาอัจฉริยะ Gemini AI Insights หน้าวิเคราะห์ (เวอร์ชันติดตั้งปุ่มกดเซฟโควตา) -->
           <div class="card" style="background: linear-gradient(135deg, #fbf7fc, #f4ecf7); border-left: 5px solid var(--accent-purple); text-align: left; margin-bottom: 20px;">
             <h3 style="color: var(--accent-purple); margin-bottom: 6px;"><i class="fas fa-robot"></i> 🤖 Quantum AI Portfolio Insights (Gemini Powered)</h3>
-            <div id="ai_analysis_text_anal" style="font-size: 13.5px; line-height: 1.6; color: #2c3e50; font-weight: 500;">
-              กำลังเชื่อมต่อเครือข่ายประสาทเทียมเพื่อประมวลผลคัมภีร์ทุนส่วนบุคคล... ⚡
-            </div>
+            <div id="ai_analysis_text_anal" style="padding: 5px 0;"></div>
           </div>
 
           <!-- ส่วนแสดงผลกราฟทั้ง 2 ตัวคู่กันรันใน Capture Zone พรีเมียม -->
@@ -274,6 +273,14 @@
       var goldDataRaw = [], thaiStockDataRaw = [];
       var dailyRecords = []; 
 
+      // ข้อความเริ่มต้นและโครงสร้างปุ่มเรียกใช้งานแบบ On-Demand เพื่อควบคุมการใช้โควตา API
+      const getAiInitialButtonHtml = () => `
+        <div style="text-align: center; padding: 12px; background: rgba(155,89,182,0.03); border-radius:16px; border:1px dashed rgba(155,89,182,0.2);">
+          <p style="margin: 0 0 10px 0; font-size: 13px; color: var(--text-muted); font-weight:500;">🔒 ระบบจำกัดโควตาไว้เพื่อประหยัดการเรียกใช้ API อัตโนมัติ</p>
+          <button onclick="triggerAiAnalysis()" class="ai-trigger-btn"><i class="fas fa-brain"></i> เรียกบทวิเคราะห์ Quantum AI</button>
+        </div>
+      `;
+
       function maskValue(num, isCurrency = true) {
         if (!isMasked) {
           return isCurrency 
@@ -305,7 +312,7 @@
           link.href = canvas.toDataURL('image/png');
           link.click();
           
-          alert("📋 คัดลอกบทสรุปข้อความลงคลิปบอร์ด และสั่งเรนเดอร์จัดพิมพ์ไฟล์รูปภาพการ์ดวิเคราะห์ (ครบคลุมกล่อง 6 มิติ, สรุป Tactical, สมองกล AI และแผงกราฟคู่) ลงบนเครื่องคุณ James เรียบร้อยแล้วครับ วางส่งในกลุ่ม LINE ได้เลยครับ! 🚀");
+          alert("📋 คัดลอกบทสรุปข้อความลงคลิปบอร์ด และสั่งเรนเดอร์จัดพิมพ์ไฟล์รูปภาพการ์ดวิเคราะห์ (ครบคลุมกล่อง 6 มิติ, สรุป Tactical, สมองกล AI และแผงกราฟคู่) ลงบนเครื่องเรียบร้อยแล้วครับ วางส่งในกลุ่ม LINE ได้เลยครับ! 🚀");
         }).catch(err => {
           console.error(err);
           alert("คัดลอกข้อความสำเร็จ แต่ระบบจำลองภาพขัดข้องชั่วคราว");
@@ -320,7 +327,15 @@
           if(el) { el.className = isMasked ? "fas fa-eye-slash" : "fas fa-eye"; }
         });
         updateSummaryBox();
-        if(ytdData.length > 0) { updateDashboard(); drawAnalysisDashboard(); }
+        if(ytdData.length > 0) {
+          updateDashboard();
+          // อัปเดตรีเฟรชการพรางตาตัวเลขในโหมดการแปลผลโลคอล (ถ้าทำงานอยู่)
+          if(cachedAiAnalysis !== "" && cachedAiAnalysis.includes("ระบบรายงานวิเคราะห์พอร์ตอัตโนมัติ")) {
+            generateLocalFallbackAnalysis();
+          } else {
+            drawAnalysisDashboard();
+          }
+        }
       }
 
       function login() {
@@ -331,6 +346,9 @@
         msgBox.innerHTML = "กำลังเข้าสู่กระบวนการถอดรหัสความปลอดภัย... <i class='fas fa-spinner fa-spin'></i>";
         
         cachedAiAnalysis = ""; 
+        // เซ็ตตัวปุ่มกดสแตนด์บายรอรับคำสั่งเริ่มต้น
+        document.getElementById('ai_analysis_text').innerHTML = getAiInitialButtonHtml();
+        document.getElementById('ai_analysis_text_anal').innerHTML = getAiInitialButtonHtml();
         
         fetch(API_URL + "?action=login&user=" + encodeURIComponent(u) + "&pass=" + encodeURIComponent(p))
           .then(res => res.json())
@@ -350,6 +368,7 @@
         currentUser = ""; document.getElementById('username').value = ""; document.getElementById('password').value = "";
         document.getElementById('login-msg').innerHTML = ""; document.getElementById('main-app').style.display = "none";
         document.getElementById('login-page').style.display = "flex";
+        cachedAiAnalysis = "";
       }
 
       function openEditPage() {
@@ -541,7 +560,6 @@
             document.getElementById('daily_change_pct').innerHTML = sign + latestDay.pct.toFixed(2) + '%';
         }
 
-        // 🧠 ซิงค์ข้อมูลอัปเดตกล่องโปรไฟล์หน้าแรกสถิติทันทีให้เห็นทันตาเมื่อคำนวณเสร็จ
         if(document.getElementById('user_profile_name')) {
           document.getElementById('user_profile_name').innerText = userDisplayGlobalName;
           document.getElementById('user_profile_baseline').innerText = maskValue(yearlyBaselineSum);
@@ -564,13 +582,15 @@
             }
           }
         }
-
-        // สั่งทริกเกอร์รันระบบโหลด AI Analysis ทันทีเพื่อให้แสดงผลได้นิ่งและรวดเร็วบนทั้งสองหน้าจอ
-        fetchAiAnalysis();
+        
+        // บังคับเซ็ตค่าเริ่มต้นกล่อง AI ให้โชว์ปุ่มกดหากยังไม่มีข้อมูลแคช
+        if (cachedAiAnalysis === "") {
+          document.getElementById('ai_analysis_text').innerHTML = getAiInitialButtonHtml();
+        }
       }
 
-      // 🆕 ฟังก์ชันดึงรายงานบทวิเคราะห์เชิงลึกสลับตามชื่อ User และข้อมูลพอร์ตจริงประจำตัว
-      function fetchAiAnalysis() {
+      // 🆕 ฟังก์ชันควบคุมการส่งค่าประมวลผล AI แบบ On-Demand (เฉพาะเมื่อคลิกปุ่ม)
+      function triggerAiAnalysis() {
         let aiTextDiv = document.getElementById('ai_analysis_text');
         let aiTextDivAnal = document.getElementById('ai_analysis_text_anal');
         
@@ -580,31 +600,47 @@
           return;
         }
         
-        let loadingMsg = `กำลังต่อสายเชื่อมสัญญาณ Quantum AI ให้คุณ ${userDisplayGlobalName} เพื่อวิเคราะห์คัมภีร์ทุนส่วนบุคคล... <i class='fas fa-spinner fa-spin'></i>`;
+        let loadingMsg = `กำลังส่งสถิติพอร์ตไปให้สมองกลขุมพลัง Gemini 2.0 Flash ประมวลผล... <i class='fas fa-spinner fa-spin'></i>`;
         if(aiTextDiv) aiTextDiv.innerHTML = loadingMsg;
         if(aiTextDivAnal) aiTextDivAnal.innerHTML = loadingMsg;
         
         fetch(API_URL + "?action=getAiAnalysis&user=" + encodeURIComponent(currentUser))
           .then(res => res.json())
           .then(data => {
-            // ถ้าระบบหลังบ้านส่งข้อมูลบทวิเคราะห์จาก Gemini กลับมาสำเร็จ
-            if(data && data.status === "success" && data.analysis) {
+            // คัดกรองตรวจสอบหน้าจอ: หากหลังบ้านทำงานสำเร็จและไม่ติดเงื่อนไขโค้ดหลุด (Error 429)
+            if(data && data.status === "success" && data.analysis && !data.analysis.includes("❌") && !data.analysis.includes("Gemini API Error")) {
               cachedAiAnalysis = data.analysis;
               if(aiTextDiv) aiTextDiv.innerHTML = data.analysis;
               if(aiTextDivAnal) aiTextDivAnal.innerHTML = data.analysis;
             } else {
-              // 🧠 แผนสำรองกรณีเชื่อมต่อ API ไม่ผ่าน (เปลี่ยนชื่ออ้างอิงตาม User จริงแบบอัตโนมัติ)
-              let fallback = `💡 แนะนำคุณ <b>${userDisplayGlobalName}</b> รักษาวินัยการจัดสรรพอร์ตตามกล่องสัญญาณ Momentum Tracker ประจำงวด และล็อกระดับการเฝ้าระวังของสินทรัพย์ทองคำโลกให้อยู่ภายใต้กรอบข้อจำกัด 25% อย่างมั่นคง`;
-              if(aiTextDiv) aiTextDiv.innerHTML = fallback;
-              if(aiTextDivAnal) aiTextDivAnal.innerHTML = fallback;
+              // ⚙️ แผนสำรอง: วิ่งเข้าระบบประมวลผลถอดรหัสข้อมูลพอร์ตสดเบื้องต้นทันทีเมื่อโควตาเต็ม
+              generateLocalFallbackAnalysis();
             }
           })
           .catch(err => {
             console.error(err);
-            let errorFallback = `💡 <b>คำแนะนำกลยุทธ์ (คลังสำรอง):</b> สวัสดีคุณ <b>${userDisplayGlobalName}</b> สถิติตลาดมีความผันผวนระยะสั้น แนะนำเน้นรักษาวินัยการเติมเงินออมเพิ่มสะสมหน่วยลงทุนอย่างต่อเนื่อง เพื่อรอรอบการฟื้นตัวของสินทรัพย์รอบใหม่ครับ`;
-            if(aiTextDiv) aiTextDiv.innerHTML = errorFallback;
-            if(aiTextDivAnal) aiTextDivAnal.innerHTML = errorFallback;
+            generateLocalFallbackAnalysis();
           });
+      }
+
+      // 🆕 ระบบแปลผลพอร์ตจากข้อมูลเบื้องต้นอัตโนมัติ (กรณีโควตา AI เต็ม) พร้อมหมายเหตุระบุตัวตนผู้แปลครบถ้วน
+      function generateLocalFallbackAnalysis() {
+        let aiTextDiv = document.getElementById('ai_analysis_text');
+        let aiTextDivAnal = document.getElementById('ai_analysis_text_anal');
+        
+        let latestTotalVal = ytdData.length > 0 ? parseFloat(ytdData[ytdData.length - 1][globalHeaders.indexOf(customPlanName)]) || 0 : 0;
+        let trendStatus = globalTrueYtdPctText.includes('+') ? "เติบโตทวีทรัพย์ในแดนบวก" : "ชะลอตัวชั่วคราวตามแนวโน้มตลาด";
+        
+        let localFallbackText = `
+          <b>💡 [รายงานวิเคราะห์พอร์ตจำลอง - โหมดคลังโควตาเต็ม]</b><br/>
+          เรียนคุณ ${userDisplayGlobalName} จากการกวาดสแกนโครงสร้างเม็ดเงินลงทุน กบข. ล่าสุด บัญชีของคุณมีมูลค่าสินทรัพย์ครองพอร์ตรวมสุทธิอยู่ที่ <b>${maskValue(latestTotalVal)}</b> โดยมีอัตราผลตอบแทนจริงคำนวณหักลบเงินเติม (True YTD) อยู่ที่สถิติ <b>${globalTrueYtdPctText}</b> ซึ่งสถานะในภาพรวมปีนี้จัดอยู่ในเกณฑ์ <u>${trendStatus}</u> ครับ<br/>
+          <b>กลยุทธ์เชิงรับประจำงวด:</b> เน้นรักษาวินัยการเติมออมเพิ่มสะสมจำนวนหน่วยลงทุนต่อเนื่อง เพื่อสร้างผลกระทบพลังดอกเบี้ยทบต้นระยะยาว และพิจารณาวางจังหวะปรับพอร์ตอิงตามสัญญาณความเร็วของสินทรัพย์ในตาราง Momentum Tracker ด้านล่าง<br/>
+          <span style="display:block; margin-top:8px; font-size:11.5px; color:#7f8c8d; font-weight:600; border-top:1px dashed #ddd; padding-top:5px;"><i class="fas fa-pen-nib"></i> หมายเหตุ: แปลและวิเคราะห์ผลโดย ระบบถอดรหัสสถิติฐานข้อมูลจำลอง (Quantum Local System Engine)</span>
+        `;
+        
+        cachedAiAnalysis = localFallbackText;
+        if(aiTextDiv) aiTextDiv.innerHTML = localFallbackText;
+        if(aiTextDivAnal) aiTextDivAnal.innerHTML = localFallbackText;
       }
 
       function drawAnalysisDashboard() {
@@ -617,7 +653,6 @@
           ? (latestTotalValue - yearlyBaselineSum - totalContributionSum) 
           : (latestTotalValue - parseFloat(ytdData[0][customIdx]) - totalContributionSum);
 
-        // 🧠 พ่นข้อมูลลงแผงกล่องข้อมูลชุดวิเคราะห์ (_anal) ควบคู่ไปกับหน้าแรกให้ล็อกตัวเลขตรงกัน 100%
         if(document.getElementById('user_profile_name_anal')) {
           document.getElementById('user_profile_name_anal').innerText = userDisplayGlobalName;
           document.getElementById('user_profile_baseline_anal').innerText = maskValue(yearlyBaselineSum);
@@ -641,7 +676,12 @@
           }
         }
 
-        fetchAiAnalysis();
+        // หากแคชยังว่างเปล่า ให้สแตนด์บายโครงสร้างปุ่มเรียกใช้งาน On-Demand ไว้เสมอ
+        if (cachedAiAnalysis === "") {
+          document.getElementById('ai_analysis_text_anal').innerHTML = getAiInitialButtonHtml();
+        } else {
+          document.getElementById('ai_analysis_text_anal').innerHTML = cachedAiAnalysis;
+        }
 
         var pieDataTable = new google.visualization.DataTable();
         pieDataTable.addColumn('string', 'แผนการลงทุน');
@@ -692,7 +732,7 @@
         let btmM = sorted1M[sorted1M.length - 1];
         let tacticalHtml = `
           <div class="tactical-title"><i class="fas fa-bolt"></i> กล่องสัญญาณสรุป Tactical Switch ประจำงวดปัจจุบัน</div>
-          <p style="font-size:12px; margin:0 0 10px 0; color:#566573;">ระบบประมวลผลความเร็วของแนวโน้มราคา (Momentum) เพื่อตรวจหาโอกาสสับเปลี่ยนแผนการลงทุนที่ดีที่สุดให้คุณ James</p>
+          <p style="font-size:12px; margin:0 0 10px 0; color:#566573;">ระบบประมวลผลความเร็วของแนวโน้มราคา (Momentum) เพื่อตรวจหาโอกาสสับเปลี่ยนแผนการลงทุนที่ดีที่สุด</p>
           <div style="font-size:13px; font-weight:600; line-height:1.6;">
             🟢 <span style="color:#27ae60;">สัญญาณเชิงรุกสับเปลี่ยนเข้า (Switch IN):</span> แนะนำพิจารณา <strong style="color:#196f3d;">"${topM.cleanName}"</strong> เนื่องจากมีแรงส่งโมเมนตัมรอบ 1 เดือนเติบโตสูงโดดเด่นสุดที่ (+${topM.mPct.toFixed(2)}%) แข็งแกร่งชนะตลาด<br/>
             🔴 <span style="color:#c0392b;">สัญญาณเฝ้าระวังหรือสับเปลี่ยนออก (Switch OUT):</span> ควรระวังและทยอยลดน้ำหนักในแผน <strong style="color:#7b241c;">"${btmM.cleanName}"</strong> เนื่องจากสถิติส่งสัญญาณย่อตัวลงมาต่ำสุดรอบเดือนอยู่ที่ (${btmM.mPct.toFixed(2)}%)
@@ -911,7 +951,13 @@
         if(document.getElementById('page-daily').classList.contains('active') && dailyRecords.length > 0) drawDailyDashboard();
         if(document.getElementById('page-thaistock').classList.contains('active') && thaiStockDataRaw.length > 0) drawThaiStockDashboard();
         if(document.getElementById('page-gold').classList.contains('active') && goldDataRaw.length > 0) drawGoldDashboard();
-        if(document.getElementById('page-analysis').classList.contains('active') && ytdData.length > 0) drawAnalysisDashboard();
+        if(document.getElementById('page-analysis').classList.contains('active') && ytdData.length > 0) {
+          if (cachedAiAnalysis !== "" && cachedAiAnalysis.includes("ระบบรายงานวิเคราะห์พอร์ตอัตโนมัติ")) {
+            generateLocalFallbackAnalysis();
+          } else {
+            drawAnalysisDashboard();
+          }
+        }
       });
     </script>
   </body>
