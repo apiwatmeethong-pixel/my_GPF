@@ -569,7 +569,7 @@
         fetchAiAnalysis();
       }
 
-      // 🆕 ฟังก์ชันดึงรายงานบทวิเคราะห์เชิงลึกจากโมเดล Gemini API ฝั่งหลังบ้านอย่างแม่นยำ (อัปเดตกระจายพลังลง 2 หน้าจอ)
+      // 🆕 ฟังก์ชันดึงรายงานบทวิเคราะห์เชิงลึกสลับตามชื่อ User และข้อมูลพอร์ตจริงประจำตัว
       function fetchAiAnalysis() {
         let aiTextDiv = document.getElementById('ai_analysis_text');
         let aiTextDivAnal = document.getElementById('ai_analysis_text_anal');
@@ -580,26 +580,28 @@
           return;
         }
         
-        let loadingMsg = "กำลังต่อสายเชื่อมสัญญาณ Quantum AI (Gemini Core Processor) เพื่อคัดกรองแผนสลับพอร์ตคาดการณ์... <i class='fas fa-spinner fa-spin'></i>";
+        let loadingMsg = `กำลังต่อสายเชื่อมสัญญาณ Quantum AI ให้คุณ ${userDisplayGlobalName} เพื่อวิเคราะห์คัมภีร์ทุนส่วนบุคคล... <i class='fas fa-spinner fa-spin'></i>`;
         if(aiTextDiv) aiTextDiv.innerHTML = loadingMsg;
         if(aiTextDivAnal) aiTextDivAnal.innerHTML = loadingMsg;
         
         fetch(API_URL + "?action=getAiAnalysis&user=" + encodeURIComponent(currentUser))
           .then(res => res.json())
           .then(data => {
-            if(data && data.analysis) {
+            // ถ้าระบบหลังบ้านส่งข้อมูลบทวิเคราะห์จาก Gemini กลับมาสำเร็จ
+            if(data && data.status === "success" && data.analysis) {
               cachedAiAnalysis = data.analysis;
               if(aiTextDiv) aiTextDiv.innerHTML = data.analysis;
               if(aiTextDivAnal) aiTextDivAnal.innerHTML = data.analysis;
             } else {
-              let fallback = "💡 แนะนำคุณ James รักษาวินัยการจัดสรรพอร์ตตามกล่องสัญญาณ Momentum Tracker ประจำงวด และล็อกระดับการเฝ้าระวังของสินทรัพย์ทองคำโลกให้อยู่ภายใต้กรอบข้อจำกัด 25% อย่างมั่นคง";
+              // 🧠 แผนสำรองกรณีเชื่อมต่อ API ไม่ผ่าน (เปลี่ยนชื่ออ้างอิงตาม User จริงแบบอัตโนมัติ)
+              let fallback = `💡 แนะนำคุณ <b>${userDisplayGlobalName}</b> รักษาวินัยการจัดสรรพอร์ตตามกล่องสัญญาณ Momentum Tracker ประจำงวด และล็อกระดับการเฝ้าระวังของสินทรัพย์ทองคำโลกให้อยู่ภายใต้กรอบข้อจำกัด 25% อย่างมั่นคง`;
               if(aiTextDiv) aiTextDiv.innerHTML = fallback;
               if(aiTextDivAnal) aiTextDivAnal.innerHTML = fallback;
             }
           })
           .catch(err => {
             console.error(err);
-            let errorFallback = "💡 <b>คำแนะนำกลยุทธ์:</b> ตลาดมีความผันผวนระยะสั้น แนะนำคงสัดส่วนออมเพิ่มสมัครใจอย่างต่อเนื่องเพื่อสะสมจำนวนหน่วยลงทุนเพิ่ม และพิจารณาถือครองสินทรัพย์กลุ่มที่มีแรงส่งดีเด่นตามกล่องเทรนด์ด้านล่าง";
+            let errorFallback = `💡 <b>คำแนะนำกลยุทธ์ (คลังสำรอง):</b> สวัสดีคุณ <b>${userDisplayGlobalName}</b> สถิติตลาดมีความผันผวนระยะสั้น แนะนำเน้นรักษาวินัยการเติมเงินออมเพิ่มสะสมหน่วยลงทุนอย่างต่อเนื่อง เพื่อรอรอบการฟื้นตัวของสินทรัพย์รอบใหม่ครับ`;
             if(aiTextDiv) aiTextDiv.innerHTML = errorFallback;
             if(aiTextDivAnal) aiTextDivAnal.innerHTML = errorFallback;
           });
