@@ -169,10 +169,10 @@
 
       <!-- หน้า 5: 📊 เมนูวิเคราะห์อัจฉริยะ -->
       <div id="page-analysis" class="page">
-        <!-- 🆕 ครอบโดเมนโซนการแชร์ด้วย DIV เพื่อให้ html2canvas กวาดถ่ายรูปภาพได้ครบถ้วน -->
-        <div id="analysis-capture-zone" style="background: #f0f4f8; padding: 12px; border-radius: 28px; margin-bottom: 10px;">
+        <!-- 🔓 ครอบโดเมนโซนการแชร์ด้วย DIV เพื่อให้ html2canvas สแนปเก็บข้อมูลครบถ้วนทั้งหมด -->
+        <div id="analysis-capture-zone" style="background: #f0f4f8; padding: 14px; border-radius: 28px; margin-bottom: 10px;">
           
-          <!-- ส่วนหัวข้อมูลและโปรไฟล์ผู้ใช้ -->
+          <!-- ส่วนหัวข้อมูลและโปรไฟล์ผู้ใช้ฉบับปรับปรุง 6 กล่องทวีทรัพย์ -->
           <div id="share-profile-area" class="card" style="background: linear-gradient(135deg, #f4ecf7, #eaf2f8); border: 1px solid #d5f5e3; margin-bottom: 15px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
               <h3 style="color: #1b4f72; margin-bottom:0;"><i class="fas fa-user-circle"></i> ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน</h3>
@@ -181,11 +181,14 @@
                 <button class="action-icon-btn" style="padding:4px 10px; font-size:12px; background:var(--primary-color); color:#fff; border:none; font-weight:600;" onclick="shareToSocial()"><i class="fas fa-share-alt"></i> แชร์สถิติลง Line/FB</button>
               </div>
             </div>
+            <!-- การจัดโครงสร้างแบบ 6 กล่องแบ่งสัดส่วนเด่นชัด -->
             <div class="user-badge-container">
               <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name">-</strong></div>
               <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline">฿0.00</strong></div>
               <div class="user-badge"><span>ยอดส่งสะสมเติมปีนี้</span><strong id="user_profile_contrib">฿0.00</strong></div>
-              <div class="user-badge"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current">฿0.00</strong></div>
+              <div class="user-badge" style="background: #ebf5fb; border: 1px solid #3498db;"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current" style="color:#1b4f72;">฿0.00</strong></div>
+              <!-- 🆕 กล่องที่ 6 เสริมทัพ: แสดงจำนวนเงินบาทกำไรรวมประจำงวดปีปัจจุบัน (ยืดหยุ่นปิดตาพรางข้อมูลได้) -->
+              <div class="user-badge" id="box_profit_baht" style="background: #e8f8f5; border: 1px solid #2ecc71;"><span>จำนวนกำไรสุทธิปีนี้</span><strong id="user_profile_profit" style="color:#196f3d;">฿0.00</strong></div>
               <div class="user-badge" style="background: linear-gradient(135deg, #e8f8f5, #a9dfbf); border: 1px solid #2ecc71;"><span>ผลงานสะสมปีนี้ (True YTD)</span><strong id="user_profile_ytd" style="color:#196f3d; font-size:15px;">0.00%</strong></div>
             </div>
           </div>
@@ -193,7 +196,15 @@
           <!-- กล่องสัญญาณสรุป Tactical Switch -->
           <div id="tactical_switch_panel" class="tactical-box"></div>
 
-          <!-- ส่วนแสดงผลกราฟทั้ง 2 ตัวคู่กัน -->
+          <!-- 🆕 กล่องที่ปรึกษาอัจฉริยะ Gemini AI Insights (Premium Pastel Purple Theme) -->
+          <div class="card" style="background: linear-gradient(135deg, #fbf7fc, #f4ecf7); border-left: 5px solid var(--accent-purple); text-align: left; margin-bottom: 20px;">
+            <h3 style="color: var(--accent-purple); margin-bottom: 6px;"><i class="fas fa-robot"></i> 🤖 Quantum AI Portfolio Insights (Gemini Powered)</h3>
+            <div id="ai_analysis_text" style="font-size: 13.5px; line-height: 1.6; color: #2c3e50; font-weight: 500;">
+              กำลังเชื่อมต่อเครือข่ายประสาทเทียมเพื่อประมวลผลคัมภีร์ทุนส่วนบุคคล... ⚡
+            </div>
+          </div>
+
+          <!-- ส่วนแสดงผลกราฟทั้ง 2 ตัวคู่กันรันใน Capture Zone พรีเมียม -->
           <div class="grid-2">
             <div class="card" style="margin-bottom:0;">
               <h3><i class="fas fa-chart-pie" style="color: var(--accent-purple);"></i> กราฟสัดส่วนการกระจายพอร์ตจริงประจำวัน</h3>
@@ -227,7 +238,7 @@
     <script>
       google.charts.load('current', {'packages':['corechart']});
       
-      const API_URL = "https://script.google.com/macros/s/AKfycbxy6Lc-bDsxFSvROeUhChvNHB3BwrH5TjxD94cGB2UL5N9UHb3n2nUU2o_4aMv40EAjpg/exec";
+      const API_URL = "https://script.google.com/macros/s/AKfycbyS8hgfZyQ67MJpx5irWHLBJG1jSRKe_4vNknWoGtwCdQC9ENWJ8ceX3duFq0i9qf9kRA/exec";
 
       let currentUser = ""; 
       let customPlanName = '🚀 พอร์ตจริงของฉัน (บาท)';
@@ -236,6 +247,7 @@
       let userDisplayGlobalName = "";
       let isMasked = false; 
       let globalTrueYtdPctText = "0.00%"; 
+      let cachedAiAnalysis = ""; // ตัวแปรจำสถานะเก็บแคชเพื่อป้องกันการสแปมยิง API ซ้ำซ้อน
 
       var globalHeaders = [], ytdData = [], myUnits = {};
       var goldDataRaw = [], thaiStockDataRaw = [];
@@ -255,28 +267,24 @@
         return isCurrency ? '฿' + maskedMain + '.' + parts[1] : maskedMain + '.' + parts[1];
       }
 
-      // 🆕 ฟังก์ชันกดแชร์แบบทริกเกอร์คู่: ก็อปปี้ข้อความ + รันระบบแคปรูปภาพโซนโปรไฟล์และกราฟ
       function shareToSocial() {
         let latestValue = parseFloat(ytdData[ytdData.length - 1][globalHeaders.indexOf(customPlanName)]) || 0;
-        let reportText = `📊 รายงานสรุปพอร์ตการลงทุน กบข. ประจำวันนี้\n👤 นักลงทุน: ${userDisplayGlobalName}\n📈 ผลงานประจำปี (True YTD): ${globalTrueYtdPctText}\n💰 มูลค่าพอร์ตรวมสุทธิ: ${maskValue(latestValue)}\n💵 ยอดนำส่งสะสมปีนี้: ${maskValue(totalContributionSum)}\n💼 ตรวจสอบผ่านระบบคัมภีร์ทุนส่วนบุคคล`;
+        let reportText = `📊 รายงานสรุปพอร์ตการลงทุน กบข. ประจำวันนี้\n👤 นักลงทุน: ${userDisplayGlobalName}\n📈 ผลงานประจำปี (True YTD): ${globalTrueYtdPctText}\n💰 มูลค่าพอร์ตรวมสุทธิ: ${maskValue(latestValue)}\n💵 ยอดนำส่งสะสมปีนี้: ${maskValue(totalContributionSum)}\n💼 ตรวจสอบผ่านระบบคัมภีร์ทุนส่วนบุคคลคุมความเสี่ยง Quantum AI`;
         
-        // ขั้นตอนที่ 1: คัดลอกข้อความลงคลิปบอร์ด
         navigator.clipboard.writeText(reportText);
-
-        // ขั้นตอนที่ 2: รัน html2canvas บันทึกรูปการ์ดสรุปข้อมูลรวมกราฟทั้ง 2 ตัว
         let captureZone = document.getElementById('analysis-capture-zone');
         
         html2canvas(captureZone, {
           useCORS: true,
           backgroundColor: "#f0f4f8",
-          scale: 2 // ดันความละเอียดคูณ 2 เพื่อให้ภาพกราฟและตัวอักษรคมชัดสูง ไม่แตกเบลอ
+          scale: 2 
         }).then(canvas => {
           let link = document.createElement('a');
-          link.download = `GPF_Analysis_Report.png`;
+          link.download = `GPF_Analysis_Comprehensive_Report.png`;
           link.href = canvas.toDataURL('image/png');
           link.click();
           
-          alert("📋 คัดลอกบทสรุปข้อความลงคลิปบอร์ด และสร้างไฟล์รูปภาพการ์ดวิเคราะห์ (รวมข้อมูลและกราฟทั้ง 2) ดาวน์โหลดเข้าเครื่องคุณ James เรียบร้อยแล้วครับ! สามารถกดส่งเปิดวางโพสต์ลง LINE/FB ต่อได้ทันทีครับ 🚀");
+          alert("📋 คัดลอกบทสรุปข้อความลงคลิปบอร์ด และสั่งเรนเดอร์จัดพิมพ์ไฟล์รูปภาพการ์ดวิเคราะห์ (ครบคลุมกล่อง 6 มิติ, สรุป Tactical, สมองกล AI และแผงกราฟคู่) ลงบนเครื่องคุณ James เรียบร้อยแล้วครับ วางส่งในกลุ่ม LINE ได้เลยครับ! 🚀");
         }).catch(err => {
           console.error(err);
           alert("คัดลอกข้อความสำเร็จ แต่ระบบจำลองภาพขัดข้องชั่วคราว");
@@ -300,6 +308,9 @@
         var msgBox = document.getElementById('login-msg');
         if(u === "" || p === "") { msgBox.innerHTML = "กรุณากรอกข้อมูลให้ครบถ้วน"; return; }
         msgBox.innerHTML = "กำลังเข้าสู่กระบวนการถอดรหัสความปลอดภัย... <i class='fas fa-spinner fa-spin'></i>";
+        
+        // ล้างหน่วยความจำแคช AI เก่าทุกครั้งเมื่อมีการล็อกอินสลับบัญชีผู้ใช้ใหม่
+        cachedAiAnalysis = ""; 
         
         fetch(API_URL + "?action=login&user=" + encodeURIComponent(u) + "&pass=" + encodeURIComponent(p))
           .then(res => res.json())
@@ -511,11 +522,45 @@
         }
       }
 
+      // 🆕 ฟังก์ชันดึงรายงานบทวิเคราะห์เชิงลึกจากโมเดล Gemini API ฝั่งหลังบ้านอย่างแม่นยำ
+      function fetchAiAnalysis() {
+        let aiTextDiv = document.getElementById('ai_analysis_text');
+        if(!aiTextDiv) return;
+        
+        // หากตัวแปรแคชส่วนกลางเคยดึงข้อมูลสำเร็จรอบนี้แล้ว ให้นำผลลัพธ์มาวางโชว์ได้เลยโดยไม่ต้องกดโหลดซ้ำซ้อน
+        if(cachedAiAnalysis !== "") {
+          aiTextDiv.innerHTML = cachedAiAnalysis;
+          return;
+        }
+        
+        aiTextDiv.innerHTML = "กำลังต่อสายเชื่อมสัญญาณ Quantum AI (Gemini Core Processor) เพื่อคัดกรองแผนสลับพอร์ตคาดการณ์... <i class='fas fa-spinner fa-spin'></i>";
+        
+        fetch(API_URL + "?action=getAiAnalysis&user=" + encodeURIComponent(currentUser))
+          .then(res => res.json())
+          .then(data => {
+            if(data && data.analysis) {
+              cachedAiAnalysis = data.analysis;
+              aiTextDiv.innerHTML = data.analysis;
+            } else {
+              aiTextDiv.innerHTML = "💡 แนะนำคุณ James รักษาวินัยการจัดสรรพอร์ตตามกล่องสัญญาณ Momentum Tracker ประจำงวด และล็อกระดับการเฝ้าระวังของสินทรัพย์ทองคำโลกให้อยู่ภายใต้กรอบข้อจำกัด 25% อย่างมั่นคง";
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            aiTextDiv.innerHTML = "💡 <b>คำแนะนำกลยุทธ์:</b> ตลาดมีความผันผวนระยะสั้น แนะนำคงสัดส่วนออมเพิ่มสมัครใจอย่างต่อเนื่องเพื่อสะสมจำนวนหน่วยลงทุนเพิ่ม และพิจารณาถือครองสินทรัพย์กลุ่มที่มีแรงส่งดีเด่นตามกล่องเทรนด์ด้านล่าง";
+          });
+      }
+
       function drawAnalysisDashboard() {
         if (ytdData.length === 0) return;
         var customIdx = globalHeaders.indexOf(customPlanName);
         var latestRow = ytdData[ytdData.length - 1];
         var latestTotalValue = parseFloat(latestRow[customIdx]) || 0;
+
+        // คำนวณหาเม็ดเงินบาทกำไร/ขาดทุนสุทธิที่แท้จริง
+        var trueProfitMoney = yearlyBaselineSum > 0 
+          ? (latestTotalValue - yearlyBaselineSum - totalContributionSum) 
+          : (latestTotalValue - parseFloat(ytdData[0][customIdx]) - totalContributionSum);
 
         document.getElementById('user_profile_name').innerText = userDisplayGlobalName;
         document.getElementById('user_profile_baseline').innerText = maskValue(yearlyBaselineSum);
@@ -523,6 +568,26 @@
         document.getElementById('user_profile_current').innerText = maskValue(latestTotalValue);
         document.getElementById('user_profile_ytd').innerText = globalTrueYtdPctText;
 
+        // 🆕 อัปเดตจัดการสีสันและค่าตัวเลขกล่องที่ 6 (จำนวนเงินกำไรบาท) แบบสลับสีตามผลกำไร
+        let profitBox = document.getElementById('box_profit_baht');
+        if (profitBox) {
+          if (trueProfitMoney >= 0) {
+            profitBox.style.background = "#e8f8f5";
+            profitBox.style.borderColor = "#2ecc71";
+            document.getElementById('user_profile_profit').style.color = "#196f3d";
+            document.getElementById('user_profile_profit').innerText = maskValue(trueProfitMoney);
+          } else {
+            profitBox.style.background = "#fdedec";
+            profitBox.style.borderColor = "#e74c3c";
+            document.getElementById('user_profile_profit').style.color = "#7b241c";
+            document.getElementById('user_profile_profit').innerText = maskValue(trueProfitMoney);
+          }
+        }
+
+        // ทริกเกอร์เรียกคำสั่งยิงไปเรียกบทวิเคราะห์อัจฉริยะจากขุมพลังสมองกล Gemini API
+        fetchAiAnalysis();
+
+        // เริ่มต้นการเรนเดอร์กราฟสัดส่วนวงกลมประจำวัน
         var pieDataTable = new google.visualization.DataTable();
         pieDataTable.addColumn('string', 'แผนการลงทุน');
         pieDataTable.addColumn('number', 'มูลค่าครองทุนรวม');
@@ -618,14 +683,13 @@
             if (monthlyData[m] && monthlyData[m].length > 0) {
                 var currentMonthClose = monthlyData[m][monthlyData[m].length - 1];
                 var diff = currentMonthClose - prevMonthClose;
-                // 🔥 แก้บั๊กกราฟแท่งรายเดือน: เปลี่ยนจากตัวแปร CSS เป็นการใส่รหัสสี Hex โดยตรง เพื่อให้ Engine ตัววาดภาพยอมเรนเดอร์แท่งสี
+                // บังคับแปลงรหัสสีเป็นกลุ่ม Hex ตรงๆ เพื่อไม่ให้กราฟ SVG ของระบบหลุดเรนเดอร์เป็นสีดำ
                 var color = diff >= 0 ? 'color: #2ecc71' : 'color: #e74c3c'; 
                 dtMonth.addRow([m, diff, color]);
                 prevMonthClose = currentMonthClose;
             }
         });
 
-        // ปรับปรุงค่าขอบซ้าย (left: 70) ป้องกันตัวเลขหลักหมื่นถูกพับบีบตัวอักษรกลืนหาย
         var optMonth = {
             fontName: 'Prompt', legend: 'none',
             vAxis: { textStyle: {color: '#7f8c8d', fontSize:11}, gridlines: {color: '#f2f4f4'} },
@@ -686,28 +750,23 @@
         drawTable(selectedPlans, planIndices, baseValues);
       }
 
-      // 🛠️ แก้ไขบั๊กข้อมูลตารางไม่ตรง: บังคับให้แถวพอร์ตของ James คำนวณแบบ True YTD (หักเงินนำส่งแล้ว) เพื่อให้สถิติตัวเลขล้อตรงกันกับหน้าจอบน 100%
       function drawTable(selectedPlans, planIndices, baseValues) {
         var html = '<table><thead><tr><th>แผนงานลงทุน</th><th>มูลค่ารวมครองพอร์ตปัจจุบัน (บาท)</th><th>ผลงาน % YTD</th></tr></thead><tbody>';
         var latestRow = ytdData[ytdData.length - 1];
         for (var i = 0; i < selectedPlans.length; i++) {
           var planName = selectedPlans[i], baseVal = baseValues[i], latestVal = parseFloat(latestRow[planIndices[i]]);
-          
-          // คำนวณอัตรา YTD เริ่มต้น
           var ytdPct = baseVal > 0 ? ((latestVal - baseVal) / baseVal) * 100 : 0;
           
           var displayLatest = "";
           if (planName === customPlanName) {
-            displayLatest = maskValue(latestVal); // ยอดรวมสุทธิพอร์ต
-            
-            // 🔥 ปลั๊กอินเปลี่ยนเงื่อนไขสิทธิ์เฉพาะแถวพอร์ตรวม ให้คำนวณแบบ True YTD สอดคล้องตัวกล่องข้อมูลหลัก
+            displayLatest = maskValue(latestVal);
             var baseValueTrue = yearlyBaselineSum > 0 ? yearlyBaselineSum : parseFloat(ytdData[0][planIndices[i]]);
             var trueProfit = yearlyBaselineSum > 0 ? (latestVal - yearlyBaselineSum - totalContributionSum) : (latestVal - baseValueTrue - totalContributionSum);
             ytdPct = baseValueTrue > 0 ? (trueProfit / baseValueTrue) * 100 : 0;
           } else {
             var planUnits = myUnits[planName] || 0;
             var planTotalMoneyValue = latestVal * planUnits;
-            displayLatest = maskValue(planTotalMoneyValue); // ยอดเงินสดในแต่ละกองทุน
+            displayLatest = maskValue(planTotalMoneyValue);
           }
           
           var rowClass = planName === customPlanName ? ' style="background:#fefde8; font-weight:600;"' : '';
