@@ -254,10 +254,10 @@
         <div class="nav-item" onclick="switchPage('analysis', this)"><i class="fas fa-sliders-h"></i> วิเคราะห์</div>
       </div>
     </div>
-
-    <script>
+<script>
       google.charts.load('current', {'packages':['corechart']});
       
+      // 🔗 ที่อยู่ด่านหน้าเชื่อมหลังบ้าน Google Apps Script ของคุณ James
       const API_URL = "https://script.google.com/macros/s/AKfycbzUS3B3NSe_QZagIFt56JoR5e9TlCy6XNI0Za3AEeI7g1GCv2TJ_Uo1mQlQrI9krDWx/exec";
 
       let currentUser = ""; 
@@ -267,13 +267,13 @@
       let userDisplayGlobalName = "";
       let isMasked = false; 
       let globalTrueYtdPctText = "0.00%"; 
-      let cachedAiAnalysis = ""; // ตัวแปรจำสถานะเก็บแคชเพื่อป้องกันการสแปมยิง API ซ้ำซ้อน
+      let cachedAiAnalysis = ""; // แคชความจำระบบป้องกันการกดรัน API ซ้ำซ้อนโดยไม่จำเป็น
 
       var globalHeaders = [], ytdData = [], myUnits = {};
       var goldDataRaw = [], thaiStockDataRaw = [];
       var dailyRecords = []; 
 
-      // 🎯 1. โครงสร้างปุ่มกดประมวลผลแบบ On-Demand (ใช้สไตล์อินไลน์ป้องกันการโดนเขียนทับ)
+      // 🎯 โครงสร้างหน้าต่างปุ่มกดเรียกใช้ Quantum AI แบบ On-Demand (เซฟค่าโควตาปลอดภัยสูงสุด)
       const getAiInitialButtonHtml = () => `
         <div style="text-align: center; padding: 18px; background: #f5eef8; border-radius:20px; border:2px dashed #9b59b6; margin: 10px 0;">
           <p style="margin: 0 0 12px 0; font-size: 13px; color: #5b2c6f; font-weight:600;"><i class="fas fa-lock"></i> โหมดเซฟโควตา: ระบบจะไม่รัน AI จนกว่าคุณจะสั่ง</p>
@@ -281,35 +281,62 @@
         </div>
       `;
 
-      // 🚀 2. ฟังก์ชันดึงข้อมูลพอร์ตแบบเรียงคิว และล็อกปุ่มกดสแตนด์บาย (ห้ามแอบรัน AI อัตโนมัติเด็ดขาด)
-      async function fetchData() {
-        try {
-          // เคลียร์หน้าจอและบังคับแสดงปุ่มกดรอก่อนเลยตั้งแต่วินาทีแรก
-          if(document.getElementById('ai_analysis_text')) document.getElementById('ai_analysis_text').innerHTML = getAiInitialButtonHtml();
-          if(document.getElementById('ai_analysis_text_anal')) document.getElementById('ai_analysis_text_anal').innerHTML = getAiInitialButtonHtml();
+      function maskValue(num, isCurrency = true) {
+        if (!isMasked) {
+          return isCurrency 
+            ? '฿' + num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : num.toFixed(4);
+        }
+        let str = num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (str.length <= 4) return '฿X.XX';
+        let parts = str.split('.');
+        let mainStr = parts[0]; 
+        let maskedMain = mainStr.substring(0, 2) + mainStr.substring(2, mainStr.length - 1).replace(/[0-9,.]/g, 'X') + mainStr.substring(mainStr.length - 1);
+        return isCurrency ? '฿' + maskedMain + '.' + parts[1] : maskedMain + '.' + parts[1];
+      }
 
-          // ดึงข้อมูลพอร์ตหลักและรอให้เสร็จ (ท่อที่ 1)
-          const resNav = await fetch(API_URL + "?action=getNavData&user=" + encodeURIComponent(currentUser));
-          const dataNav = await resNav.json();
-          processData(dataNav);
+      function shareToSocial() {
+        let latestValue = parseFloat(ytdData[ytdData.length - 1][globalHeaders.indexOf(customPlanName)]) || 0;
+        let reportText = `📊 รายงานสรุปพอร์ตการลงทุน กบข. ประจำวันนี้\n👤 นักลงทุน: ${userDisplayGlobalName}\n📈 ผลงานประจำปี (True YTD): ${globalTrueYtdPctText}\n💰 มูลค่าพอร์ตรวมสุทธิ: ${maskValue(latestValue)}\n💵 ยอดนำส่งสะสมปีนี้: ${maskValue(totalContributionSum)}\n💼 ตรวจสอบผ่านระบบคัมภีร์ทุนส่วนบุคคลคุมความเสี่ยง Quantum AI`;
+        
+        navigator.clipboard.writeText(reportText);
+        let captureZone = document.getElementById('analysis-capture-zone');
+        
+        html2canvas(captureZone, {
+          useCORS: true,
+          backgroundColor: "#f0f4f8",
+          scale: 2 
+        }).then(canvas => {
+          let link = document.createElement('a');
+          link.download = `GPF_Analysis_Comprehensive_Report.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          alert("📋 คัดลอกบทสรุปข้อความลงคลิปบอร์ด และสั่งจัดพิมพ์ไฟล์รูปภาพการ์ดวิเคราะห์ 6 มิติ ลงเครื่องเรียบร้อยแล้วครับ วางส่งในกลุ่ม LINE ได้เลยครับ! 🚀");
+        }).catch(err => {
+          console.error(err);
+          alert("คัดลอกข้อความสำเร็จ แต่ระบบจำลองภาพขัดข้องชั่วคราว");
+        });
+      }
 
-          // ดึงข้อมูลหุ้นไทย (ท่อที่ 2)
-          const resThai = await fetch(API_URL + "?action=getThaiStockData");
-          const dataThai = await resThai.json();
-          processThaiStockData(dataThai);
-
-          // ดึงข้อมูลทองคำสากล (ท่อที่ 3)
-          const resGold = await fetch(API_URL + "?action=getGoldData");
-          const dataGold = await resGold.json();
-          processGoldData(dataGold);
-
-        } catch (err) {
-          console.error("Sequential Fetch System Error: ", err);
-          if(document.getElementById('total_money')) document.getElementById('total_money').innerHTML = "⚠️ ตรวจพบ Session ซ้อน";
+      function togglePrivacy() {
+        isMasked = !isMasked;
+        let eyeIcons = ['eye-icon-main', 'eye-icon-analysis'];
+        eyeIcons.forEach(id => {
+          let el = document.getElementById(id);
+          if(el) { el.className = isMasked ? "fas fa-eye-slash" : "fas fa-eye"; }
+        });
+        updateSummaryBox();
+        if(ytdData.length > 0) {
+          updateDashboard();
+          if(cachedAiAnalysis !== "" && cachedAiAnalysis.includes("รายงานวิเคราะห์พอร์ตจำลอง")) {
+            generateLocalFallbackAnalysis();
+          } else {
+            drawAnalysisDashboard();
+          }
         }
       }
 
-      // 🔑 3. ฟังก์ชันล็อกอิน (ล้างค่าแคชเก่า และสแตนด์บายปุ่มกดใหม่ทุกครั้ง)
+      // 🔑 ฟังก์ชันเข้าสู่ระบบพร้อมสแตนด์บายปุ่มกดถนอมโควตา
       function login() {
         var u = document.getElementById('username').value.trim();
         var p = document.getElementById('password').value.trim();
@@ -317,7 +344,7 @@
         if(u === "" || p === "") { msgBox.innerHTML = "กรุณากรอกข้อมูลให้ครบถ้วน"; return; }
         msgBox.innerHTML = "กำลังเข้าสู่กระบวนการถอดรหัสความปลอดภัย... <i class='fas fa-spinner fa-spin'></i>";
         
-        cachedAiAnalysis = ""; // ล้างแคชสมองกลเก่าออกทั้งหมด ป้องกันการจำค่าสลับคน
+        cachedAiAnalysis = ""; 
         
         fetch(API_URL + "?action=login&user=" + encodeURIComponent(u) + "&pass=" + encodeURIComponent(p))
           .then(res => res.json())
@@ -328,7 +355,6 @@
               document.getElementById('login-page').style.display = "none";
               document.getElementById('main-app').style.display = "block";
               
-              // บังคับขึ้นรูปปุ่มกดสแตนด์บายทันทีที่เข้าสู่ระบบสำเร็จ
               if(document.getElementById('ai_analysis_text')) document.getElementById('ai_analysis_text').innerHTML = getAiInitialButtonHtml();
               if(document.getElementById('ai_analysis_text_anal')) document.getElementById('ai_analysis_text_anal').innerHTML = getAiInitialButtonHtml();
               
@@ -338,7 +364,203 @@
           .catch(err => { console.error(err); msgBox.innerHTML = "เครือข่ายขัดข้อง กรุณาลองตรวจสอบสัญญาณ"; });
       }
 
-      // ⚙️ 4. ฟังก์ชันควบคุมการอัปเดตกล่องแดชบอร์ดหน้าแรก (ห้ามใส่คำสั่งยิงเรียก AI ในนี้)
+      function logout() {
+        currentUser = ""; document.getElementById('username').value = ""; document.getElementById('password').value = "";
+        document.getElementById('login-msg').innerHTML = ""; document.getElementById('main-app').style.display = "none";
+        document.getElementById('login-page').style.display = "flex";
+        cachedAiAnalysis = "";
+      }
+
+      function openEditPage() {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-edit').classList.add('active');
+        document.getElementById('main_title').innerHTML = "📝 แก้ไขพอร์ตการลงทุน";
+        document.getElementById('input_baseline_amount').value = yearlyBaselineSum;
+        
+        let container = document.getElementById('edit-form-container');
+        let html = `
+        <div style="margin-bottom: 20px; background: #fffdf9; border: 1px dashed #fad7a0; padding: 15px; border-radius: 16px; text-align: left;">
+            <label style="font-size: 13px; font-weight: 600; color: #e67e22; display: block; margin-bottom: 6px;">
+                <i class="fas fa-money-bill-wave"></i> จำนวนเงินนำส่งหักสะสมจากสลิปงวดเดือนนี้ (บาท)
+            </label>
+            <input type="number" id="input_monthly_cash" class="login-input" style="border-color: #fad7a0; background: #fff;" placeholder="ระบุยอดเงินเติมเช่น 3500 (หากไม่มีพิมพ์ 0)" value="0">
+        </div>
+        <h4 style="font-size:13px; color:#566573; text-align:left; margin-bottom:10px; font-weight:600;"><i class="fas fa-cubes"></i> ปรับสมดุลหน่วยลงทุนแยกแต่ละแผนงาน</h4>`;
+
+        for (let i = 1; i < globalHeaders.length - 1; i++) {
+            let planName = globalHeaders[i];
+            let currentUnit = myUnits[planName] || 0;
+            html += `<div style="margin-bottom: 12px; text-align: left;">
+                <label style="font-size: 13px; font-weight: 500; color: #2c3e50; display: block; margin-bottom: 4px;">${planName}</label>
+                <input type="number" step="any" id="input_plan_${i}" class="login-input" style="margin-bottom: 0;" value="${currentUnit}">
+            </div>`;
+        }
+        container.innerHTML = html;
+      }
+
+      function setYearlyBaseline() {
+        let amt = parseFloat(document.getElementById('input_baseline_amount').value) || 0;
+        if(amt < 0) { alert("ยอดเงินห้ามติดลบครับ"); return; }
+        let currentYear = new Date().getFullYear();
+        let payload = { action: "saveBaseline", user: currentUser, year: currentYear, amount: amt };
+        fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if(res.status === "success") {
+                alert("⚙️ ตั้งทุนฐานยกมาต้นปีสำเร็จแล้ว ระบบจะคำนวณกำไรที่แท้จริงให้ใหม่ทันทีครับ");
+                fetchData();
+            }
+        }).catch(err => console.error(err));
+      }
+
+      function savePortfolioData() {
+        let saveBtn = document.getElementById('save-btn');
+        saveBtn.innerHTML = "กำลังเข้ารหัสบันทึกข้อมูล... <i class='fas fa-spinner fa-spin'></i>";
+        saveBtn.disabled = true;
+
+        let newPlans = [];
+        for (let i = 1; i < globalHeaders.length - 1; i++) {
+            let planName = globalHeaders[i];
+            let val = parseFloat(document.getElementById('input_plan_' + i).value) || 0;
+            newPlans.push({ plan: planName, units: val });
+        }
+        let monthlyCash = parseFloat(document.getElementById('input_monthly_cash').value) || 0;
+        let payload = { action: "savePortfolio", user: currentUser, data: newPlans, monthlyCash: monthlyCash };
+
+        fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(res => {
+            if(res.status === "success") {
+                alert("✅ จัดเก็บฐานข้อมูลพอร์ตและเงินเติมเรียบร้อย!");
+                fetchData();
+                switchPage('portfolio', document.querySelector('.nav-item.active')); 
+            } else { alert("เกิดข้อผิดพลาดในการเขียนคำสั่งฐานข้อมูล"); }
+        })
+        .catch(err => { console.error(err); alert("ระบบความปลอดภัยตัดการเชื่อมต่อภายนอก"); })
+        .finally(() => { saveBtn.innerHTML = "<i class='fas fa-check-circle'></i> บันทึกข้อมูลพอร์ตเข้าคลังปลอดภัย"; saveBtn.disabled = false; });
+      }
+
+      // 🚀 ฟังก์ชันดึงข้อมูลแบบเรียงคิวอัจฉริยะ ป้องกัน Google สิทธิ์หลุดกลางทาง (เสถียรที่สุด)
+      async function fetchData() {
+        try {
+          if(document.getElementById('ai_analysis_text')) document.getElementById('ai_analysis_text').innerHTML = getAiInitialButtonHtml();
+          if(document.getElementById('ai_analysis_text_anal')) document.getElementById('ai_analysis_text_anal').innerHTML = getAiInitialButtonHtml();
+
+          const resNav = await fetch(API_URL + "?action=getNavData&user=" + encodeURIComponent(currentUser));
+          const dataNav = await resNav.json();
+          processData(dataNav);
+
+          const resThai = await fetch(API_URL + "?action=getThaiStockData");
+          const dataThai = await resThai.json();
+          processThaiStockData(dataThai);
+
+          const resGold = await fetch(API_URL + "?action=getGoldData");
+          const dataGold = await resGold.json();
+          processGoldData(dataGold);
+
+        } catch (err) {
+          console.error("Sequential Fetch System Error: ", err);
+          if(document.getElementById('total_money')) document.getElementById('total_money').innerHTML = "⚠️ ตรวจพบ Session ซ้อน";
+        }
+      }
+
+      function formatShortDate(raw) {
+        if (!raw) return '';
+        var str = String(raw).trim();
+        if (str === 'T+1' || str === 'T+2') return str; 
+        if (str.includes('-')) { var p = str.split('-'); if (p.length >= 3) return p[2].substring(0, 2).padStart(2, '0') + '/' + p[1].padStart(2, '0'); }
+        if (str.includes('/')) { var p = str.split('/'); if (p.length >= 2) return p[0].substring(0, 2).padStart(2, '0') + '/' + p[1].substring(0, 2).padStart(2, '0'); }
+        var d = new Date(raw);
+        if (!isNaN(d.getTime())) return d.getDate().toString().padStart(2, '0') + '/' + (d.getMonth() + 1).toString().padStart(2, '0');
+        return str.substring(0, 5); 
+      }
+
+      function switchPage(pageId, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + pageId).classList.add('active');
+        if(el) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
+        
+        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🇹🇭 พยากรณ์ระบบหุ้นไทย', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
+        document.getElementById('main_title').innerHTML = titles[pageId] || '';
+
+        if(pageId === 'portfolio' && ytdData.length > 0) updateDashboard();
+        if(pageId === 'daily' && dailyRecords.length > 0) drawDailyDashboard();
+        if(pageId === 'thaistock' && thaiStockDataRaw.length > 0) drawThaiStockDashboard();
+        if(pageId === 'gold' && goldDataRaw.length > 0) drawGoldDashboard();
+        if(pageId === 'analysis' && ytdData.length > 0) drawAnalysisDashboard();
+      }
+
+      // 🎯 ฟังก์ชันหลักแกะและประมวลผลโครงสร้างตารางข้อมูล NAV พอร์ตรายบุคคล
+      function processData(response) {
+        try {
+            if (!response || !response.data) return;
+            globalHeaders = response.headers;
+            var data = response.data.filter(row => row[0] && String(row[0]).trim() !== '');
+            if(data.length === 0) return;
+
+            myUnits = response.myUnits;
+            totalContributionSum = response.totalContribution || 0;
+            yearlyBaselineSum = response.yearlyBaseline || 0;
+            userDisplayGlobalName = response.userFullName || currentUser;
+
+            // บล็อกตัดความซ้ำซ้อนของอาเรย์หัวตาราง
+            if (!globalHeaders.includes(customPlanName)) {
+              globalHeaders.push(customPlanName);
+            }
+
+            for (var i = 0; i < data.length; i++) {
+              var dailyTotalMoney = 0;
+              for (var plan in myUnits) {
+                var planIdx = globalHeaders.indexOf(plan);
+                if (planIdx !== -1) dailyTotalMoney += ((parseFloat(data[i][planIdx]) || 0) * myUnits[plan]);
+              }
+              if (data[i].length < globalHeaders.length) {
+                data[i].push(dailyTotalMoney); 
+              } else {
+                data[i][globalHeaders.indexOf(customPlanName)] = dailyTotalMoney;
+              }
+            }
+
+            var lastRowRaw = data[data.length - 1][0];
+            var currentYearStr = "";
+            var tempD = new Date(lastRowRaw);
+            if (!isNaN(tempD.getTime())) currentYearStr = String(tempD.getFullYear());
+            else if (String(lastRowRaw).includes('/')) { var parts = String(lastRowRaw).split('/'); if (parts.length >= 3) currentYearStr = parts[2].substring(0, 4); }
+            
+            ytdData = data.filter(row => String(row[0]).includes(currentYearStr));
+            if (ytdData.length === 0) ytdData = data; 
+
+            dailyRecords = [];
+            var customIdx = globalHeaders.indexOf(customPlanName);
+            
+            for(var i = 1; i < ytdData.length; i++) {
+                var todayVal = parseFloat(ytdData[i][customIdx]);
+                var ydayVal = parseFloat(ytdData[i-1][customIdx]);
+                var diff = todayVal - ydayVal;
+                var pct = ydayVal > 0 ? (diff / ydayVal) * 100 : 0;
+                var planDiffs = {};
+                for(var plan in myUnits) {
+                    var pIdx = globalHeaders.indexOf(plan);
+                    if (pIdx !== -1) {
+                        var pToday = parseFloat(ytdData[i][pIdx]), pYday = parseFloat(ytdData[i-1][pIdx]);
+                        planDiffs[plan] = pYday > 0 ? ((pToday - pYday) / pYday) * 100 : 0;
+                    }
+                }
+                dailyRecords.push({ date: formatShortDate(ytdData[i][0]), dateRaw: ytdData[i][0], total: todayVal, diff: diff, pct: pct, planDiffs: planDiffs });
+            }
+            updateSummaryBox(); createCheckboxes();
+            if(document.getElementById('page-analysis').classList.contains('active')) drawAnalysisDashboard();
+        } catch(e) { console.error("Data Struct Error: ", e); }
+      }
+
       function updateSummaryBox() {
         if(ytdData.length === 0) return;
         var customIdx = globalHeaders.indexOf(customPlanName);
@@ -379,7 +601,6 @@
           }
         }
         
-        // 🔒 บังคับแสดงผลปุ่มกดเรียกใช้ On-Demand เท่านั้น หากยังไม่มีประวัติการกดเรียกคำสั่ง
         if (cachedAiAnalysis === "") {
           if(document.getElementById('ai_analysis_text')) document.getElementById('ai_analysis_text').innerHTML = getAiInitialButtonHtml();
         } else {
@@ -387,7 +608,7 @@
         }
       }
 
-      // 🤖 5. ท่อคำสั่งเดียวในระบบที่ได้รับอนุญาตให้ยิงไปหา Gemini API (เมื่อคลิกปุ่มม่วงเท่านั้น)
+      // 🤖 ยิงส่งไปประมวลผลที่ Gemini API เมื่อมีการคลิกปุ่มม่วงพาสเทล On-Demand เท่านั้น
       function triggerAiAnalysis() {
         let aiTextDiv = document.getElementById('ai_analysis_text');
         let aiTextDivAnal = document.getElementById('ai_analysis_text_anal');
@@ -405,13 +626,11 @@
         fetch(API_URL + "?action=getAiAnalysis&user=" + encodeURIComponent(currentUser))
           .then(res => res.json())
           .then(data => {
-            // หากระบบผ่านฉลุยและไม่ติดหลุดโค้ดผิดพลาดรายวัน (429) ให้แสดงบทวิเคราะห์สดทันที
             if(data && data.status === "success" && data.analysis && !data.analysis.includes("❌") && !data.analysis.includes("Gemini API Error")) {
               cachedAiAnalysis = data.analysis;
               if(aiTextDiv) aiTextDiv.innerHTML = data.analysis;
               if(aiTextDivAnal) aiTextDivAnal.innerHTML = data.analysis;
             } else {
-              // ⚠️ โควตาเต็มหรือเกิดข้อผิดพลาด: วิ่งเข้าระบบแปลผลโลคอลดึงตัวเลขสดจากพอร์ตทันที!
               generateLocalFallbackAnalysis();
             }
           })
@@ -421,7 +640,25 @@
           });
       }
 
-      // ⚙️ 6. ฟังก์ชันจัดหน้าต่างเมนูวิเคราะห์หลัก (ห้ามแอบสั่งรัน AI อัตโนมัติเช่นกัน)
+      // ⚙️ ระบบแปลผลพอร์ตจากฐานข้อมูลภายในอัตโนมัติ (Fallback Engine เมื่อโควตาเต็ม)
+      function generateLocalFallbackAnalysis() {
+        let aiTextDiv = document.getElementById('ai_analysis_text');
+        let aiTextDivAnal = document.getElementById('ai_analysis_text_anal');
+        let latestTotalVal = ytdData.length > 0 ? parseFloat(ytdData[ytdData.length - 1][globalHeaders.indexOf(customPlanName)]) || 0 : 0;
+        let trendStatus = globalTrueYtdPctText.includes('+') ? "เติบโตทวีทรัพย์ในแดนบวก" : "ชะลอตัวชั่วคราวตามแนวโน้มตลาด";
+        
+        let localFallbackText = `
+          <b>💡 [รายงานวิเคราะห์พอร์ตจำลอง - โหมดคลังโควตาเต็ม]</b><br/>
+          เรียนคุณ ${userDisplayGlobalName} จากการกวาดสแกนโครงสร้างเม็ดเงินลงทุน กบข. ล่าสุด บัญชีของคุณมีมูลค่าสินทรัพย์ครองพอร์ตรวมสุทธิอยู่ที่ <b>${maskValue(latestTotalVal)}</b> โดยมีอัตราผลตอบแทนจริงคำนวณหักลบเงินเติม (True YTD) อยู่ที่สถิติ <b>${globalTrueYtdPctText}</b> ซึ่งสถานะในภาพรวมปีนี้จัดอยู่ในเกณฑ์ <u>${trendStatus}</u> ครับ<br/>
+          <b>กลยุทธ์เชิงรับประจำงวด:</b> เน้นรักษาวินัยการเติมออมเพิ่มสะสมจำนวนหน่วยลงทุนต่อเนื่อง เพื่อสร้างผลกระทบพลังดอกเบี้ยทบต้นระยะยาว และพิจารณาวางจังหวะปรับพอร์ตอิงตามสัญญาณความเร็วของสินทรัพย์ในตาราง Momentum Tracker ด้านล่าง<br/>
+          <span style="display:block; margin-top:8px; font-size:11.5px; color:#7f8c8d; font-weight:600; border-top:1px dashed #ddd; padding-top:5px;"><i class="fas fa-pen-nib"></i> หมายเหตุ: แปลและวิเคราะห์ผลโดย ระบบถอดรหัสสถิติฐานข้อมูลจำลอง (Quantum Local System Engine)</span>
+        `;
+        
+        cachedAiAnalysis = localFallbackText;
+        if(aiTextDiv) aiTextDiv.innerHTML = localFallbackText;
+        if(aiTextDivAnal) aiTextDivAnal.innerHTML = localFallbackText;
+      }
+
       function drawAnalysisDashboard() {
         if (ytdData.length === 0) return;
         var customIdx = globalHeaders.indexOf(customPlanName);
@@ -451,14 +688,12 @@
           }
         }
 
-        // 🔒 บังคับล็อกสิทธิ์หน้าจอวิเคราะห์ให้แสดงผลปุ่มกดเรียกใช้ On-Demand เช่นกัน
         if (cachedAiAnalysis === "") {
           if(document.getElementById('ai_analysis_text_anal')) document.getElementById('ai_analysis_text_anal').innerHTML = getAiInitialButtonHtml();
         } else {
           if(document.getElementById('ai_analysis_text_anal')) document.getElementById('ai_analysis_text_anal').innerHTML = cachedAiAnalysis;
         }
 
-        // --- ส่วนวาดชาร์ตวงกลม Pie Chart และการคำนวณอันดับ Momentum คงเดิมตามโครงสร้างหน้าเว็บ ---
         var pieDataTable = new google.visualization.DataTable();
         pieDataTable.addColumn('string', 'แผนการลงทุน'); pieDataTable.addColumn('number', 'มูลค่าครองทุนรวม');
         for (var plan in myUnits) {
@@ -527,6 +762,7 @@
         sorted1M.forEach(r => { tableHtml += `<tr><td style="text-align:left; font-weight:500; color:#2c3e50;">${r.cleanName}</td><td><span class="${r.wPct>=0?'positive':'negative'}">${r.wPct>=0?'+':''}${r.wPct.toFixed(2)}%</span></td><td><span class="${r.mPct>=0?'positive':'negative'}">${r.mPct>=0?'+':''}${r.mPct.toFixed(2)}%</span></td><td><span class="${r.ytdPct>=0?'positive':'negative'}">${r.ytdPct>=0?'+':''}${r.ytdPct.toFixed(2)}%</span></td></tr>`; });
         document.getElementById('rank_table_div').innerHTML = tableHtml + '</tbody></table>';
       }
+
       function createCheckboxes() {
         var container = document.getElementById('checkboxes');
         var html = '';
@@ -572,9 +808,7 @@
         var latestRow = ytdData[ytdData.length - 1];
         for (var i = 0; i < selectedPlans.length; i++) {
           var planName = selectedPlans[i], baseVal = baseValues[i], latestVal = parseFloat(latestRow[planIndices[i]]);
-          
           var ytdPct = baseVal > 0 ? ((latestVal - baseVal) / baseVal) * 100 : 0;
-          
           var displayLatest = "";
           if (planName === customPlanName) {
             displayLatest = maskValue(latestVal);
@@ -582,11 +816,8 @@
             var trueProfit = yearlyBaselineSum > 0 ? (latestVal - yearlyBaselineSum - totalContributionSum) : (latestVal - baseValueTrue - totalContributionSum);
             ytdPct = baseValueTrue > 0 ? (trueProfit / baseValueTrue) * 100 : 0;
           } else {
-            var planUnits = myUnits[planName] || 0;
-            var planTotalMoneyValue = latestVal * planUnits;
-            displayLatest = maskValue(planTotalMoneyValue);
+            displayLatest = maskValue(latestVal * (myUnits[planName] || 0));
           }
-          
           var rowClass = planName === customPlanName ? ' style="background:#fefde8; font-weight:600;"' : '';
           html += `<tr${rowClass}><td>${planName.replace('แผนกองทุน', '')}</td><td>${displayLatest}</td><td><span class="${ytdPct >= 0 ? 'positive' : 'negative'}">${ytdPct >= 0 ? '+' : ''}${ytdPct.toFixed(2)}%</span></td></tr>`;
         }
@@ -602,10 +833,8 @@
         var winCount = 0, lossCount = 0;
         recentRecords.forEach(r => {
             if (r.diff >= 0) winCount++; else lossCount++;
-            var color = r.diff >= 0 ? 'color: #abc9af' : 'color: #f2b6b6';
-            var sign = r.diff >= 0 ? '+' : '';
-            var tooltipHtml = `<div style="padding:10px; font-family:'Prompt'; font-size:12px;"><b>${r.date}</b><br/>มูลค่ารวม: ${maskValue(r.total)}<br/>ขยับงวด: ${sign}${r.diff.toLocaleString('th-TH', {maximumFractionDigits:2})} ฿</div>`;
-            dt.addRow([r.date, r.diff, color, tooltipHtml]);
+            var tooltipHtml = `<div style="padding:10px; font-family:'Prompt'; font-size:12px;"><b>${r.date}</b><br/>มูลค่ารวม: ${maskValue(r.total)}<br/>ขยับงวด: ${r.diff>=0?'+':''}${r.diff.toLocaleString('th-TH', {maximumFractionDigits:2})} ฿</div>`;
+            dt.addRow([r.date, r.diff, r.diff >= 0 ? 'color: #abc9af' : 'color: #f2b6b6', tooltipHtml]);
         });
 
         var options = { fontName: 'Prompt', legend: 'none', vAxis: { textStyle: {color: '#808b96'}, gridlines: {color: '#f2f4f4'} }, hAxis: { textStyle: {color: '#808b96'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 20, bottom: 50 }, backgroundColor: 'transparent', tooltip: {isHtml: true} };
@@ -619,7 +848,7 @@
         [...recentRecords].reverse().forEach(r => {
             var sign = r.diff >= 0 ? '+' : '', classStr = r.diff > 0 ? 'positive' : (r.diff < 0 ? 'negative' : 'neutral');
             tableHtml += `<tr><td style="text-align:left">${r.date}</td><td>${maskValue(r.total)}</td><td><span class="${classStr}">${sign}${r.diff.toLocaleString('th-TH', {maximumFractionDigits:2})}</span></td><td><span class="${classStr}">${sign}${r.pct.toFixed(2)}%</span></td>`;
-            myPlanNames.forEach(p => { var pVal = r.planDiffs[p] || 0; var pSign = pVal >= 0 ? '+' : ''; var pClass = pVal > 0 ? 'positive' : (pVal < 0 ? 'negative' : 'neutral'); var pDisplay = pVal === 0 ? '-' : `${pSign}${pVal.toFixed(2)}%`; tableHtml += `<td><span class="${pClass}" style="font-size: 11px;">${pDisplay}</span></td>`; });
+            myPlanNames.forEach(p => { var pVal = r.planDiffs[p] || 0; var pClass = pVal > 0 ? 'positive' : (pVal < 0 ? 'negative' : 'neutral'); tableHtml += `<td><span class="${pClass}" style="font-size: 11px;">${pVal===0?'-':(pVal>=0?'+':'')+pVal.toFixed(2)+'%'}</span></td>`; });
             tableHtml += `</tr>`;
         });
         document.getElementById('daily_table_div').innerHTML = tableHtml + '</tbody></table>';
@@ -675,13 +904,10 @@
         if(document.getElementById('page-thaistock').classList.contains('active') && thaiStockDataRaw.length > 0) drawThaiStockDashboard();
         if(document.getElementById('page-gold').classList.contains('active') && goldDataRaw.length > 0) drawGoldDashboard();
         if(document.getElementById('page-analysis').classList.contains('active') && ytdData.length > 0) {
-          if (cachedAiAnalysis !== "" && cachedAiAnalysis.includes("ระบบรายงานวิเคราะห์พอร์ตอัตโนมัติ")) {
-            generateLocalFallbackAnalysis();
-          } else {
-            drawAnalysisDashboard();
-          }
+          if (cachedAiAnalysis !== "" && cachedAiAnalysis.includes("รายงานวิเคราะห์พอร์ตจำลอง")) { generateLocalFallbackAnalysis(); } else { drawAnalysisDashboard(); }
         }
       });
     </script>
+    
   </body>
 </html>
