@@ -115,6 +115,28 @@
             <button onclick="openEditPage()" style="background: var(--analysis-color); color: #fff; border: none; padding: 8px 18px; border-radius: 12px; font-family: 'Prompt'; font-size: 13px; font-weight:600; cursor: pointer; box-shadow: 0 4px 10px rgba(52,152,219,0.2);"><i class="fas fa-edit"></i> ปรับปรุงยอดหน่วย & สลิป</button>
           </div>
         </div>
+
+        <!-- 🆕 ดึงกล่องโปรไฟล์ 6 ช่องทวีทรัพย์มาจำลองโชว์ที่หน้าแรก (พรางข้อมูลปิดตาได้พร้อมกัน) -->
+        <div class="card" style="background: linear-gradient(135deg, #f4ecf7, #eaf2f8); border: 1px solid #d5f5e3;">
+          <h3 style="color: #1b4f72;"><i class="fas fa-user-circle"></i> ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน</h3>
+          <div class="user-badge-container">
+            <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name">-</strong></div>
+            <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline">฿0.00</strong></div>
+            <div class="user-badge"><span>ยอดส่งสะสมเติมปีนี้</span><strong id="user_profile_contrib">฿0.00</strong></div>
+            <div class="user-badge" style="background: #ebf5fb; border: 1px solid #3498db;"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current" style="color:#1b4f72;">฿0.00</strong></div>
+            <div class="user-badge" id="box_profit_baht" style="background: #e8f8f5; border: 1px solid #2ecc71;"><span>จำนวนกำไรสุทธิปีนี้</span><strong id="user_profile_profit" style="color:#196f3d;">฿0.00</strong></div>
+            <div class="user-badge" style="background: linear-gradient(135deg, #e8f8f5, #a9dfbf); border: 1px solid #2ecc71;"><span>ผลงานสะสมปีนี้ (True YTD)</span><strong id="user_profile_ytd" style="color:#196f3d; font-size:15px;">0.00%</strong></div>
+          </div>
+        </div>
+
+        <!-- 🆕 ดึงกล่องผลวิเคราะห์สมองกล AI มาร่วมจัดแสดงที่หน้าแรกเพื่อความชัดเจนแบบเห็นทันตา -->
+        <div class="card" style="background: linear-gradient(135deg, #fbf7fc, #f4ecf7); border-left: 5px solid var(--accent-purple); text-align: left;">
+          <h3 style="color: var(--accent-purple); margin-bottom: 6px;"><i class="fas fa-robot"></i> 🤖 Quantum AI Portfolio Insights (Gemini Powered)</h3>
+          <div id="ai_analysis_text" style="font-size: 13.5px; line-height: 1.6; color: #2c3e50; font-weight: 500;">
+            กำลังเชื่อมต่อเครือข่ายประสาทเทียมเพื่อประมวลผลคัมภีร์ทุนส่วนบุคคล... ⚡
+          </div>
+        </div>
+
         <div class="card">
           <h3><i class="fas fa-chart-line" style="color:var(--analysis-color)"></i> เปรียบเทียบแรงส่งสถิติกราฟ NAV YTD</h3>
           <div id="checkboxes" class="checkbox-container"></div>
@@ -172,7 +194,7 @@
         <!-- 🔓 ครอบโดเมนโซนการแชร์ด้วย DIV เพื่อให้ html2canvas สแนปเก็บข้อมูลครบถ้วนทั้งหมด -->
         <div id="analysis-capture-zone" style="background: #f0f4f8; padding: 14px; border-radius: 28px; margin-bottom: 10px;">
           
-          <!-- ส่วนหัวข้อมูลและโปรไฟล์ผู้ใช้ฉบับปรับปรุง 6 กล่องทวีทรัพย์ -->
+          <!-- ส่วนหัวข้อมูลและโปรไฟล์ผู้ใช้ฉบับปรับปรุง 6 กล่องทวีทรัพย์ (เวอร์ชันหน้าวิเคราะห์) -->
           <div id="share-profile-area" class="card" style="background: linear-gradient(135deg, #f4ecf7, #eaf2f8); border: 1px solid #d5f5e3; margin-bottom: 15px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
               <h3 style="color: #1b4f72; margin-bottom:0;"><i class="fas fa-user-circle"></i> ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน</h3>
@@ -181,25 +203,24 @@
                 <button class="action-icon-btn" style="padding:4px 10px; font-size:12px; background:var(--primary-color); color:#fff; border:none; font-weight:600;" onclick="shareToSocial()"><i class="fas fa-share-alt"></i> แชร์สถิติลง Line/FB</button>
               </div>
             </div>
-            <!-- การจัดโครงสร้างแบบ 6 กล่องแบ่งสัดส่วนเด่นชัด -->
+            <!-- การจัดโครงสร้างแบบ 6 กล่องแบ่งสัดส่วนเด่นชัดบนแผงแชร์ -->
             <div class="user-badge-container">
-              <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name">-</strong></div>
-              <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline">฿0.00</strong></div>
-              <div class="user-badge"><span>ยอดส่งสะสมเติมปีนี้</span><strong id="user_profile_contrib">฿0.00</strong></div>
-              <div class="user-badge" style="background: #ebf5fb; border: 1px solid #3498db;"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current" style="color:#1b4f72;">฿0.00</strong></div>
-              <!-- 🆕 กล่องที่ 6 เสริมทัพ: แสดงจำนวนเงินบาทกำไรรวมประจำงวดปีปัจจุบัน (ยืดหยุ่นปิดตาพรางข้อมูลได้) -->
-              <div class="user-badge" id="box_profit_baht" style="background: #e8f8f5; border: 1px solid #2ecc71;"><span>จำนวนกำไรสุทธิปีนี้</span><strong id="user_profile_profit" style="color:#196f3d;">฿0.00</strong></div>
-              <div class="user-badge" style="background: linear-gradient(135deg, #e8f8f5, #a9dfbf); border: 1px solid #2ecc71;"><span>ผลงานสะสมปีนี้ (True YTD)</span><strong id="user_profile_ytd" style="color:#196f3d; font-size:15px;">0.00%</strong></div>
+              <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name_anal">-</strong></div>
+              <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline_anal">฿0.00</strong></div>
+              <div class="user-badge"><span>ยอดส่งสะสมเติมปีนี้</span><strong id="user_profile_contrib_anal">฿0.00</strong></div>
+              <div class="user-badge" style="background: #ebf5fb; border: 1px solid #3498db;"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current_anal" style="color:#1b4f72;">฿0.00</strong></div>
+              <div class="user-badge" id="box_profit_baht_anal" style="background: #e8f8f5; border: 1px solid #2ecc71;"><span>จำนวนกำไรสุทธิปีนี้</span><strong id="user_profile_profit_anal" style="color:#196f3d;">฿0.00</strong></div>
+              <div class="user-badge" style="background: linear-gradient(135deg, #e8f8f5, #a9dfbf); border: 1px solid #2ecc71;"><span>ผลงานสะสมปีนี้ (True YTD)</span><strong id="user_profile_ytd_anal" style="color:#196f3d; font-size:15px;">0.00%</strong></div>
             </div>
           </div>
 
           <!-- กล่องสัญญาณสรุป Tactical Switch -->
           <div id="tactical_switch_panel" class="tactical-box"></div>
 
-          <!-- 🆕 กล่องที่ปรึกษาอัจฉริยะ Gemini AI Insights (Premium Pastel Purple Theme) -->
+          <!-- กล่องที่ปรึกษาอัจฉริยะ Gemini AI Insights (Premium Pastel Purple Theme ในโซนแชร์) -->
           <div class="card" style="background: linear-gradient(135deg, #fbf7fc, #f4ecf7); border-left: 5px solid var(--accent-purple); text-align: left; margin-bottom: 20px;">
             <h3 style="color: var(--accent-purple); margin-bottom: 6px;"><i class="fas fa-robot"></i> 🤖 Quantum AI Portfolio Insights (Gemini Powered)</h3>
-            <div id="ai_analysis_text" style="font-size: 13.5px; line-height: 1.6; color: #2c3e50; font-weight: 500;">
+            <div id="ai_analysis_text_anal" style="font-size: 13.5px; line-height: 1.6; color: #2c3e50; font-weight: 500;">
               กำลังเชื่อมต่อเครือข่ายประสาทเทียมเพื่อประมวลผลคัมภีร์ทุนส่วนบุคคล... ⚡
             </div>
           </div>
@@ -238,7 +259,7 @@
     <script>
       google.charts.load('current', {'packages':['corechart']});
       
-      const API_URL = "https://script.google.com/macros/s/AKfycbyS8hgfZyQ67MJpx5irWHLBJG1jSRKe_4vNknWoGtwCdQC9ENWJ8ceX3duFq0i9qf9kRA/exec";
+      const API_URL = "https://script.google.com/macros/s/AKfycbxy6Lc-bDsxFSvROeUhChvNHB3BwrH5TjxD94cGB2UL5N9UHb3n2nUU2o_4aMv40EAjpg/exec";
 
       let currentUser = ""; 
       let customPlanName = '🚀 พอร์ตจริงของฉัน (บาท)';
@@ -309,7 +330,6 @@
         if(u === "" || p === "") { msgBox.innerHTML = "กรุณากรอกข้อมูลให้ครบถ้วน"; return; }
         msgBox.innerHTML = "กำลังเข้าสู่กระบวนการถอดรหัสความปลอดภัย... <i class='fas fa-spinner fa-spin'></i>";
         
-        // ล้างหน่วยความจำแคช AI เก่าทุกครั้งเมื่อมีการล็อกอินสลับบัญชีผู้ใช้ใหม่
         cachedAiAnalysis = ""; 
         
         fetch(API_URL + "?action=login&user=" + encodeURIComponent(u) + "&pass=" + encodeURIComponent(p))
@@ -520,34 +540,68 @@
             document.getElementById('daily_change_money').innerHTML = sign + (isMasked ? "XX,XXX.XX" : latestDay.diff.toLocaleString('th-TH', { maximumFractionDigits: 2 })) + ' ฿';
             document.getElementById('daily_change_pct').innerHTML = sign + latestDay.pct.toFixed(2) + '%';
         }
+
+        // 🧠 ซิงค์ข้อมูลอัปเดตกล่องโปรไฟล์หน้าแรกสถิติทันทีให้เห็นทันตาเมื่อคำนวณเสร็จ
+        if(document.getElementById('user_profile_name')) {
+          document.getElementById('user_profile_name').innerText = userDisplayGlobalName;
+          document.getElementById('user_profile_baseline').innerText = maskValue(yearlyBaselineSum);
+          document.getElementById('user_profile_contrib').innerText = maskValue(totalContributionSum);
+          document.getElementById('user_profile_current').innerText = maskValue(latestValue);
+          document.getElementById('user_profile_ytd').innerText = globalTrueYtdPctText;
+
+          let profitBox = document.getElementById('box_profit_baht');
+          if (profitBox) {
+            if (trueProfit >= 0) {
+              profitBox.style.background = "#e8f8f5";
+              profitBox.style.borderColor = "#2ecc71";
+              document.getElementById('user_profile_profit').style.color = "#196f3d";
+              document.getElementById('user_profile_profit').innerText = maskValue(trueProfit);
+            } else {
+              profitBox.style.background = "#fdedec";
+              profitBox.style.borderColor = "#e74c3c";
+              document.getElementById('user_profile_profit').style.color = "#7b241c";
+              document.getElementById('user_profile_profit').innerText = maskValue(trueProfit);
+            }
+          }
+        }
+
+        // สั่งทริกเกอร์รันระบบโหลด AI Analysis ทันทีเพื่อให้แสดงผลได้นิ่งและรวดเร็วบนทั้งสองหน้าจอ
+        fetchAiAnalysis();
       }
 
-      // 🆕 ฟังก์ชันดึงรายงานบทวิเคราะห์เชิงลึกจากโมเดล Gemini API ฝั่งหลังบ้านอย่างแม่นยำ
+      // 🆕 ฟังก์ชันดึงรายงานบทวิเคราะห์เชิงลึกจากโมเดล Gemini API ฝั่งหลังบ้านอย่างแม่นยำ (อัปเดตกระจายพลังลง 2 หน้าจอ)
       function fetchAiAnalysis() {
         let aiTextDiv = document.getElementById('ai_analysis_text');
-        if(!aiTextDiv) return;
+        let aiTextDivAnal = document.getElementById('ai_analysis_text_anal');
         
-        // หากตัวแปรแคชส่วนกลางเคยดึงข้อมูลสำเร็จรอบนี้แล้ว ให้นำผลลัพธ์มาวางโชว์ได้เลยโดยไม่ต้องกดโหลดซ้ำซ้อน
         if(cachedAiAnalysis !== "") {
-          aiTextDiv.innerHTML = cachedAiAnalysis;
+          if(aiTextDiv) aiTextDiv.innerHTML = cachedAiAnalysis;
+          if(aiTextDivAnal) aiTextDivAnal.innerHTML = cachedAiAnalysis;
           return;
         }
         
-        aiTextDiv.innerHTML = "กำลังต่อสายเชื่อมสัญญาณ Quantum AI (Gemini Core Processor) เพื่อคัดกรองแผนสลับพอร์ตคาดการณ์... <i class='fas fa-spinner fa-spin'></i>";
+        let loadingMsg = "กำลังต่อสายเชื่อมสัญญาณ Quantum AI (Gemini Core Processor) เพื่อคัดกรองแผนสลับพอร์ตคาดการณ์... <i class='fas fa-spinner fa-spin'></i>";
+        if(aiTextDiv) aiTextDiv.innerHTML = loadingMsg;
+        if(aiTextDivAnal) aiTextDivAnal.innerHTML = loadingMsg;
         
         fetch(API_URL + "?action=getAiAnalysis&user=" + encodeURIComponent(currentUser))
           .then(res => res.json())
           .then(data => {
             if(data && data.analysis) {
               cachedAiAnalysis = data.analysis;
-              aiTextDiv.innerHTML = data.analysis;
+              if(aiTextDiv) aiTextDiv.innerHTML = data.analysis;
+              if(aiTextDivAnal) aiTextDivAnal.innerHTML = data.analysis;
             } else {
-              aiTextDiv.innerHTML = "💡 แนะนำคุณ James รักษาวินัยการจัดสรรพอร์ตตามกล่องสัญญาณ Momentum Tracker ประจำงวด และล็อกระดับการเฝ้าระวังของสินทรัพย์ทองคำโลกให้อยู่ภายใต้กรอบข้อจำกัด 25% อย่างมั่นคง";
+              let fallback = "💡 แนะนำคุณ James รักษาวินัยการจัดสรรพอร์ตตามกล่องสัญญาณ Momentum Tracker ประจำงวด และล็อกระดับการเฝ้าระวังของสินทรัพย์ทองคำโลกให้อยู่ภายใต้กรอบข้อจำกัด 25% อย่างมั่นคง";
+              if(aiTextDiv) aiTextDiv.innerHTML = fallback;
+              if(aiTextDivAnal) aiTextDivAnal.innerHTML = fallback;
             }
           })
           .catch(err => {
             console.error(err);
-            aiTextDiv.innerHTML = "💡 <b>คำแนะนำกลยุทธ์:</b> ตลาดมีความผันผวนระยะสั้น แนะนำคงสัดส่วนออมเพิ่มสมัครใจอย่างต่อเนื่องเพื่อสะสมจำนวนหน่วยลงทุนเพิ่ม และพิจารณาถือครองสินทรัพย์กลุ่มที่มีแรงส่งดีเด่นตามกล่องเทรนด์ด้านล่าง";
+            let errorFallback = "💡 <b>คำแนะนำกลยุทธ์:</b> ตลาดมีความผันผวนระยะสั้น แนะนำคงสัดส่วนออมเพิ่มสมัครใจอย่างต่อเนื่องเพื่อสะสมจำนวนหน่วยลงทุนเพิ่ม และพิจารณาถือครองสินทรัพย์กลุ่มที่มีแรงส่งดีเด่นตามกล่องเทรนด์ด้านล่าง";
+            if(aiTextDiv) aiTextDiv.innerHTML = errorFallback;
+            if(aiTextDivAnal) aiTextDivAnal.innerHTML = errorFallback;
           });
       }
 
@@ -557,37 +611,36 @@
         var latestRow = ytdData[ytdData.length - 1];
         var latestTotalValue = parseFloat(latestRow[customIdx]) || 0;
 
-        // คำนวณหาเม็ดเงินบาทกำไร/ขาดทุนสุทธิที่แท้จริง
         var trueProfitMoney = yearlyBaselineSum > 0 
           ? (latestTotalValue - yearlyBaselineSum - totalContributionSum) 
           : (latestTotalValue - parseFloat(ytdData[0][customIdx]) - totalContributionSum);
 
-        document.getElementById('user_profile_name').innerText = userDisplayGlobalName;
-        document.getElementById('user_profile_baseline').innerText = maskValue(yearlyBaselineSum);
-        document.getElementById('user_profile_contrib').innerText = maskValue(totalContributionSum);
-        document.getElementById('user_profile_current').innerText = maskValue(latestTotalValue);
-        document.getElementById('user_profile_ytd').innerText = globalTrueYtdPctText;
+        // 🧠 พ่นข้อมูลลงแผงกล่องข้อมูลชุดวิเคราะห์ (_anal) ควบคู่ไปกับหน้าแรกให้ล็อกตัวเลขตรงกัน 100%
+        if(document.getElementById('user_profile_name_anal')) {
+          document.getElementById('user_profile_name_anal').innerText = userDisplayGlobalName;
+          document.getElementById('user_profile_baseline_anal').innerText = maskValue(yearlyBaselineSum);
+          document.getElementById('user_profile_contrib_anal').innerText = maskValue(totalContributionSum);
+          document.getElementById('user_profile_current_anal').innerText = maskValue(latestTotalValue);
+          document.getElementById('user_profile_ytd_anal').innerText = globalTrueYtdPctText;
 
-        // 🆕 อัปเดตจัดการสีสันและค่าตัวเลขกล่องที่ 6 (จำนวนเงินกำไรบาท) แบบสลับสีตามผลกำไร
-        let profitBox = document.getElementById('box_profit_baht');
-        if (profitBox) {
-          if (trueProfitMoney >= 0) {
-            profitBox.style.background = "#e8f8f5";
-            profitBox.style.borderColor = "#2ecc71";
-            document.getElementById('user_profile_profit').style.color = "#196f3d";
-            document.getElementById('user_profile_profit').innerText = maskValue(trueProfitMoney);
-          } else {
-            profitBox.style.background = "#fdedec";
-            profitBox.style.borderColor = "#e74c3c";
-            document.getElementById('user_profile_profit').style.color = "#7b241c";
-            document.getElementById('user_profile_profit').innerText = maskValue(trueProfitMoney);
+          let profitBoxAnal = document.getElementById('box_profit_baht_anal');
+          if (profitBoxAnal) {
+            if (trueProfitMoney >= 0) {
+              profitBoxAnal.style.background = "#e8f8f5";
+              profitBoxAnal.style.borderColor = "#2ecc71";
+              document.getElementById('user_profile_profit_anal').style.color = "#196f3d";
+              document.getElementById('user_profile_profit_anal').innerText = maskValue(trueProfitMoney);
+            } else {
+              profitBoxAnal.style.background = "#fdedec";
+              profitBoxAnal.style.borderColor = "#e74c3c";
+              document.getElementById('user_profile_profit_anal').style.color = "#7b241c";
+              document.getElementById('user_profile_profit_anal').innerText = maskValue(trueProfitMoney);
+            }
           }
         }
 
-        // ทริกเกอร์เรียกคำสั่งยิงไปเรียกบทวิเคราะห์อัจฉริยะจากขุมพลังสมองกล Gemini API
         fetchAiAnalysis();
 
-        // เริ่มต้นการเรนเดอร์กราฟสัดส่วนวงกลมประจำวัน
         var pieDataTable = new google.visualization.DataTable();
         pieDataTable.addColumn('string', 'แผนการลงทุน');
         pieDataTable.addColumn('number', 'มูลค่าครองทุนรวม');
@@ -683,7 +736,6 @@
             if (monthlyData[m] && monthlyData[m].length > 0) {
                 var currentMonthClose = monthlyData[m][monthlyData[m].length - 1];
                 var diff = currentMonthClose - prevMonthClose;
-                // บังคับแปลงรหัสสีเป็นกลุ่ม Hex ตรงๆ เพื่อไม่ให้กราฟ SVG ของระบบหลุดเรนเดอร์เป็นสีดำ
                 var color = diff >= 0 ? 'color: #2ecc71' : 'color: #e74c3c'; 
                 dtMonth.addRow([m, diff, color]);
                 prevMonthClose = currentMonthClose;
@@ -755,6 +807,7 @@
         var latestRow = ytdData[ytdData.length - 1];
         for (var i = 0; i < selectedPlans.length; i++) {
           var planName = selectedPlans[i], baseVal = baseValues[i], latestVal = parseFloat(latestRow[planIndices[i]]);
+          
           var ytdPct = baseVal > 0 ? ((latestVal - baseVal) / baseVal) * 100 : 0;
           
           var displayLatest = "";
