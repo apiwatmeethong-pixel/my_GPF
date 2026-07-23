@@ -3,282 +3,497 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My GPF Portfolio Management</title>
+    <title>My GPF Portfolio Management - Quantum AI</title>
     
-    <!-- Google Fonts & FontAwesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS & FontAwesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Libraries: Google Charts & Chart.js & html2canvas -->
+    <!-- Libraries: Google Charts, Chart.js, html2canvas, SweetAlert2, Marked -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
-    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%220.9em%22 font-size=%2290%22>📈</text></svg>">
     
     <style>
       :root {
-        --primary-bg: #f0f4f8; 
-        --card-bg: #ffffff; 
-        --text-main: #1c2833; 
-        --text-muted: #7f8c8d;
-        --primary-color: #2ecc71;   
-        --gold-color: #f1c40f;      
-        --daily-color: #e67e22;     
-        --thai-color: #e74c3c;      
-        --analysis-color: #3498db;  
-        --accent-purple: #9b59b6;   
+        --primary-bg: #f5f3ff; 
+        --card-bg: rgba(255, 255, 255, 0.94); 
+        --text-main: #1e1b4b; 
+        --text-muted: #6b7280;
+        --primary-purple: #7c3aed;   
+        --accent-pink: #ec4899;      
       }
-      body { font-family: 'Prompt', sans-serif; background-color: var(--primary-bg); color: var(--text-main); margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+      * { font-family: 'Prompt', sans-serif; }
+      body { 
+        background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 50%, #fce7f3 100%); 
+        min-height: 100vh; 
+        color: var(--text-main); 
+        -webkit-tap-highlight-color: transparent;
+      }
       
-      #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(135deg, #d6eaf8, #d1f2eb); }
-      .login-card { background: var(--card-bg); padding: 40px 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(52,152,219,0.25); width: 90%; max-width: 350px; text-align: center; border: 2px solid #fff; }
-      .login-card h2 { margin-top: 0; color: #2c3e50; font-weight: 600; margin-bottom: 25px; font-size: 24px; }
-      .login-input { width: 100%; padding: 12px 16px; margin-bottom: 16px; border: 1.5px solid #bdc3c7; border-radius: 12px; font-family: 'Prompt'; font-size: 14px; box-sizing: border-box; outline: none; transition: 0.3s; background-color: #fcfcfc; }
-      .login-input:focus { border-color: var(--analysis-color); box-shadow: 0 0 10px rgba(52, 152, 219, 0.3); background-color: #fff; }
-      .login-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #3498db, #2ecc71); color: #fff; border: none; border-radius: 12px; font-family: 'Prompt'; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-      .login-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
-      .login-msg { margin-top: 15px; font-size: 13px; color: #e74c3c; min-height: 20px; }
+      .pastel-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(233, 213, 255, 0.8);
+        box-shadow: 0 10px 30px -5px rgba(124, 58, 237, 0.1);
+        border-radius: 24px;
+        transition: all 0.2s ease-in-out;
+      }
 
-      #main-app { display: none; padding: 15px; padding-bottom: 90px; max-width: 1000px; margin: 0 auto; }
-      h2.app-title { text-align: center; font-weight: 600; font-size: 24px; margin-bottom: 20px; color: #2c3e50; }
-      h3 { margin-top: 0; font-size: 16px; font-weight: 600; color: #2c3e50; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
-      
-      .card { background: var(--card-bg); padding: 20px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); margin-bottom: 20px; border: 1px solid #eaf2f8; position: relative; }
-      .summary-box { text-align: center; background: linear-gradient(135deg, #ebf5fb, #e8f8f5); color: #2c3e50; border: 1px solid #d6eaf8; }
-      .summary-box h3 { color: #34495e; font-weight: 500; font-size: 14px; margin-bottom: 5px; justify-content: center; }
-      .total-money { font-size: clamp(32px, 6vw, 46px); font-weight: 700; margin: 8px 0; color: #1b4f72; }
-      .total-ytd { font-size: 14px; font-weight: 600; background: rgba(255,255,255,0.8); padding: 6px 20px; border-radius: 30px; display: inline-block; color: #21618c; border: 1px solid #aed6f1; }
-
-      .grid-2 { display: grid; grid-template-columns: 1fr; gap: 20px; }
-      @media(min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
-
-      .user-badge-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 15px; }
-      .user-badge { padding: 12px; border-radius: 16px; background: #fdfefe; text-align: left; border: 1px solid #ebf5fb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.01); }
+      .user-badge-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 12px; }
+      .user-badge { padding: 12px; border-radius: 18px; background: #ffffff; border: 1px solid #f3e8ff; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.04); }
       .user-badge span { display: block; font-size: 11px; color: var(--text-muted); font-weight: 500; }
       .user-badge strong { font-size: 14px; color: var(--text-main); font-weight: 700; display: block; margin-top: 2px; }
 
-      .checkbox-container { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-      .checkbox-container label { background: #f2f4f4; border: 1px solid #d5dbdb; padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 500; color: #34495e; cursor: pointer; transition: 0.2s; }
-      .checkbox-container label:hover { background: #eaf2f8; }
-      .custom-plan-label { background: linear-gradient(135deg, #f9e79f, #fad7a0) !important; color: #1c2833 !important; font-weight: 700 !important; border: 1px solid #f4d03f !important;}
+      .checkbox-container { display: flex; flex-wrap: wrap; gap: 8px; }
+      .checkbox-container label { background: #f3e8ff; border: 1px solid #ddd6fe; padding: 6px 14px; border-radius: 30px; font-size: 12px; font-weight: 500; color: #5b21b6; cursor: pointer; transition: 0.2s; user-select: none; }
+      .checkbox-container label:hover { background: #e9d5ff; }
+      .custom-plan-label { background: linear-gradient(135deg, #fef08a, #fde047) !important; color: #854d0e !important; font-weight: 700 !important; border: 1px solid #facc15 !important;}
 
-      .table-responsive { overflow-x: auto; border-radius: 14px; border: 1px solid #eaeded; }
+      .table-responsive { overflow-x: auto; border-radius: 16px; border: 1px solid #f3e8ff; background: #ffffff; }
       table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 400px; }
-      th, td { padding: 12px 14px; border-bottom: 1px solid #f2f4f4; text-align: right; font-size: 13px; }
-      th { background-color: #f8f9f9; color: #34495e; font-weight: 600; font-size: 12px; white-space: nowrap; text-align: right; border-bottom: 2px solid #d5dbdb; }
+      th, td { padding: 10px 12px; border-bottom: 1px solid #f5f3ff; text-align: right; font-size: 12px; }
+      th { background-color: #faf5ff; color: #6b21a8; font-weight: 600; font-size: 11px; text-align: right; border-bottom: 2px solid #e9d5ff; white-space: nowrap; }
       td:first-child, th:first-child { text-align: left; } 
-      .positive { color: #27ae60; font-weight: 700; background: #e8f8f5; padding: 4px 10px; border-radius: 8px; display: inline-block; }
-      .negative { color: #e74c3c; font-weight: 700; background: #fdedec; padding: 4px 10px; border-radius: 8px; display: inline-block; }
-      .neutral { color: #7f8c8d; font-size: 12px; }
+      .positive { color: #059669; font-weight: 700; background: #d1fae5; padding: 2px 8px; border-radius: 6px; display: inline-block; }
+      .negative { color: #dc2626; font-weight: 700; background: #fee2e2; padding: 2px 8px; border-radius: 6px; display: inline-block; }
+      .neutral { color: #6b7280; font-size: 11px; }
 
-      .page { display: none; animation: fadeIn 0.3s ease-in-out; }
-      .page.active { display: block; }
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+      .nav-tab-active { color: #7c3aed !important; font-weight: 700 !important; }
+      .nav-tab-active i { transform: scale(1.15); color: #7c3aed !important; }
 
-      .nav-bottom { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--card-bg); display: flex; box-shadow: 0 -4px 25px rgba(0,0,0,0.06); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-      .nav-item { flex: 1; text-align: center; padding: 14px 0; color: var(--text-muted); cursor: pointer; font-size: 11px; font-weight: 500; transition: 0.2s; }
-      .nav-item.active { color: var(--analysis-color); font-weight: 700; }
-      .nav-item i { font-size: 20px; display: block; margin-bottom: 4px; transition: 0.2s; }
-      .nav-item.active i { transform: scale(1.15); color: var(--analysis-color); }
-      
-      .logout-btn { position: absolute; top: 15px; right: 15px; background: #f2f4f4; border: none; color: #7f8c8d; font-family: 'Prompt'; padding: 6px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; transition: 0.2s; z-index: 5; }
-      .logout-btn:hover { background: #e5e8e8; color: #c0392b; }
-
-      .action-icon-btn { background: #fff; border: 1px solid #d5dbdb; padding: 8px 14px; border-radius: 12px; font-size: 13px; font-family: 'Prompt'; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; color: #34495e; }
-      .action-icon-btn:hover { background: #f2f4f4; border-color: #bdc3c7; }
-      
-      .tactical-box { background: linear-gradient(135deg, #fef9e7, #fdf2e9); border: 1px dashed #f39c12; border-radius: 18px; padding: 15px; margin-bottom: 20px; text-align: left; }
-      .tactical-title { font-size: 14px; font-weight: 700; color: #d35400; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
-      
-      .ai-trigger-btn { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--accent-purple), var(--analysis-color)); color: #fff; border: none; padding: 10px 22px; border-radius: 16px; font-family: 'Prompt'; font-size: 13.5px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.25); transition: 0.3s; }
-      .ai-trigger-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(155, 89, 182, 0.4); }
+      /* AI Analysis Markdown Container */
+      .prose-ai h1, .prose-ai h2, .prose-ai h3 { font-weight: 700; color: #4c1d95; margin-top: 8px; margin-bottom: 4px; }
+      .prose-ai ul { list-style-type: disc; padding-left: 20px; margin: 6px 0; }
+      .prose-ai ol { list-style-type: decimal; padding-left: 20px; margin: 6px 0; }
+      .prose-ai p { margin-bottom: 6px; }
+      .prose-ai strong { color: #581c87; }
     </style>
   </head>
-  <body>
+  <body class="pb-24 md:pb-10">
 
-    <!-- LOGIN PAGE -->
-    <div id="login-page">
-      <div class="login-card">
-        <h2><i class="fas fa-shield-alt" style="color: var(--analysis-color);"></i> myGPF Quantum</h2>
-        <input type="text" id="username" class="login-input" placeholder="ชื่อผู้ใช้งาน (User)">
-        <input type="password" id="password" class="login-input" placeholder="รหัสผ่าน (Password)">
-        <button class="login-btn" onclick="login()">เชื่อมต่อพอร์ตอย่างปลอดภัย</button>
-        <div id="login-msg" class="login-msg"></div>
+    <!-- LOGIN SCREEN -->
+    <div id="login-page" class="min-h-screen flex items-center justify-center p-4">
+      <div class="pastel-card p-8 max-w-md w-full shadow-2xl border border-purple-100">
+        <div class="text-center mb-8">
+          <div class="w-20 h-20 bg-gradient-to-tr from-purple-500 via-indigo-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-300/50">
+            <i class="fa-solid fa-chart-line text-white text-3xl"></i>
+          </div>
+          <h1 class="text-2xl font-bold text-slate-800 mb-1">myGPF Quantum</h1>
+          <p class="text-purple-600 text-xs font-semibold">ระบบบริหารและวิเคราะห์พอร์ต กบข. อัจฉริยะ</p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-slate-600 text-xs font-semibold mb-1.5">ชื่อผู้ใช้งาน (User)</label>
+            <input type="text" id="username" placeholder="เช่น mithong หรือ admin" onkeypress="if(event.key === 'Enter') login()"
+                   class="w-full bg-purple-50/50 border border-purple-200 text-slate-800 placeholder-slate-400 rounded-2xl px-4 py-3 text-xs focus:bg-white focus:ring-2 focus:ring-purple-400 focus:outline-none transition-all">
+          </div>
+
+          <div>
+            <label class="block text-slate-600 text-xs font-semibold mb-1.5">รหัสผ่าน (Password)</label>
+            <input type="password" id="password" placeholder="••••••••" onkeypress="if(event.key === 'Enter') login()"
+                   class="w-full bg-purple-50/50 border border-purple-200 text-slate-800 placeholder-slate-400 rounded-2xl px-4 py-3 text-xs focus:bg-white focus:ring-2 focus:ring-purple-400 focus:outline-none transition-all">
+          </div>
+
+          <button onclick="login()" class="w-full bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-purple-300/60 flex items-center justify-center gap-2 transition-all text-sm active:scale-95">
+            <span>เชื่อมต่อพอร์ตอย่างปลอดภัย</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          
+          <div id="login-msg" class="text-center text-xs text-rose-500 min-h-[16px] font-medium"></div>
+        </div>
       </div>
     </div>
 
-    <!-- MAIN APP INTERFACE -->
-    <div id="main-app">
-      <button class="logout-btn" onclick="logout()"><i class="fas fa-power-off"></i> ออก</button>
-      <h2 id="main_title" class="app-title">📈 My GPF Dashboard</h2>
+    <!-- MAIN APP SCREEN -->
+    <div id="main-app" class="hidden min-h-screen">
+      <!-- Navbar Top -->
+      <header class="bg-white/80 backdrop-blur-md border-b border-purple-100 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-purple-100 rounded-2xl flex items-center justify-center border border-purple-200 shadow-xs">
+              <i class="fa-solid fa-chart-pie text-purple-600 text-lg"></i>
+            </div>
+            <div>
+              <h2 id="main_title" class="text-sm sm:text-base font-bold text-slate-800 leading-tight">📈 My GPF Dashboard</h2>
+              <p class="text-[10px] sm:text-xs text-purple-600 font-medium">Quantum AI Analysis Engine</p>
+            </div>
+          </div>
 
-      <!-- หน้า 1: สรุปภาพรวมพอร์ตรวม -->
-      <div id="page-portfolio" class="page active">
-        <div class="card summary-box">
-          <h3>มูลค่าพอร์ตคงเหลือสะสมสุทธิ (บาท)</h3>
-          <div id="total_money" class="total-money">กำลังคำนวณสถิติ... ⏳</div>
-          <div id="total_ytd" class="total-ytd"></div>
-          <br>
-          <div style="margin-top: 15px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
-            <button class="action-icon-btn" onclick="togglePrivacy()"><i id="eye-icon-main" class="fas fa-eye"></i> ปิด/เปิดตัวเลข</button>
-            <button onclick="openEditPage()" style="background: var(--analysis-color); color: #fff; border: none; padding: 8px 18px; border-radius: 12px; font-family: 'Prompt'; font-size: 13px; font-weight:600; cursor: pointer; box-shadow: 0 4px 10px rgba(52,152,219,0.2);"><i class="fas fa-edit"></i> ปรับปรุงยอดหน่วย & สลิป</button>
+          <div class="flex items-center gap-2">
+            <button id="btnAdminPanel" onclick="openAdminModal()" class="hidden bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all">
+              <i class="fa-solid fa-gear"></i>
+              <span class="hidden sm:inline">แอดมิน</span>
+            </button>
+
+            <button onclick="logout()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all">
+              <i class="fa-solid fa-power-off"></i>
+              <span>ออก</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Container -->
+      <main class="max-w-6xl mx-auto px-4 pt-6 space-y-6">
+
+        <!-- PAGE 1: PORTFOLIO SUMMARY (รวม) -->
+        <div id="page-portfolio" class="space-y-6">
+          <!-- Main Total Card -->
+          <div class="pastel-card p-6 text-center border-2 border-purple-200 bg-gradient-to-br from-white via-purple-50/40 to-indigo-50/30">
+            <h3 class="text-xs font-bold text-purple-700 uppercase tracking-wider mb-1">มูลค่าพอร์ตคงเหลือสะสมสุทธิ (บาท)</h3>
+            <div id="total_money" class="text-3xl sm:text-4xl font-extrabold text-indigo-950 my-2">กำลังคำนวณสถิติ... ⏳</div>
+            <div id="total_ytd" class="inline-block text-xs font-bold bg-purple-100 text-purple-800 px-4 py-1.5 rounded-full border border-purple-200">0.00% (True YTD)</div>
+
+            <div class="mt-4 flex flex-wrap justify-center gap-2">
+              <button onclick="togglePrivacy()" class="bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 px-3.5 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm">
+                <i id="eye-icon-main" class="fa-solid fa-eye"></i> ปิด/เปิดตัวเลข
+              </button>
+              <button onclick="openEditPage()" class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-md shadow-purple-200">
+                <i class="fa-solid fa-edit"></i> ปรับปรุงยอดหน่วย & สลิป
+              </button>
+            </div>
+          </div>
+
+          <!-- Profile Card -->
+          <div class="pastel-card p-5 bg-gradient-to-br from-purple-50/80 via-white to-emerald-50/40">
+            <h3 class="text-xs font-bold text-indigo-900 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-user-circle text-purple-600 text-base"></i>
+              <span>ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน</span>
+            </h3>
+            <div class="user-badge-container">
+              <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name">-</strong></div>
+              <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline">฿0.00</strong></div>
+              <div class="user-badge"><span>ยอดส่งสะสมเติมปีนี้</span><strong id="user_profile_contrib">฿0.00</strong></div>
+              <div class="user-badge" style="background: #eff6ff; border-color: #bfdbfe;"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current" class="text-blue-900">฿0.00</strong></div>
+              <div class="user-badge" id="box_profit_baht" style="background: #ecfdf5; border-color: #a7f3d0;"><span>จำนวนกำไรสุทธิปีนี้</span><strong id="user_profile_profit" class="text-emerald-800">฿0.00</strong></div>
+              <div class="user-badge" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-color: #6ee7b7;"><span>ผลงานสะสมปีนี้ (True YTD)</span><strong id="user_profile_ytd" class="text-emerald-800 text-sm">0.00%</strong></div>
+            </div>
+          </div>
+
+          <!-- Quantum AI Insights Banner -->
+          <div class="pastel-card p-5 border-l-4 border-l-purple-600 bg-gradient-to-r from-purple-50/60 to-pink-50/40">
+            <h3 class="text-xs font-bold text-purple-900 mb-2 flex items-center gap-2">
+              <i class="fa-solid fa-robot text-purple-600 text-base"></i>
+              <span>🤖 Quantum AI Portfolio Insights (Gemini Powered)</span>
+            </h3>
+            <div id="ai_analysis_text" class="text-xs leading-relaxed text-slate-700 prose-ai"></div>
+          </div>
+
+          <!-- Line Chart NAV YTD -->
+          <div class="pastel-card p-5">
+            <h3 class="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-indigo-600 text-base"></i>
+              <span>เปรียบเทียบแรงส่งสถิติกราฟ NAV YTD</span>
+            </h3>
+            <div id="checkboxes" class="checkbox-container mb-4"></div>
+            <div id="chart_div" class="h-[320px] w-full"></div>
+          </div>
+
+          <!-- Table Holdings Breakdown -->
+          <div class="pastel-card p-5">
+            <h3 class="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-list-ol text-emerald-600 text-base"></i>
+              <span>ยอดเงินแยกตามแผนการลงทุนประจำงวด</span>
+            </h3>
+            <div class="table-responsive"><div id="table_div"></div></div>
           </div>
         </div>
 
-        <!-- กล่องโปรไฟล์ 6 ช่องทวีทรัพย์ -->
-        <div class="card" style="background: linear-gradient(135deg, #f4ecf7, #eaf2f8); border: 1px solid #d5f5e3;">
-          <h3 style="color: #1b4f72;"><i class="fas fa-user-circle"></i> ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน</h3>
-          <div class="user-badge-container">
-            <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name">-</strong></div>
-            <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline">฿0.00</strong></div>
-            <div class="user-badge"><span>ยอดส่งสะสมเติมปีนี้</span><strong id="user_profile_contrib">฿0.00</strong></div>
-            <div class="user-badge" style="background: #ebf5fb; border: 1px solid #3498db;"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current" style="color:#1b4f72;">฿0.00</strong></div>
-            <div class="user-badge" id="box_profit_baht" style="background: #e8f8f5; border: 1px solid #2ecc71;"><span>จำนวนกำไรสุทธิปีนี้</span><strong id="user_profile_profit" style="color:#196f3d;">฿0.00</strong></div>
-            <div class="user-badge" style="background: linear-gradient(135deg, #e8f8f5, #a9dfbf); border: 1px solid #2ecc71;"><span>ผลงานสะสมปีนี้ (True YTD)</span><strong id="user_profile_ytd" style="color:#196f3d; font-size:15px;">0.00%</strong></div>
+        <!-- PAGE EDIT: ปรับปรุงยอดหน่วย & สลิป -->
+        <div id="page-edit" class="hidden space-y-6">
+          <div class="pastel-card p-5">
+            <h3 class="text-xs font-bold text-indigo-900 mb-1 flex items-center gap-2">
+              <i class="fa-solid fa-history text-indigo-600"></i>
+              <span>ตั้งค่ายอดเงินยกมาต้นปีสุทธิ (ระบุปีละ 1 ครั้ง)</span>
+            </h3>
+            <p class="text-[11px] text-slate-500 mb-3">คัดลอกตัวเลขรวมยอดสุทธิจากใบสรุปงบรายงานประจำปีของ กบข. เพื่อคุมเป็นฐานสำหรับหักลบคิด True YTD</p>
+            <div class="flex flex-wrap gap-2">
+              <input type="number" id="input_baseline_amount" placeholder="ยอดเงินทุนยกมาต้นปีสุทธิ เช่น 120000"
+                     class="flex-1 min-w-[200px] bg-purple-50/50 border border-purple-200 rounded-xl px-3.5 py-2 text-xs">
+              <button onclick="setYearlyBaseline()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-save"></i> บันทึกยอดต้นปี
+              </button>
+            </div>
+          </div>
+
+          <div class="pastel-card p-5">
+            <h3 class="text-xs font-bold text-amber-900 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-wallet text-amber-600"></i>
+              <span>บันทึกข้อมูลและสลิปประจำงวดเดือน</span>
+            </h3>
+            <div id="edit-form-container" class="space-y-3"></div>
+            
+            <div class="mt-6 space-y-2">
+              <button id="save-btn" onclick="savePortfolioData()" class="w-full bg-gradient-to-r from-amber-500 via-purple-600 to-indigo-600 text-white font-semibold py-3 rounded-2xl text-xs flex items-center justify-center gap-2 shadow-md">
+                <i class="fa-solid fa-circle-check"></i> บันทึกข้อมูลพอร์ตเข้าคลังปลอดภัย
+              </button>
+              <button onclick="switchPage('portfolio', document.querySelector('.nav-item'))" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-2xl text-xs">
+                ยกเลิกรายการ
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- กล่องที่ปรึกษา AI Insights -->
-        <div class="card" style="background: linear-gradient(135deg, #fbf7fc, #f4ecf7); border-left: 5px solid var(--accent-purple); text-align: left;">
-          <h3 style="color: var(--accent-purple); margin-bottom: 6px;"><i class="fas fa-robot"></i> 🤖 Quantum AI Portfolio Insights (Gemini Powered)</h3>
-          <div id="ai_analysis_text" style="padding: 5px 0;"></div>
-        </div>
+        <!-- PAGE 2: DAILY MOVEMENT (รายวัน) -->
+        <div id="page-daily" class="hidden space-y-6">
+          <div class="pastel-card p-6 text-center bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border-amber-200">
+            <h3 class="text-xs font-bold text-amber-800 mb-1">ผลกำไรส่วนต่างประจำงวดวัน (เปรียบเทียบจากราคาเมื่อวาน)</h3>
+            <div id="daily_change_money" class="text-3xl font-extrabold text-amber-950 my-1">0.00 ฿</div>
+            <div id="daily_change_pct" class="inline-block text-xs font-bold bg-white/80 text-amber-900 px-3 py-1 rounded-full border border-amber-300 shadow-sm">0.00%</div>
+          </div>
 
-        <!-- กราฟเทียบแรงส่งสถิติ NAV YTD + พอร์ตเจ้าของ -->
-        <div class="card">
-          <h3><i class="fas fa-chart-line" style="color:var(--analysis-color)"></i> เปรียบเทียบแรงส่งสถิติกราฟ NAV YTD</h3>
-          <div id="checkboxes" class="checkbox-container"></div>
-          <div id="chart_div" style="height: 340px;"></div>
-        </div>
+          <div class="pastel-card p-5">
+            <div id="daily_chart_div" class="h-[280px] w-full"></div>
+          </div>
 
-        <!-- ตารางยอดเงินแยกตามแผนการลงทุน -->
-        <div class="card">
-          <h3><i class="fas fa-list-ol" style="color:var(--primary-color)"></i> ยอดเงินแยกตามแผนการลงทุนประจำงวด</h3>
-          <div class="table-responsive"><div id="table_div"></div></div>
-        </div>
-      </div>
-
-      <!-- หน้าแก้ไขข้อมูลหน่วยลงทุน / เงินนำส่ง -->
-      <div id="page-edit" class="page">
-        <div class="card" style="background: #fbfcfc; border: 1px solid #e5e8e8;">
-          <h3 style="color: #2980b9;"><i class="fas fa-history"></i> ตั้งค่ายอดเงินยกมาต้นปีสุทธิ (ระบุปีละ 1 ครั้ง)</h3>
-          <p style="font-size: 12px; color: var(--text-muted); margin-top:-5px;">คัดลอกตัวเลขรวมยอดสุทธิจากใบสรุปงบรายงานประจำปีของ กบข. เพื่อคุมเป็นฐานสำหรับหักลบคิด True YTD</p>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px;">
-            <input type="number" id="input_baseline_amount" class="login-input" style="margin-bottom:0; flex:2; min-width:180px;" placeholder="ยอดเงินทุนยกมาต้นปีสุทธิ เช่น 120000">
-            <button onclick="setYearlyBaseline()" class="login-btn" style="flex:1; min-width:110px; background: var(--analysis-color); font-size:13px;"><i class="fas fa-save"></i> บันทึกยอดต้นปี</button>
+          <div class="pastel-card p-5">
+            <div class="table-responsive"><div id="daily_table_div"></div></div>
           </div>
         </div>
 
-        <div class="card">
-          <h3 style="color: var(--daily-color);"><i class="fas fa-wallet"></i> บันทึกข้อมูลและสลิปประจำงวดเดือน</h3>
-          <div id="edit-form-container" style="margin-top: 15px;"></div>
-          <button id="save-btn" class="login-btn" onclick="savePortfolioData()" style="margin-top: 20px; background:linear-gradient(135deg, #e67e22, #3498db);"><i class="fas fa-check-circle"></i> บันทึกข้อมูลพอร์ตเข้าคลังปลอดภัย</button>
-          <button class="login-btn" onclick="switchPage('portfolio', document.querySelector('.nav-item.active'))" style="margin-top: 10px; background: #e5e8e8; color:#34495e;">ยกเลิกรายการ</button>
+        <!-- PAGE 3: THAI STOCKS (หุ้นไทย) -->
+        <div id="page-thaistock" class="hidden space-y-6">
+          <div class="pastel-card p-5">
+            <h3 class="text-xs font-bold text-emerald-800 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-university text-emerald-600"></i>
+              <span>ตัวแบบจำลองคาดการณ์ NAV หุ้นไทย (SET 100)</span>
+            </h3>
+            <div id="thaistock_chart_div" class="h-[320px] w-full"></div>
+          </div>
+
+          <div class="pastel-card p-5">
+            <div class="table-responsive"><div id="thaistock_table_div"></div></div>
+          </div>
         </div>
-      </div>
 
-      <!-- หน้า 2: ข้อมูลสถิติรายวัน -->
-      <div id="page-daily" class="page">
-        <div class="card summary-box" style="background: linear-gradient(135deg, #fdebd0, #faddad);">
-          <h3>ผลกำไรส่วนต่างประจำงวดวัน (เปรียบเทียบจากราคาเมื่อวาน)</h3>
-          <div id="daily_change_money" class="total-money" style="color:#78281f;">0.00</div>
-          <div id="daily_change_pct" class="total-ytd" style="background: rgba(255,255,255,0.6); color:#78281f; border-color:#f8c471;">0.00%</div>
+        <!-- PAGE 4: GOLD (ทองคำ) -->
+        <div id="page-gold" class="hidden space-y-6">
+          <div class="pastel-card p-5">
+            <h3 class="text-xs font-bold text-amber-800 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-coins text-amber-600"></i>
+              <span>ตัวแบบจำลองคาดการณ์ NAV ทองคำโลก (SPDR)</span>
+            </h3>
+            <div id="gold_chart_div" class="h-[320px] w-full"></div>
+          </div>
+
+          <div class="pastel-card p-5">
+            <div class="table-responsive"><div id="gold_table_div"></div></div>
+          </div>
         </div>
-        <div class="card"><div id="daily_chart_div" style="height: 300px;"></div></div>
-        <div class="card"><div class="table-responsive"><div id="daily_table_div"></div></div></div>
-      </div>
 
-      <!-- หน้า 3: หุ้นไทย -->
-      <div id="page-thaistock" class="page">
-        <div class="card"><h3 style="color: #e67e22;"><i class="fas fa-university"></i> ตัวแบบจำลองคาดการณ์ NAV หุ้นไทย (SET 100)</h3><div id="thaistock_chart_div" style="height: 340px;"></div></div>
-        <div class="card"><div class="table-responsive"><div id="thaistock_table_div"></div></div></div>
-      </div>
+        <!-- PAGE 5: AI & COMPREHENSIVE ANALYSIS (วิเคราะห์) -->
+        <div id="page-analysis" class="hidden space-y-6">
+          <div id="analysis-capture-zone" class="p-4 rounded-3xl bg-purple-50/40 border border-purple-100 space-y-5">
+            
+            <!-- User Profile Share Card -->
+            <div class="pastel-card p-5">
+              <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                <h3 class="text-xs font-bold text-indigo-900 flex items-center gap-2">
+                  <i class="fa-solid fa-user-circle text-purple-600"></i>
+                  <span>ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน</span>
+                </h3>
+                <div class="flex gap-2">
+                  <button onclick="togglePrivacy()" class="bg-white border border-purple-200 text-purple-700 px-2.5 py-1 rounded-xl text-xs font-medium shadow-xs">
+                    <i id="eye-icon-analysis" class="fa-solid fa-eye"></i>
+                  </button>
+                  <button onclick="shareToSocial()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-sm">
+                    <i class="fa-solid fa-share-nodes"></i> แชร์สถิติลง Line/FB
+                  </button>
+                </div>
+              </div>
 
-      <!-- หน้า 4: ทองคำ -->
-      <div id="page-gold" class="page">
-        <div class="card"><h3 style="color: #d4ac0d;"><i class="fas fa-coins"></i> ตัวแบบจำลองคาดการณ์ NAV ทองคำโลก (SPDR)</h3><div id="gold_chart_div" style="height: 340px;"></div></div>
-        <div class="card"><div class="table-responsive"><div id="gold_table_div"></div></div></div>
-      </div>
-
-      <!-- หน้า 5: 📊 เมนูวิเคราะห์อัจฉริยะ -->
-      <div id="page-analysis" class="page">
-        <div id="analysis-capture-zone" style="background: #f0f4f8; padding: 14px; border-radius: 28px; margin-bottom: 10px;">
-          
-          <!-- โปรไฟล์ผู้ใช้ 6 ช่องทวีทรัพย์ (เวอร์ชันหน้าวิเคราะห์) -->
-          <div id="share-profile-area" class="card" style="background: linear-gradient(135deg, #f4ecf7, #eaf2f8); border: 1px solid #d5f5e3; margin-bottom: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-              <h3 style="color: #1b4f72; margin-bottom:0;"><i class="fas fa-user-circle"></i> ข้อมูลโปรไฟล์ผู้ใช้และบัญชีบริหารการลงทุน</h3>
-              <div style="display:flex; gap:6px;">
-                <button class="action-icon-btn" style="padding:4px 10px; font-size:12px;" onclick="togglePrivacy()"><i id="eye-icon-analysis" class="fas fa-eye"></i></button>
-                <button class="action-icon-btn" style="padding:4px 10px; font-size:12px; background:var(--primary-color); color:#fff; border:none; font-weight:600;" onclick="shareToSocial()"><i class="fas fa-share-alt"></i> แชร์สถิติลง Line/FB</button>
+              <div class="user-badge-container">
+                <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name_anal">-</strong></div>
+                <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline_anal">฿0.00</strong></div>
+                <div class="user-badge"><span>ยอดส่งสะสมเติมปีนี้</span><strong id="user_profile_contrib_anal">฿0.00</strong></div>
+                <div class="user-badge" style="background: #eff6ff; border-color: #bfdbfe;"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current_anal" class="text-blue-900">฿0.00</strong></div>
+                <div class="user-badge" id="box_profit_baht_anal" style="background: #ecfdf5; border-color: #a7f3d0;"><span>จำนวนกำไรสุทธิปีนี้</span><strong id="user_profile_profit_anal" class="text-emerald-800">฿0.00</strong></div>
+                <div class="user-badge" style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-color: #6ee7b7;"><span>ผลงานสะสมปีนี้ (True YTD)</span><strong id="user_profile_ytd_anal" class="text-emerald-800 text-sm">0.00%</strong></div>
               </div>
             </div>
-            <div class="user-badge-container">
-              <div class="user-badge"><span>นักลงทุนปัจจุบัน</span><strong id="user_profile_name_anal">-</strong></div>
-              <div class="user-badge"><span>เงินยกมาต้นปี (Baseline)</span><strong id="user_profile_baseline_anal">฿0.00</strong></div>
-              <div class="user-badge"><span>ยอดส่งสะสมเติมปีนี้</span><strong id="user_profile_contrib_anal">฿0.00</strong></div>
-              <div class="user-badge" style="background: #ebf5fb; border: 1px solid #3498db;"><span>มูลค่าสินทรัพย์สุทธิ</span><strong id="user_profile_current_anal" style="color:#1b4f72;">฿0.00</strong></div>
-              <div class="user-badge" id="box_profit_baht_anal" style="background: #e8f8f5; border: 1px solid #2ecc71;"><span>จำนวนกำไรสุทธิปีนี้</span><strong id="user_profile_profit_anal" style="color:#196f3d;">฿0.00</strong></div>
-              <div class="user-badge" style="background: linear-gradient(135deg, #e8f8f5, #a9dfbf); border: 1px solid #2ecc71;"><span>ผลงานสะสมปีนี้ (True YTD)</span><strong id="user_profile_ytd_anal" style="color:#196f3d; font-size:15px;">0.00%</strong></div>
-            </div>
-          </div>
 
-          <!-- Tactical Switch Panel -->
-          <div id="tactical_switch_panel" class="tactical-box"></div>
+            <!-- Tactical Switch Panel -->
+            <div id="tactical_switch_panel" class="p-4 rounded-2xl bg-amber-50/80 border border-dashed border-amber-300 text-xs"></div>
 
-          <!-- AI Insights -->
-          <div class="card" style="background: linear-gradient(135deg, #fbf7fc, #f4ecf7); border-left: 5px solid var(--accent-purple); text-align: left; margin-bottom: 20px;">
-            <h3 style="color: var(--accent-purple); margin-bottom: 6px;"><i class="fas fa-robot"></i> 🤖 Quantum AI Portfolio Insights (Gemini Powered)</h3>
-            <div id="ai_analysis_text_anal" style="padding: 5px 0;"></div>
-          </div>
-
-          <!-- องค์ประกอบกราฟ 3 ตัว (วงกลม, แท่งรายเดือน, ใยแมงมุม) -->
-          <div class="grid-2" style="margin-bottom: 20px;">
-            <div class="card" style="margin-bottom:0;">
-              <h3><i class="fas fa-chart-pie" style="color: var(--accent-purple);"></i> กราฟสัดส่วนการกระจายพอร์ตจริงประจำวัน</h3>
-              <div id="analysis_pie_chart_div" style="height: 280px;"></div>
+            <!-- AI Analysis -->
+            <div class="pastel-card p-5 border-l-4 border-l-purple-600">
+              <h3 class="text-xs font-bold text-purple-900 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-robot text-purple-600"></i>
+                <span>🤖 Quantum AI Portfolio Insights (Gemini Powered)</span>
+              </h3>
+              <div id="ai_analysis_text_anal" class="text-xs leading-relaxed text-slate-700 prose-ai"></div>
             </div>
 
-            <div class="card" style="margin-bottom:0;">
-              <h3><i class="fas fa-chart-bar" style="color: var(--daily-color);"></i> แท่งแสดงอัตรากำไรขาดทุนสะสมแยกรายเดือน</h3>
-              <div id="monthly_chart_div" style="height: 280px;"></div>
+            <!-- Charts Grid (Pie + Column) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="pastel-card p-4">
+                <h3 class="text-xs font-bold text-purple-900 mb-2 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-pie text-purple-600"></i>
+                  <span>สัดส่วนการกระจายพอร์ตจริงประจำวัน</span>
+                </h3>
+                <div id="analysis_pie_chart_div" class="h-[260px] w-full"></div>
+              </div>
+
+              <div class="pastel-card p-4">
+                <h3 class="text-xs font-bold text-amber-900 mb-2 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-column text-amber-600"></i>
+                  <span>แท่งแสดงอัตรากำไรขาดทุนสะสมแยกรายเดือน</span>
+                </h3>
+                <div id="monthly_chart_div" class="h-[260px] w-full"></div>
+              </div>
             </div>
-          </div>
 
-          <!-- กราฟใยแมงมุม (Radar/Spider Chart) -->
-          <div class="card" style="margin-bottom: 0;">
-            <h3><i class="fas fa-spider" style="color: #8e44ad;"></i> กราฟใยแมงมุมวิเคราะห์สมดุลสัดส่วนพอร์ต & ดรรชนีความเสี่ยง (Asset Radar)</h3>
-            <div style="height: 320px; position: relative;">
-              <canvas id="radarChartCanvas"></canvas>
+            <!-- Radar / Spider Chart -->
+            <div class="pastel-card p-5">
+              <h3 class="text-xs font-bold text-purple-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-spider text-purple-600"></i>
+                <span>กราฟใยแมงมุมวิเคราะห์สมดุลสัดส่วนพอร์ต & ดรรชนีความเสี่ยง (Asset Radar)</span>
+              </h3>
+              <div class="h-[300px] w-full relative">
+                <canvas id="radarChartCanvas"></canvas>
+              </div>
             </div>
+
+          </div> <!-- End Capture Zone -->
+
+          <!-- Leaderboard Table -->
+          <div class="pastel-card p-5">
+            <h3 class="text-xs font-bold text-amber-900 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-bolt text-amber-500"></i>
+              <span>ตารางสรุปจัดระดับความแข็งแกร่งสินทรัพย์ (Momentum Tracker)</span>
+            </h3>
+            <div id="leaderboard_div"></div>
+            <div class="table-responsive mt-3"><div id="rank_table_div"></div></div>
           </div>
-
-        </div> <!-- ปิด capture-zone -->
-
-        <!-- Momentum Tracker Leaderboard -->
-        <div class="card" style="margin-top: 20px;">
-          <h3><i class="fas fa-bolt" style="color: var(--gold-color);"></i> ตารางสรุปจัดระดับความแข็งแกร่งสินทรัพย์ (Momentum Tracker)</h3>
-          <div id="leaderboard_div"></div>
-          <div class="table-responsive" style="margin-top: 15px;"><div id="rank_table_div"></div></div>
         </div>
-      </div>
 
-      <!-- แถบนำทางด้านล่าง -->
-      <div class="nav-bottom">
-        <div class="nav-item active" onclick="switchPage('portfolio', this)"><i class="fas fa-chart-pie"></i> รวม</div>
-        <div class="nav-item" onclick="switchPage('daily', this)"><i class="fas fa-calendar-day"></i> รายวัน</div>
-        <div class="nav-item" onclick="switchPage('thaistock', this)"><i class="fas fa-chart-line"></i> หุ้นไทย</div>
-        <div class="nav-item" onclick="switchPage('gold', this)"><i class="fas fa-coins"></i> ทองคำ</div>
-        <div class="nav-item" onclick="switchPage('analysis', this)"><i class="fas fa-sliders-h"></i> วิเคราะห์</div>
+      </main>
+
+      <!-- FIXED BOTTOM NAVIGATION BAR -->
+      <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-purple-100 z-40 shadow-lg">
+        <div class="max-w-md mx-auto flex justify-around items-center py-2 text-slate-400">
+          
+          <button onclick="switchPage('portfolio', this)" class="nav-item nav-tab-active flex flex-col items-center gap-1 transition-all">
+            <i class="fa-solid fa-chart-pie text-lg"></i>
+            <span class="text-[11px]">รวม</span>
+          </button>
+
+          <button onclick="switchPage('daily', this)" class="nav-item flex flex-col items-center gap-1 transition-all">
+            <i class="fa-solid fa-calendar-days text-lg"></i>
+            <span class="text-[11px]">รายวัน</span>
+          </button>
+
+          <button onclick="switchPage('thaistock', this)" class="nav-item flex flex-col items-center gap-1 transition-all">
+            <i class="fa-solid fa-chart-line text-lg"></i>
+            <span class="text-[11px]">หุ้นไทย</span>
+          </button>
+
+          <button onclick="switchPage('gold', this)" class="nav-item flex flex-col items-center gap-1 transition-all">
+            <i class="fa-solid fa-coins text-lg"></i>
+            <span class="text-[11px]">ทองคำ</span>
+          </button>
+
+          <button onclick="switchPage('analysis', this)" class="nav-item flex flex-col items-center gap-1 transition-all">
+            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+            <span class="text-[11px]">วิเคราะห์</span>
+          </button>
+
+        </div>
+      </nav>
+    </div>
+
+    <!-- ADMIN MODAL -->
+    <div id="adminModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="pastel-card rounded-3xl max-w-2xl w-full p-6 shadow-2xl bg-white max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center pb-3 border-b border-purple-100 mb-4">
+          <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-amber-500"></i>
+            <span>Admin Control Center</span>
+          </h3>
+          <button onclick="closeAdminModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
+
+        <div class="flex border-b border-purple-100 mb-4 text-xs font-medium">
+          <button id="tabBtnKeys" onclick="switchAdminTab('keys')" class="py-2 px-3 border-b-2 border-purple-600 text-purple-600 font-bold">ตั้งค่า API Keys</button>
+          <button id="tabBtnUsers" onclick="switchAdminTab('users')" class="py-2 px-3 text-slate-400 border-b-2 border-transparent">จัดการผู้ใช้ (Users)</button>
+        </div>
+
+        <div id="tabKeysContent" class="space-y-3 text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Google Gemini Key</label>
+              <input type="password" id="inputGeminiKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">Groq API Key</label>
+              <input type="password" id="inputGroqKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">OpenRouter Key</label>
+              <input type="password" id="inputOpenrouterKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">GitHub Models PAT</label>
+              <input type="password" id="inputGithubKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">DeepSeek API Key</label>
+              <input type="password" id="inputDeepseekKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-600 mb-1">OpenAI API Key</label>
+              <input type="password" id="inputOpenaiKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
+            </div>
+          </div>
+
+          <button onclick="saveAdminSettings()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 rounded-xl text-xs mt-3 shadow-md">
+            บันทึกการตั้งค่า API Keys
+          </button>
+        </div>
+
+        <div id="tabUsersContent" class="hidden space-y-3 text-xs">
+          <form onsubmit="handleSaveUser(event)" class="bg-purple-50/50 p-3 rounded-2xl border border-purple-100 space-y-2">
+            <div class="grid grid-cols-2 gap-2">
+              <input type="text" id="uUsername" placeholder="Username" required class="bg-white border border-purple-200 rounded-xl px-3 py-1.5">
+              <input type="text" id="uPassword" placeholder="Password" required class="bg-white border border-purple-200 rounded-xl px-3 py-1.5">
+              <input type="text" id="uFullName" placeholder="ชื่อ-นามสกุล" required class="bg-white border border-purple-200 rounded-xl px-3 py-1.5">
+              <select id="uRole" class="bg-white border border-purple-200 rounded-xl px-3 py-1.5">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-xl font-semibold">เพิ่ม/อัปเดตผู้ใช้งาน</button>
+          </form>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border border-purple-100 rounded-xl">
+              <thead class="bg-purple-50 text-purple-700 font-bold">
+                <tr>
+                  <th class="p-2 border">Username</th>
+                  <th class="p-2 border">ชื่อ-นามสกุล</th>
+                  <th class="p-2 border">สิทธิ์</th>
+                  <th class="p-2 border text-center">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="adminUsersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
     <script>
       google.charts.load('current', {'packages':['corechart']});
       
+      // 🔗 Web App Endpoint (เมื่อเปลี่ยนพิกัดการ Deploy นำ URL มาใส่ตรงนี้ได้)
       const API_URL = "https://script.google.com/macros/s/AKfycbx-wA5Ifie0an1Yq-OMD87gNlqOBgTVOHR3jUwC8TrXa_wNnT2OifyCCvy1uXMCOlkkCg/exec";
 
       let currentUser = ""; 
@@ -295,8 +510,9 @@
       var goldDataRaw = [], thaiStockDataRaw = [];
       var dailyRecords = []; 
 
-      // Universal Backend API Handler
+      // Universal Backend Caller
       async function callBackend(action, params = {}) {
+        // หากฝังอยู่ใน Google Apps Script แพลตฟอร์ม
         if (typeof google !== 'undefined' && google.script && google.script.run) {
           return new Promise((resolve, reject) => {
             google.script.run
@@ -305,6 +521,7 @@
               [action](...Object.values(params));
           });
         } else {
+          // หากรันภายนอกผ่าน HTTP POST Fetch
           try {
             const res = await fetch(API_URL, {
               method: 'POST',
@@ -319,9 +536,9 @@
       }
 
       const getAiInitialButtonHtml = () => `
-        <div style="text-align: center; padding: 18px; background: #f5eef8; border-radius:20px; border:2px dashed #9b59b6; margin: 10px 0;">
-          <p style="margin: 0 0 12px 0; font-size: 13px; color: #5b2c6f; font-weight:600;"><i class="fas fa-lock"></i> โหมดเซฟโควตา: ระบบจะไม่รัน AI จนกว่าคุณจะสั่ง</p>
-          <button onclick="triggerAiAnalysis()" style="background: linear-gradient(135deg, #9b59b6, #3498db); color: #fff; border: none; padding: 11px 26px; border-radius: 14px; font-family: 'Prompt'; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3); display: inline-flex; align-items: center; gap: 8px; transition: 0.2s;"><i class="fas fa-brain"></i> กดเพื่อประมวลผล Quantum AI</button>
+        <div style="text-align: center; padding: 14px; background: #f3e8ff; border-radius:18px; border:2px dashed #a855f7;">
+          <p style="margin: 0 0 10px 0; font-size: 12px; color: #6b21a8; font-weight:600;"><i class="fa-solid fa-lock"></i> โหมดเซฟโควตา: ระบบจะไม่รัน AI จนกว่าคุณจะสั่ง</p>
+          <button onclick="triggerAiAnalysis()" style="background: linear-gradient(135deg, #9333ea, #4f46e5); color: #fff; border: none; padding: 9px 22px; border-radius: 14px; font-size: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(147, 51, 234, 0.25); display: inline-flex; align-items: center; gap: 6px;"><i class="fa-solid fa-brain"></i> กดเพื่อประมวลผล Quantum AI</button>
         </div>
       `;
 
@@ -340,7 +557,8 @@
       }
 
       function shareToSocial() {
-        let latestValue = parseFloat(ytdData[ytdData.length - 1][globalHeaders.indexOf(customPlanName)]) || 0;
+        let customIdx = globalHeaders.indexOf(customPlanName);
+        let latestValue = (ytdData.length > 0 && customIdx !== -1) ? (parseFloat(ytdData[ytdData.length - 1][customIdx]) || 0) : 0;
         let reportText = `📊 รายงานสรุปพอร์ตการลงทุน กบข. ประจำวันนี้\n👤 นักลงทุน: ${userDisplayGlobalName}\n📈 ผลงานประจำปี (True YTD): ${globalTrueYtdPctText}\n💰 มูลค่าพอร์ตรวมสุทธิ: ${maskValue(latestValue)}\n💵 ยอดนำส่งสะสมปีนี้: ${maskValue(totalContributionSum)}\n💼 ตรวจสอบผ่านระบบคัมภีร์ทุนส่วนบุคคลคุมความเสี่ยง Quantum AI`;
         
         navigator.clipboard.writeText(reportText);
@@ -348,14 +566,14 @@
         
         html2canvas(captureZone, {
           useCORS: true,
-          backgroundColor: "#f0f4f8",
+          backgroundColor: "#f5f3ff",
           scale: 2 
         }).then(canvas => {
           let link = document.createElement('a');
-          link.download = `GPF_Analysis_Comprehensive_Report.png`;
+          link.download = `GPF_Analysis_${userDisplayGlobalName || 'Report'}.png`;
           link.href = canvas.toDataURL('image/png');
           link.click();
-          alert("📋 คัดลอกบทสรุปข้อความลงคลิปบอร์ด และสั่งจัดพิมพ์ไฟล์รูปภาพการ์ดวิเคราะห์ 6 มิติ ลงเครื่องเรียบร้อยแล้วครับ วางส่งในกลุ่ม LINE ได้เลยครับ! 🚀");
+          Swal.fire('คัดลอกและสร้างการ์ดสำเร็จ', 'คัดลอกบทสรุปข้อความ และดาวน์โหลดไฟล์รูปภาพการ์ดวิเคราะห์เรียบร้อยแล้วครับ!', 'success');
         }).catch(err => {
           console.error(err);
           alert("คัดลอกข้อความสำเร็จ แต่ระบบจำลองภาพขัดข้องชั่วคราว");
@@ -367,7 +585,7 @@
         let eyeIcons = ['eye-icon-main', 'eye-icon-analysis'];
         eyeIcons.forEach(id => {
           let el = document.getElementById(id);
-          if(el) { el.className = isMasked ? "fas fa-eye-slash" : "fas fa-eye"; }
+          if(el) { el.className = isMasked ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"; }
         });
         updateSummaryBox();
         if(ytdData.length > 0) {
@@ -385,7 +603,7 @@
         var p = document.getElementById('password').value.trim();
         var msgBox = document.getElementById('login-msg');
         if(u === "" || p === "") { msgBox.innerHTML = "กรุณากรอกข้อมูลให้ครบถ้วน"; return; }
-        msgBox.innerHTML = "กำลังเข้าสู่กระบวนการถอดรหัสความปลอดภัย... <i class='fas fa-spinner fa-spin'></i>";
+        msgBox.innerHTML = "กำลังตรวจสอบรหัสความปลอดภัย... <i class='fa-solid fa-spinner fa-spin'></i>";
         
         cachedAiAnalysis = ""; 
         
@@ -394,14 +612,19 @@
           if(data.status === "success" || data.success) {
             currentUser = data.username || u;
             customPlanName = "🚀 พอร์ตของ " + (data.fname || data.user?.fullName || u); 
-            document.getElementById('login-page').style.display = "none";
-            document.getElementById('main-app').style.display = "block";
+            
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+
+            if(data.user?.role === 'admin') {
+              document.getElementById('btnAdminPanel').classList.remove('hidden');
+            }
             
             if(document.getElementById('ai_analysis_text')) document.getElementById('ai_analysis_text').innerHTML = getAiInitialButtonHtml();
             if(document.getElementById('ai_analysis_text_anal')) document.getElementById('ai_analysis_text_anal').innerHTML = getAiInitialButtonHtml();
             
             fetchData();
-          } else { msgBox.innerHTML = data.message || "การเชื่อมต่อถูกระงับสิทธิ์เข้าถึง"; }
+          } else { msgBox.innerHTML = data.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"; }
         } catch(err) {
           console.error(err);
           msgBox.innerHTML = "เครือข่ายขัดข้อง กรุณาลองตรวจสอบสัญญาณ";
@@ -410,33 +633,34 @@
 
       function logout() {
         currentUser = ""; document.getElementById('username').value = ""; document.getElementById('password').value = "";
-        document.getElementById('login-msg').innerHTML = ""; document.getElementById('main-app').style.display = "none";
-        document.getElementById('login-page').style.display = "flex";
+        document.getElementById('login-msg').innerHTML = ""; 
+        document.getElementById('main-app').classList.add('hidden');
+        document.getElementById('login-page').classList.remove('hidden');
         cachedAiAnalysis = "";
       }
 
       function openEditPage() {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('page-edit').classList.add('active');
+        document.querySelectorAll('#main-app > main > div').forEach(p => p.classList.add('hidden'));
+        document.getElementById('page-edit').classList.remove('hidden');
         document.getElementById('main_title').innerHTML = "📝 แก้ไขพอร์ตการลงทุน";
         document.getElementById('input_baseline_amount').value = yearlyBaselineSum;
         
         let container = document.getElementById('edit-form-container');
         let html = `
-        <div style="margin-bottom: 20px; background: #fffdf9; border: 1px dashed #fad7a0; padding: 15px; border-radius: 16px; text-align: left;">
-            <label style="font-size: 13px; font-weight: 600; color: #e67e22; display: block; margin-bottom: 6px;">
-                <i class="fas fa-money-bill-wave"></i> จำนวนเงินนำส่งหักสะสมจากสลิปงวดเดือนนี้ (บาท)
+        <div style="margin-bottom: 16px; background: #fffdf9; border: 1px dashed #fcd34d; padding: 12px; border-radius: 16px; text-align: left;">
+            <label style="font-size: 12px; font-weight: 600; color: #d97706; display: block; margin-bottom: 4px;">
+                <i class="fa-solid fa-money-bill-wave"></i> จำนวนเงินนำส่งหักสะสมจากสลิปงวดเดือนนี้ (บาท)
             </label>
-            <input type="number" id="input_monthly_cash" class="login-input" style="border-color: #fad7a0; background: #fff;" placeholder="ระบุยอดเงินเติมเช่น 3500 (หากไม่มีพิมพ์ 0)" value="0">
+            <input type="number" id="input_monthly_cash" class="w-full bg-white border border-amber-200 rounded-xl px-3 py-2 text-xs" placeholder="ระบุยอดเงินเติมเช่น 3500 (หากไม่มีพิมพ์ 0)" value="0">
         </div>
-        <h4 style="font-size:13px; color:#566573; text-align:left; margin-bottom:10px; font-weight:600;"><i class="fas fa-cubes"></i> ปรับสมดุลหน่วยลงทุนแยกแต่ละแผนงาน</h4>`;
+        <h4 style="font-size:12px; color:#475569; text-align:left; margin-bottom:8px; font-weight:600;"><i class="fa-solid fa-cubes"></i> ปรับสมดุลหน่วยลงทุนแยกแต่ละแผนงาน</h4>`;
 
         for (let i = 1; i < globalHeaders.length - 1; i++) {
             let planName = globalHeaders[i];
             let currentUnit = myUnits[planName] || 0;
-            html += `<div style="margin-bottom: 12px; text-align: left;">
-                <label style="font-size: 13px; font-weight: 500; color: #2c3e50; display: block; margin-bottom: 4px;">${planName}</label>
-                <input type="number" step="any" id="input_plan_${i}" class="login-input" style="margin-bottom: 0;" value="${currentUnit}">
+            html += `<div style="margin-bottom: 10px; text-align: left;">
+                <label style="font-size: 12px; font-weight: 500; color: #334155; display: block; margin-bottom: 2px;">${planName}</label>
+                <input type="number" step="any" id="input_plan_${i}" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs" value="${currentUnit}">
             </div>`;
         }
         container.innerHTML = html;
@@ -450,7 +674,7 @@
         try {
           const res = await callBackend('saveBaseline', { user: currentUser, year: currentYear, amount: amt });
           if(res.status === "success" || res.success) {
-            alert("⚙️ ตั้งทุนฐานยกมาต้นปีสำเร็จแล้ว ระบบจะคำนวณกำไรที่แท้จริงให้ใหม่ทันทีครับ");
+            Swal.fire('สำเร็จ', '⚙️ ตั้งทุนฐานยกมาต้นปีสำเร็จแล้ว ระบบจะคำนวณกำไรที่แท้จริงให้ใหม่ทันทีครับ', 'success');
             fetchData();
           }
         } catch(err) { console.error(err); }
@@ -458,7 +682,7 @@
 
       async function savePortfolioData() {
         let saveBtn = document.getElementById('save-btn');
-        saveBtn.innerHTML = "กำลังเข้ารหัสบันทึกข้อมูล... <i class='fas fa-spinner fa-spin'></i>";
+        saveBtn.innerHTML = "กำลังเข้ารหัสบันทึกข้อมูล... <i class='fa-solid fa-spinner fa-spin'></i>";
         saveBtn.disabled = true;
 
         let newPlans = [];
@@ -472,15 +696,15 @@
         try {
           const res = await callBackend('savePortfolio', { user: currentUser, data: newPlans, monthlyCash: monthlyCash });
           if(res.status === "success" || res.success) {
-            alert("✅ จัดเก็บฐานข้อมูลพอร์ตและเงินเติมเรียบร้อย!");
+            Swal.fire('สำเร็จ', '✅ จัดเก็บฐานข้อมูลพอร์ตและเงินเติมเรียบร้อย!', 'success');
             fetchData();
-            switchPage('portfolio', document.querySelector('.nav-item.active')); 
-          } else { alert("เกิดข้อผิดพลาดในการเขียนคำสั่งฐานข้อมูล"); }
+            switchPage('portfolio', document.querySelector('.nav-item')); 
+          } else { Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการเขียนคำสั่งฐานข้อมูล', 'error'); }
         } catch(err) {
           console.error(err);
-          alert("ระบบความปลอดภัยตัดการเชื่อมต่อภายนอก");
+          Swal.fire('ข้อผิดพลาด', 'ระบบความปลอดภัยตัดการเชื่อมต่อภายนอก', 'error');
         } finally {
-          saveBtn.innerHTML = "<i class='fas fa-check-circle'></i> บันทึกข้อมูลพอร์ตเข้าคลังปลอดภัย";
+          saveBtn.innerHTML = "<i class='fa-solid fa-circle-check'></i> บันทึกข้อมูลพอร์ตเข้าคลังปลอดภัย";
           saveBtn.disabled = false;
         }
       }
@@ -501,7 +725,7 @@
 
         } catch (err) {
           console.error("Fetch Error: ", err);
-          if(document.getElementById('total_money')) document.getElementById('total_money').innerHTML = "⚠️ ตรวจพบ Session ซ้อน";
+          if(document.getElementById('total_money')) document.getElementById('total_money').innerHTML = "⚠️ ตรวจพบข้อผิดพลาด";
         }
       }
 
@@ -517,9 +741,13 @@
       }
 
       function switchPage(pageId, el) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('page-' + pageId).classList.add('active');
-        if(el) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); el.classList.add('active'); }
+        document.querySelectorAll('#main-app > main > div').forEach(p => p.classList.add('hidden'));
+        document.getElementById('page-' + pageId).classList.remove('hidden');
+        
+        if(el) { 
+          document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-tab-active')); 
+          el.classList.add('nav-tab-active'); 
+        }
         
         var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🇹🇭 พยากรณ์ระบบหุ้นไทย', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
         document.getElementById('main_title').innerHTML = titles[pageId] || '';
@@ -588,7 +816,7 @@
                 dailyRecords.push({ date: formatShortDate(ytdData[i][0]), dateRaw: ytdData[i][0], total: todayVal, diff: diff, pct: pct, planDiffs: planDiffs });
             }
             updateSummaryBox(); createCheckboxes();
-            if(document.getElementById('page-analysis').classList.contains('active')) drawAnalysisDashboard();
+            if(!document.getElementById('page-analysis').classList.contains('hidden')) drawAnalysisDashboard();
         } catch(e) { console.error("Data Struct Error: ", e); }
       }
 
@@ -623,11 +851,13 @@
           let profitBox = document.getElementById('box_profit_baht');
           if (profitBox) {
             if (trueProfit >= 0) {
-              profitBox.style.background = "#e8f8f5"; profitBox.style.borderColor = "#2ecc71";
-              document.getElementById('user_profile_profit').style.color = "#196f3d"; document.getElementById('user_profile_profit').innerText = maskValue(trueProfit);
+              profitBox.style.background = "#ecfdf5"; profitBox.style.borderColor = "#a7f3d0";
+              document.getElementById('user_profile_profit').className = "text-emerald-800"; 
+              document.getElementById('user_profile_profit').innerText = maskValue(trueProfit);
             } else {
-              profitBox.style.background = "#fdedec"; profitBox.style.borderColor = "#e74c3c";
-              document.getElementById('user_profile_profit').style.color = "#7b241c"; document.getElementById('user_profile_profit').innerText = maskValue(trueProfit);
+              profitBox.style.background = "#fef2f2"; profitBox.style.borderColor = "#fecaca";
+              document.getElementById('user_profile_profit').className = "text-rose-800"; 
+              document.getElementById('user_profile_profit').innerText = maskValue(trueProfit);
             }
           }
         }
@@ -649,16 +879,17 @@
           return;
         }
         
-        let loadingMsg = `<div style="text-align:center; padding:10px; color:#9b59b6; font-weight:500;">กำลังส่งข้อมูลสถิติพอร์ตไปประมวลผลที่คลังสมองกล Gemini API... <i class='fas fa-spinner fa-spin'></i></div>`;
+        let loadingMsg = `<div class="text-center py-2 text-purple-600 font-medium"><i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังประมวลผลข้อมูลพอร์ตผ่าน Quantum AI...</div>`;
         if(aiTextDiv) aiTextDiv.innerHTML = loadingMsg;
         if(aiTextDivAnal) aiTextDivAnal.innerHTML = loadingMsg;
         
         try {
           const data = await callBackend('generateQuantumAIAnalysis', { username: currentUser });
           if(data && (data.status === "success" || data.analysis)) {
-            cachedAiAnalysis = data.analysis;
-            if(aiTextDiv) aiTextDiv.innerHTML = data.analysis;
-            if(aiTextDivAnal) aiTextDivAnal.innerHTML = data.analysis;
+            const parsedText = marked.parse(data.analysis);
+            cachedAiAnalysis = parsedText;
+            if(aiTextDiv) aiTextDiv.innerHTML = parsedText;
+            if(aiTextDivAnal) aiTextDivAnal.innerHTML = parsedText;
           } else {
             generateLocalFallbackAnalysis();
           }
@@ -671,14 +902,15 @@
       function generateLocalFallbackAnalysis() {
         let aiTextDiv = document.getElementById('ai_analysis_text');
         let aiTextDivAnal = document.getElementById('ai_analysis_text_anal');
-        let latestTotalVal = ytdData.length > 0 ? parseFloat(ytdData[ytdData.length - 1][globalHeaders.indexOf(customPlanName)]) || 0 : 0;
+        let customIdx = globalHeaders.indexOf(customPlanName);
+        let latestTotalVal = (ytdData.length > 0 && customIdx !== -1) ? (parseFloat(ytdData[ytdData.length - 1][customIdx]) || 0) : 0;
         let trendStatus = globalTrueYtdPctText.includes('+') ? "เติบโตทวีทรัพย์ในแดนบวก" : "ชะลอตัวชั่วคราวตามแนวโน้มตลาด";
         
         let localFallbackText = `
           <b>💡 [รายงานวิเคราะห์พอร์ตจำลอง - โหมดคลังโควตาเต็ม]</b><br/>
-          เรียนคุณ ${userDisplayGlobalName} จากการกวาดสแกนโครงสร้างเม็ดเงินลงทุน กบข. ล่าสุด บัญชีของคุณมีมูลค่าสินทรัพย์ครองพอร์ตรวมสุทธิอยู่ที่ <b>${maskValue(latestTotalVal)}</b> โดยมีอัตราผลตอบแทนจริงคำนวณหักลบเงินเติม (True YTD) อยู่ที่สถิติ <b>${globalTrueYtdPctText}</b> ซึ่งสถานะในภาพรวมปีนี้จัดอยู่ในเกณฑ์ <u>${trendStatus}</u> ครับ<br/>
+          เรียนคุณ <b>${userDisplayGlobalName}</b> จากการกวาดสแกนโครงสร้างเม็ดเงินลงทุน กบข. ล่าสุด บัญชีของคุณมีมูลค่าสินทรัพย์ครองพอร์ตรวมสุทธิอยู่ที่ <b>${maskValue(latestTotalVal)}</b> โดยมีอัตราผลตอบแทนจริงคำนวณหักลบเงินเติม (True YTD) อยู่ที่สถิติ <b>${globalTrueYtdPctText}</b> ซึ่งสถานะในภาพรวมปีนี้จัดอยู่ในเกณฑ์ <u>${trendStatus}</u> ครับ<br/>
           <b>กลยุทธ์เชิงรับประจำงวด:</b> เน้นรักษาวินัยการเติมออมเพิ่มสะสมจำนวนหน่วยลงทุนต่อเนื่อง เพื่อสร้างผลกระทบพลังดอกเบี้ยทบต้นระยะยาว และพิจารณาวางจังหวะปรับพอร์ตอิงตามสัญญาณความเร็วของสินทรัพย์ในตาราง Momentum Tracker ด้านล่าง<br/>
-          <span style="display:block; margin-top:8px; font-size:11.5px; color:#7f8c8d; font-weight:600; border-top:1px dashed #ddd; padding-top:5px;"><i class="fas fa-pen-nib"></i> หมายเหตุ: แปลและวิเคราะห์ผลโดย ระบบถอดรหัสสถิติฐานข้อมูลจำลอง (Quantum Local System Engine)</span>
+          <span style="display:block; margin-top:8px; font-size:11px; color:#6b7280; font-weight:600; border-top:1px dashed #ddd; padding-top:4px;"><i class="fa-solid fa-pen-nib"></i> แปลและวิเคราะห์ผลโดย ระบบถอดรหัสสถิติฐานข้อมูลจำลอง (Quantum Local System Engine)</span>
         `;
         
         cachedAiAnalysis = localFallbackText;
@@ -706,11 +938,13 @@
           let profitBoxAnal = document.getElementById('box_profit_baht_anal');
           if (profitBoxAnal) {
             if (trueProfitMoney >= 0) {
-              profitBoxAnal.style.background = "#e8f8f5"; profitBoxAnal.style.borderColor = "#2ecc71";
-              document.getElementById('user_profile_profit_anal').style.color = "#196f3d"; document.getElementById('user_profile_profit_anal').innerText = maskValue(trueProfitMoney);
+              profitBoxAnal.style.background = "#ecfdf5"; profitBoxAnal.style.borderColor = "#a7f3d0";
+              document.getElementById('user_profile_profit_anal').className = "text-emerald-800";
+              document.getElementById('user_profile_profit_anal').innerText = maskValue(trueProfitMoney);
             } else {
-              profitBoxAnal.style.background = "#fdedec"; profitBoxAnal.style.borderColor = "#e74c3c";
-              document.getElementById('user_profile_profit_anal').style.color = "#7b241c"; document.getElementById('user_profile_profit_anal').innerText = maskValue(trueProfitMoney);
+              profitBoxAnal.style.background = "#fef2f2"; profitBoxAnal.style.borderColor = "#fecaca";
+              document.getElementById('user_profile_profit_anal').className = "text-rose-800";
+              document.getElementById('user_profile_profit_anal').innerText = maskValue(trueProfitMoney);
             }
           }
         }
@@ -721,7 +955,6 @@
           if(document.getElementById('ai_analysis_text_anal')) document.getElementById('ai_analysis_text_anal').innerHTML = cachedAiAnalysis;
         }
 
-        // 1. กราฟวงกลม (Pie Chart)
         var pieDataTable = new google.visualization.DataTable();
         pieDataTable.addColumn('string', 'แผนการลงทุน'); pieDataTable.addColumn('number', 'มูลค่าครองทุนรวม');
         var planAllocations = {};
@@ -738,13 +971,11 @@
             }
           }
         }
-        var pieOptions = { fontName: 'Prompt', backgroundColor: 'transparent', chartArea: { width: '90%', height: '80%' }, legend: { position: 'right', textStyle: { fontSize: 11, color: '#1c2833' } }, colors: ['#3498db', '#f1c40f', '#e74c3c', '#2ecc71', '#9b59b6', '#e67e22'], holeSize: 0.4, pieHole: 0.4 };
+        var pieOptions = { fontName: 'Prompt', backgroundColor: 'transparent', chartArea: { width: '90%', height: '80%' }, legend: { position: 'right', textStyle: { fontSize: 11, color: '#1e1b4b' } }, colors: ['#8b5cf6', '#3b82f6', '#ec4899', '#10b981', '#f59e0b', '#06b6d4'], holeSize: 0.4, pieHole: 0.4 };
         new google.visualization.PieChart(document.getElementById('analysis_pie_chart_div')).draw(pieDataTable, pieOptions);
 
-        // 2. กราฟใยแมงมุม (Radar/Spider Chart via Chart.js)
         renderRadarChart(planAllocations, latestTotalValue);
 
-        // 3. Momentum Rankings & Tactical Switch
         var oneWeekRow = ytdData[Math.max(0, ytdData.length - 6)]; var oneMonthRow = ytdData[Math.max(0, ytdData.length - 21)]; var startYearRow = ytdData[0];
         var rankings = [];
         for (var i = 1; i < globalHeaders.length - 1; i++) {
@@ -753,33 +984,33 @@
             rankings.push({ name: globalHeaders[i], cleanName: name, wPct: wVal > 0 ? ((latestVal - wVal) / wVal) * 100 : 0, mPct: mVal > 0 ? ((latestVal - mVal) / mVal) * 100 : 0, ytdPct: ytdVal > 0 ? ((latestVal - ytdVal) / ytdVal) * 100 : 0 });
         }
         var sorted1M = [...rankings].sort((a, b) => b.mPct - a.mPct);
-        let topM = sorted1M[0]; let btmM = sorted1M[sorted1M.length - 1];
+        let topM = sorted1M[0] || { cleanName: "-", mPct: 0 }; 
+        let btmM = sorted1M[sorted1M.length - 1] || { cleanName: "-", mPct: 0 };
         
         document.getElementById('tactical_switch_panel').innerHTML = `
-          <div class="tactical-title"><i class="fas fa-bolt"></i> กล่องสัญญาณสรุป Tactical Switch ประจำงวดปัจจุบัน</div>
-          <p style="font-size:12px; margin:0 0 10px 0; color:#566573;">ระบบประมวลผลความเร็วของแนวโน้มราคา (Momentum) เพื่อตรวจหาโอกาสสับเปลี่ยนแผนการลงทุนที่ดีที่สุด</p>
-          <div style="font-size:13px; font-weight:600; line-height:1.6;">
-            🟢 <span style="color:#27ae60;">สัญญาณเชิงรุกสับเปลี่ยนเข้า (Switch IN):</span> แนะนำพิจารณา <strong style="color:#196f3d;">"${topM.cleanName}"</strong> (+${topM.mPct.toFixed(2)}%)<br/>
-            🔴 <span style="color:#c0392b;">สัญญาณเฝ้าระวังหรือสับเปลี่ยนออก (Switch OUT):</span> ควรระวังในแผน <strong style="color:#7b241c;">"${btmM.cleanName}"</strong> (${btmM.mPct.toFixed(2)}%)
+          <div class="font-bold text-amber-900 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-bolt"></i> กล่องสัญญาณสรุป Tactical Switch ประจำงวดปัจจุบัน</div>
+          <p class="text-slate-600 mb-2">ระบบประมวลผลความเร็วของแนวโน้มราคา (Momentum) เพื่อตรวจหาโอกาสสับเปลี่ยนแผนการลงทุนที่ดีที่สุด</p>
+          <div class="font-semibold text-slate-800 leading-relaxed">
+            🟢 <span class="text-emerald-700">สัญญาณเชิงรุกสับเปลี่ยนเข้า (Switch IN):</span> แนะนำพิจารณา <strong class="text-emerald-900">"${topM.cleanName}"</strong> (+${topM.mPct.toFixed(2)}%)<br/>
+            🔴 <span class="text-rose-700">สัญญาณเฝ้าระวังหรือสับเปลี่ยนออก (Switch OUT):</span> ควรระวังในแผน <strong class="text-rose-900">"${btmM.cleanName}"</strong> (${btmM.mPct.toFixed(2)}%)
           </div>
         `;
 
         document.getElementById('leaderboard_div').innerHTML = `
-          <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
-            <div style="flex: 1; min-width:140px; background: #ebf5fb; padding: 12px; border-radius: 14px; border-left: 4px solid var(--analysis-color); text-align: left;">
-              <span style="font-size: 11px; color: #2980b9; font-weight: 600;"><i class="fas fa-arrow-circle-up"></i> ดีที่สุดในเดือน</span>
-              <div style="font-size: 13px; font-weight: 600; margin-top: 2px;">${sorted1M[0].cleanName}</div>
-              <span style="font-size: 12px; color: #27ae60; font-weight:700;">+${sorted1M[0].mPct.toFixed(2)}%</span>
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div class="bg-blue-50/80 p-3 rounded-2xl border-l-4 border-l-blue-500">
+              <span class="text-[11px] text-blue-700 font-semibold"><i class="fa-solid fa-circle-arrow-up"></i> ดีที่สุดในเดือน</span>
+              <div class="font-bold text-slate-800 mt-0.5">${topM.cleanName}</div>
+              <span class="text-xs text-emerald-600 font-bold">+${topM.mPct.toFixed(2)}%</span>
             </div>
-            <div style="flex: 1; min-width:140px; background: #fdf2f0; padding: 12px; border-radius: 14px; border-left: 4px solid var(--thai-color); text-align: left;">
-              <span style="font-size: 11px; color: #c0392b; font-weight: 600;"><i class="fas fa-arrow-circle-down"></i> แย่ที่สุดในเดือน</span>
-              <div style="font-size: 13px; font-weight: 600; margin-top: 2px;">${sorted1M[sorted1M.length - 1].cleanName}</div>
-              <span style="font-size: 12px; color: #e74c3c; font-weight:700;">${sorted1M[sorted1M.length - 1].mPct.toFixed(2)}%</span>
+            <div class="bg-rose-50/80 p-3 rounded-2xl border-l-4 border-l-rose-500">
+              <span class="text-[11px] text-rose-700 font-semibold"><i class="fa-solid fa-circle-arrow-down"></i> แย่ที่สุดในเดือน</span>
+              <div class="font-bold text-slate-800 mt-0.5">${btmM.cleanName}</div>
+              <span class="text-xs text-rose-600 font-bold">${btmM.mPct.toFixed(2)}%</span>
             </div>
           </div>
         `;
 
-        // 4. กราฟแท่งรายเดือน (Column Chart)
         var monthlyData = {};
         ytdData.forEach(row => {
             var dStr = String(row[0]), monthKey = dStr.includes('/') ? dStr.split('/')[1] : (dStr.includes('-') ? dStr.split('-')[1] : "");
@@ -792,19 +1023,17 @@
         monthsOrdered.forEach(m => {
             if (monthlyData[m] && monthlyData[m].length > 0) {
                 var currentMonthClose = monthlyData[m][monthlyData[m].length - 1]; var diff = currentMonthClose - prevMonthClose;
-                dtMonth.addRow([m, diff, diff >= 0 ? 'color: #2ecc71' : 'color: #e74c3c']); prevMonthClose = currentMonthClose;
+                dtMonth.addRow([m, diff, diff >= 0 ? 'color: #10b981' : 'color: #f43f5e']); prevMonthClose = currentMonthClose;
             }
         });
-        var optMonth = { fontName: 'Prompt', legend: 'none', vAxis: { textStyle: {color: '#7f8c8d', fontSize:11}, gridlines: {color: '#f2f4f4'} }, hAxis: { textStyle: {color: '#7f8c8d', fontSize:11} }, chartArea: { width: '82%', height: '75%', top: 20, bottom: 45, left: 70 }, backgroundColor: 'transparent' };
+        var optMonth = { fontName: 'Prompt', legend: 'none', vAxis: { textStyle: {color: '#6b7280', fontSize:11}, gridlines: {color: '#f3e8ff'} }, hAxis: { textStyle: {color: '#6b7280', fontSize:11} }, chartArea: { width: '82%', height: '75%', top: 20, bottom: 45, left: 70 }, backgroundColor: 'transparent' };
         new google.visualization.ColumnChart(document.getElementById('monthly_chart_div')).draw(dtMonth, optMonth);
 
-        // 5. ตาราง Ranking
         var tableHtml = '<table><thead><tr><th>ชื่อแผนกองทุน</th><th>1 สัปดาห์</th><th>1 เดือน</th><th>YTD สะสม</th></tr></thead><tbody>';
-        sorted1M.forEach(r => { tableHtml += `<tr><td style="text-align:left; font-weight:500; color:#2c3e50;">${r.cleanName}</td><td><span class="${r.wPct>=0?'positive':'negative'}">${r.wPct>=0?'+':''}${r.wPct.toFixed(2)}%</span></td><td><span class="${r.mPct>=0?'positive':'negative'}">${r.mPct>=0?'+':''}${r.mPct.toFixed(2)}%</span></td><td><span class="${r.ytdPct>=0?'positive':'negative'}">${r.ytdPct>=0?'+':''}${r.ytdPct.toFixed(2)}%</span></td></tr>`; });
+        sorted1M.forEach(r => { tableHtml += `<tr><td style="text-align:left; font-weight:500; color:#1e1b4b;">${r.cleanName}</td><td><span class="${r.wPct>=0?'positive':'negative'}">${r.wPct>=0?'+':''}${r.wPct.toFixed(2)}%</span></td><td><span class="${r.mPct>=0?'positive':'negative'}">${r.mPct>=0?'+':''}${r.mPct.toFixed(2)}%</span></td><td><span class="${r.ytdPct>=0?'positive':'negative'}">${r.ytdPct>=0?'+':''}${r.ytdPct.toFixed(2)}%</span></td></tr>`; });
         document.getElementById('rank_table_div').innerHTML = tableHtml + '</tbody></table>';
       }
 
-      // Render Radar Chart (ใยแมงมุม)
       function renderRadarChart(planAllocations, totalVal) {
         const ctx = document.getElementById('radarChartCanvas').getContext('2d');
         if (radarChartInstance) radarChartInstance.destroy();
@@ -813,7 +1042,6 @@
         if (labels.length === 0) return;
 
         const currentPctData = labels.map(key => totalVal > 0 ? ((planAllocations[key] / totalVal) * 100).toFixed(2) : 0);
-        // สเปกตรัมแผนสมดุลมาตรฐาน (Benchmark / Target Weight)
         const benchmarkPctData = labels.map(() => (100 / labels.length).toFixed(2));
 
         radarChartInstance = new Chart(ctx, {
@@ -824,20 +1052,20 @@
               {
                 label: 'สัดส่วนพอร์ตจริง (%)',
                 data: currentPctData,
-                backgroundColor: 'rgba(155, 89, 182, 0.25)',
-                borderColor: '#9b59b6',
-                borderWidth: 2.5,
-                pointBackgroundColor: '#8e44ad',
+                backgroundColor: 'rgba(124, 58, 237, 0.25)',
+                borderColor: '#7c3aed',
+                borderWidth: 2,
+                pointBackgroundColor: '#6d28d9',
                 pointRadius: 4
               },
               {
                 label: 'สมดุลการกระจาย (%)',
                 data: benchmarkPctData,
-                backgroundColor: 'rgba(52, 152, 219, 0.12)',
-                borderColor: '#3498db',
+                backgroundColor: 'rgba(59, 130, 246, 0.12)',
+                borderColor: '#3b82f6',
                 borderWidth: 1.5,
                 borderDash: [4, 4],
-                pointBackgroundColor: '#2980b9',
+                pointBackgroundColor: '#2563eb',
                 pointRadius: 3
               }
             ]
@@ -850,9 +1078,9 @@
             },
             scales: {
               r: {
-                angleLines: { color: 'rgba(0,0,0,0.08)' },
-                grid: { color: 'rgba(0,0,0,0.06)' },
-                pointLabels: { font: { family: 'Prompt', size: 11, weight: '600' }, color: '#2c3e50' },
+                angleLines: { color: 'rgba(124, 58, 237, 0.15)' },
+                grid: { color: 'rgba(124, 58, 237, 0.1)' },
+                pointLabels: { font: { family: 'Prompt', size: 11, weight: '600' }, color: '#1e1b4b' },
                 ticks: { backdropColor: 'transparent', font: { size: 10 } }
               }
             }
@@ -895,7 +1123,7 @@
           chartData.addRow(rowData);
         }
 
-        var options = { fontName: 'Prompt', lineWidth: 3, pointsVisible: true, pointSize: 3, colors: ['#aeb6bf', '#3498db', '#f1c40f', '#2ecc71', '#9b59b6'], legend: { position: 'top', textStyle: {fontSize: 11} }, vAxis: { format: '#,##0.00%', textStyle: {color: '#808b96'} }, hAxis: { textStyle: {color: '#808b96'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent' };
+        var options = { fontName: 'Prompt', lineWidth: 3, pointsVisible: true, pointSize: 3, colors: ['#a78bfa', '#3b82f6', '#f59e0b', '#10b981', '#ec4899', '#06b6d4'], legend: { position: 'top', textStyle: {fontSize: 11} }, vAxis: { format: '#,##0.00%', textStyle: {color: '#6b7280'} }, hAxis: { textStyle: {color: '#6b7280'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent' };
         new google.visualization.LineChart(document.getElementById('chart_div')).draw(chartData, options);
         drawTable(selectedPlans, planIndices, baseValues);
       }
@@ -915,7 +1143,7 @@
           } else {
             displayLatest = maskValue(latestVal * (myUnits[planName] || 0));
           }
-          var rowClass = planName === customPlanName ? ' style="background:#fefde8; font-weight:600;"' : '';
+          var rowClass = planName === customPlanName ? ' style="background:#fefce8; font-weight:600;"' : '';
           html += `<tr${rowClass}><td>${planName.replace('แผนกองทุน', '')}</td><td>${displayLatest}</td><td><span class="${ytdPct >= 0 ? 'positive' : 'negative'}">${ytdPct >= 0 ? '+' : ''}${ytdPct.toFixed(2)}%</span></td></tr>`;
         }
         document.getElementById('table_div').innerHTML = html + '</tbody></table>';
@@ -931,14 +1159,14 @@
         recentRecords.forEach(r => {
             if (r.diff >= 0) winCount++; else lossCount++;
             var tooltipHtml = `<div style="padding:10px; font-family:'Prompt'; font-size:12px;"><b>${r.date}</b><br/>มูลค่ารวม: ${maskValue(r.total)}<br/>ขยับงวด: ${r.diff>=0?'+':''}${r.diff.toLocaleString('th-TH', {maximumFractionDigits:2})} ฿</div>`;
-            dt.addRow([r.date, r.diff, r.diff >= 0 ? 'color: #abc9af' : 'color: #f2b6b6', tooltipHtml]);
+            dt.addRow([r.date, r.diff, r.diff >= 0 ? 'color: #34d399' : 'color: #f87171', tooltipHtml]);
         });
 
-        var options = { fontName: 'Prompt', legend: 'none', vAxis: { textStyle: {color: '#808b96'}, gridlines: {color: '#f2f4f4'} }, hAxis: { textStyle: {color: '#808b96'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 20, bottom: 50 }, backgroundColor: 'transparent', tooltip: {isHtml: true} };
+        var options = { fontName: 'Prompt', legend: 'none', vAxis: { textStyle: {color: '#6b7280'}, gridlines: {color: '#f3e8ff'} }, hAxis: { textStyle: {color: '#6b7280'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 20, bottom: 50 }, backgroundColor: 'transparent', tooltip: {isHtml: true} };
         new google.visualization.ColumnChart(document.getElementById('daily_chart_div')).draw(dt, options);
 
         var myPlanNames = Object.keys(myUnits);
-        var tableHtml = `<div style="font-size: 12px; color: #7f8c8d; margin-bottom: 10px; text-align: left;">📊 ข้อมูลรวม 20 วันล่าสุด: <span style="color:#27ae60; font-weight:bold;">บวกพลัง ${winCount} วัน</span> / <span style="color:#e74c3c; font-weight:bold;">ย่อตัว ${lossCount} วัน</span></div><table><thead><tr><th>วันที่</th><th>มูลค่าสุทธิ</th><th>ขยับ (฿)</th><th>ขยับ (%)</th>`;
+        var tableHtml = `<div style="font-size: 12px; color: #6b7280; margin-bottom: 8px; text-align: left;">📊 ข้อมูลรวม 20 วันล่าสุด: <span style="color:#059669; font-weight:bold;">บวกพลัง ${winCount} วัน</span> / <span style="color:#dc2626; font-weight:bold;">ย่อตัว ${lossCount} วัน</span></div><table><thead><tr><th>วันที่</th><th>มูลค่าสุทธิ</th><th>ขยับ (฿)</th><th>ขยับ (%)</th>`;
         myPlanNames.forEach(p => { var shortName = p.replace('แผน', '').replace('กองทุนรวม', '').replace('กองทุน', ''); if (shortName.length > 8) shortName = shortName.substring(0, 8) + '..'; tableHtml += `<th>${shortName}</th>`; });
         tableHtml += '</tr></thead><tbody>';
 
@@ -961,7 +1189,7 @@
                 var actualNav = parseFloat(String(data[i][12]).replace(/,/g, '')); var forecastNav = parseFloat(String(data[i][13]).replace(/,/g, '')); var diffVal = parseFloat(String(data[i][14]).replace(/,/g, '')); 
                 forecastData.push({ date: formatShortDate(data[i][0]), actual: isNaN(actualNav) ? null : actualNav, forecast: isNaN(forecastNav) ? null : forecastNav, diff: isNaN(diffVal) ? null : diffVal });
             }
-            thaiStockDataRaw = forecastData; if(document.getElementById('page-thaistock').classList.contains('active')) drawThaiStockDashboard();
+            thaiStockDataRaw = forecastData; if(!document.getElementById('page-thaistock').classList.contains('hidden')) drawThaiStockDashboard();
         } catch(e) { console.error(e); }
       }
       
@@ -969,12 +1197,12 @@
         if(thaiStockDataRaw.length === 0) return;
         document.getElementById('thaistock_chart_div').innerHTML = ""; var dt = new google.visualization.DataTable(); dt.addColumn('string', 'วันที่'); dt.addColumn('number', 'NAV จริง'); dt.addColumn('number', 'คาดการณ์');
         thaiStockDataRaw.forEach(row => { if (row.actual !== null || row.forecast !== null) dt.addRow([row.date, row.actual, row.forecast]); });
-        var options = { fontName: 'Prompt', curveType: 'function', lineWidth: 3, pointsVisible: true, pointSize: 3, colors: ['#e74c3c', '#f1c40f'], legend: { position: 'top' }, vAxis: { textStyle: {color: '#808b96'} }, hAxis: { textStyle: {color: '#808b96'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent' };
+        var options = { fontName: 'Prompt', curveType: 'function', lineWidth: 3, pointsVisible: true, pointSize: 3, colors: ['#10b981', '#f59e0b'], legend: { position: 'top' }, vAxis: { textStyle: {color: '#6b7280'} }, hAxis: { textStyle: {color: '#6b7280'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent' };
         new google.visualization.LineChart(document.getElementById('thaistock_chart_div')).draw(dt, options);
         var tableHtml = '<table><thead><tr><th>วันที่</th><th>NAV จริง</th><th>คาดการณ์</th><th>ส่วนต่าง</th></tr></thead><tbody>';
         thaiStockDataRaw.slice(-15).reverse().forEach(row => {
             var diffClass = (row.diff === null) ? '' : (row.diff >= 0 ? 'positive' : 'negative');
-            tableHtml += `<tr><td style="text-align:left">${row.date}</td><td>${row.actual===null?'-':row.actual.toFixed(4)}</td><td style="color:#d35400">${row.forecast===null?'-':row.forecast.toFixed(4)}</td><td><span class="${diffClass}">${row.diff===null?'-':(row.diff>0?'+':'')+row.diff.toFixed(4)}</span></td></tr>`;
+            tableHtml += `<tr><td style="text-align:left">${row.date}</td><td>${row.actual===null?'-':row.actual.toFixed(4)}</td><td style="color:#d97706">${row.forecast===null?'-':row.forecast.toFixed(4)}</td><td><span class="${diffClass}">${row.diff===null?'-':(row.diff>0?'+':'')+row.diff.toFixed(4)}</span></td></tr>`;
         });
         document.getElementById('thaistock_table_div').innerHTML = tableHtml + '</tbody></table>';
       }
@@ -983,7 +1211,7 @@
         try { 
           if (!response || response.error || !response.data) return; 
           goldDataRaw = response.data.filter(row => row[0] && String(row[0]).trim() !== ''); 
-          if(document.getElementById('page-gold').classList.contains('active')) drawGoldDashboard(); 
+          if(!document.getElementById('page-gold').classList.contains('hidden')) drawGoldDashboard(); 
         } catch(e) { console.error(e); } 
       }
       
@@ -991,22 +1219,127 @@
         if(goldDataRaw.length === 0) return;
         document.getElementById('gold_chart_div').innerHTML = ""; var dt = new google.visualization.DataTable(); dt.addColumn('string', 'วันที่'); dt.addColumn('number', 'NAV จริง'); dt.addColumn('number', 'คาดการณ์');
         goldDataRaw.forEach(row => { var navReal = parseFloat(row[3]); var navFore = parseFloat(row[4]); if (!isNaN(navReal) || !isNaN(navFore)) dt.addRow([formatShortDate(row[0]), navReal, navFore]); });
-        var options = { fontName: 'Prompt', curveType: 'function', lineWidth: 3, pointsVisible: true, pointSize: 3, colors: ['#f1c40f', '#9b59b6'], legend: { position: 'top' }, vAxis: { textStyle: {color: '#808b96'} }, hAxis: { textStyle: {color: '#808b96'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent' };
+        var options = { fontName: 'Prompt', curveType: 'function', lineWidth: 3, pointsVisible: true, pointSize: 3, colors: ['#f59e0b', '#8b5cf6'], legend: { position: 'top' }, vAxis: { textStyle: {color: '#6b7280'} }, hAxis: { textStyle: {color: '#6b7280'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent' };
         new google.visualization.LineChart(document.getElementById('gold_chart_div')).draw(dt, options);
         var tableHtml = '<table><thead><tr><th>วันที่</th><th>NAV จริง</th><th>คาดการณ์</th><th>ส่วนต่าง</th></tr></thead><tbody>';
         goldDataRaw.slice(-15).reverse().forEach(row => {
             var diffVal = parseFloat(row[5]); var diffClass = isNaN(diffVal) ? '' : (diffVal >= 0 ? 'positive' : 'negative');
-            tableHtml += `<tr><td style="text-align:left">${formatShortDate(row[0])}</td><td>${isNaN(parseFloat(row[3]))?'-':parseFloat(row[3]).toFixed(4)}</td><td style="color:#8e44ad">${isNaN(parseFloat(row[4]))?'-':parseFloat(row[4]).toFixed(4)}</td><td><span class="${diffClass}">${isNaN(diffVal)?'-':(diffVal>0?'+':'')+diffVal.toFixed(4)}</span></td></tr>`;
+            tableHtml += `<tr><td style="text-align:left">${formatShortDate(row[0])}</td><td>${isNaN(parseFloat(row[3]))?'-':parseFloat(row[3]).toFixed(4)}</td><td style="color:#7c3aed">${isNaN(parseFloat(row[4]))?'-':parseFloat(row[4]).toFixed(4)}</td><td><span class="${diffClass}">${isNaN(diffVal)?'-':(diffVal>0?'+':'')+diffVal.toFixed(4)}</span></td></tr>`;
         });
         document.getElementById('gold_table_div').innerHTML = tableHtml + '</tbody></table>';
       }
 
+      function openAdminModal() {
+        document.getElementById('adminModal').classList.remove('hidden');
+        loadAdminConfig();
+        loadAdminUsers();
+      }
+
+      function closeAdminModal() {
+        document.getElementById('adminModal').classList.add('hidden');
+      }
+
+      function switchAdminTab(tab) {
+        if (tab === 'keys') {
+          document.getElementById('tabKeysContent').classList.remove('hidden');
+          document.getElementById('tabUsersContent').classList.add('hidden');
+          document.getElementById('tabBtnKeys').classList.add('border-purple-600', 'text-purple-600', 'font-bold');
+          document.getElementById('tabBtnUsers').classList.remove('border-purple-600', 'text-purple-600', 'font-bold');
+        } else {
+          document.getElementById('tabKeysContent').classList.add('hidden');
+          document.getElementById('tabUsersContent').classList.remove('hidden');
+          document.getElementById('tabBtnUsers').classList.add('border-purple-600', 'text-purple-600', 'font-bold');
+          document.getElementById('tabBtnKeys').classList.remove('border-purple-600', 'text-purple-600', 'font-bold');
+        }
+      }
+
+      async function loadAdminConfig() {
+        try {
+          const cfg = await callBackend('getAdminConfig');
+          document.getElementById('inputGeminiKey').value = cfg.geminiKey || '';
+          document.getElementById('inputGroqKey').value = cfg.groqKey || '';
+          document.getElementById('inputOpenrouterKey').value = cfg.openrouterKey || '';
+          document.getElementById('inputGithubKey').value = cfg.githubKey || '';
+          document.getElementById('inputDeepseekKey').value = cfg.deepseekKey || '';
+          document.getElementById('inputOpenaiKey').value = cfg.openaiKey || '';
+        } catch (e) { console.error(e); }
+      }
+
+      async function saveAdminSettings() {
+        const config = {
+          geminiKey: document.getElementById('inputGeminiKey').value,
+          groqKey: document.getElementById('inputGroqKey').value,
+          openrouterKey: document.getElementById('inputOpenrouterKey').value,
+          githubKey: document.getElementById('inputGithubKey').value,
+          deepseekKey: document.getElementById('inputDeepseekKey').value,
+          openaiKey: document.getElementById('inputOpenaiKey').value,
+        };
+
+        try {
+          const res = await callBackend('saveAdminConfig', { configObj: config });
+          Swal.fire('สำเร็จ', res.message || 'บันทึกเรียบร้อย', 'success');
+        } catch (e) { Swal.fire('ข้อผิดพลาด', e.message, 'error'); }
+      }
+
+      async function loadAdminUsers() {
+        try {
+          const users = await callBackend('getUsersList');
+          const tbody = document.getElementById('adminUsersTableBody');
+          tbody.innerHTML = '';
+          users.forEach(u => {
+            tbody.innerHTML += `
+              <tr class="border-b border-purple-50 hover:bg-purple-50/30">
+                <td class="p-2">${u.username}</td>
+                <td class="p-2">${u.fullName}</td>
+                <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-semibold ${u.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100'}">${u.role}</span></td>
+                <td class="p-2 text-center">
+                  <button onclick="deleteUser('${u.username}')" class="text-rose-500 hover:text-rose-700 text-xs"><i class="fa-solid fa-trash"></i></button>
+                </td>
+              </tr>
+            `;
+          });
+        } catch (e) { console.error(e); }
+      }
+
+      async function handleSaveUser(e) {
+        e.preventDefault();
+        const userData = {
+          username: document.getElementById('uUsername').value,
+          password: document.getElementById('uPassword').value,
+          fullName: document.getElementById('uFullName').value,
+          role: document.getElementById('uRole').value
+        };
+
+        try {
+          const res = await callBackend('saveUser', { userData: userData });
+          Swal.fire('สำเร็จ', res.message || 'บันทึกผู้ใช้เรียบร้อย', 'success');
+          loadAdminUsers();
+        } catch (err) { Swal.fire('ข้อผิดพลาด', err.message, 'error'); }
+      }
+
+      function deleteUser(username) {
+        Swal.fire({
+          title: 'ยืนยันการลบ?',
+          text: `ต้องการลบผู้ใช้ ${username} หรือไม่?`,
+          icon: 'warning',
+          showCancelButton: true
+        }).then(async res => {
+          if (res.isConfirmed) {
+            try {
+              const r = await callBackend('deleteUser', { username: username });
+              Swal.fire('ลบแล้ว', r.message, 'success');
+              loadAdminUsers();
+            } catch (err) { Swal.fire('ข้อผิดพลาด', err.message, 'error'); }
+          }
+        });
+      }
+
       window.addEventListener('resize', function() {
-        if(document.getElementById('page-portfolio').classList.contains('active') && ytdData.length > 0) updateDashboard(); 
-        if(document.getElementById('page-daily').classList.contains('active') && dailyRecords.length > 0) drawDailyDashboard();
-        if(document.getElementById('page-thaistock').classList.contains('active') && thaiStockDataRaw.length > 0) drawThaiStockDashboard();
-        if(document.getElementById('page-gold').classList.contains('active') && goldDataRaw.length > 0) drawGoldDashboard();
-        if(document.getElementById('page-analysis').classList.contains('active') && ytdData.length > 0) {
+        if(!document.getElementById('page-portfolio').classList.contains('hidden') && ytdData.length > 0) updateDashboard(); 
+        if(!document.getElementById('page-daily').classList.contains('hidden') && dailyRecords.length > 0) drawDailyDashboard();
+        if(!document.getElementById('page-thaistock').classList.contains('hidden') && thaiStockDataRaw.length > 0) drawThaiStockDashboard();
+        if(!document.getElementById('page-gold').classList.contains('hidden') && goldDataRaw.length > 0) drawGoldDashboard();
+        if(!document.getElementById('page-analysis').classList.contains('hidden') && ytdData.length > 0) {
           if (cachedAiAnalysis !== "" && cachedAiAnalysis.includes("รายงานวิเคราะห์พอร์ตจำลอง")) { generateLocalFallbackAnalysis(); } else { drawAnalysisDashboard(); }
         }
       });
