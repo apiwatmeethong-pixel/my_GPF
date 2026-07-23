@@ -87,7 +87,7 @@
         <div class="space-y-4">
           <div>
             <label class="block text-slate-600 text-xs font-semibold mb-1.5">ชื่อผู้ใช้งาน (User)</label>
-            <input type="text" id="username" placeholder="จำไม่ได้ติดต่อ" onkeypress="if(event.key === 'Enter') login()"
+            <input type="text" id="username" placeholder="มาวางแผนเงินอนาคตกัน" onkeypress="if(event.key === 'Enter') login()"
                    class="w-full bg-purple-50/50 border border-purple-200 text-slate-800 placeholder-slate-400 rounded-2xl px-4 py-3 text-xs focus:bg-white focus:ring-2 focus:ring-purple-400 focus:outline-none transition-all">
           </div>
 
@@ -117,7 +117,7 @@
               <i class="fa-solid fa-chart-pie text-purple-600 text-lg"></i>
             </div>
             <div>
-              <h2 id="main_title" class="text-sm sm:text-base font-bold text-slate-800 leading-tight">📈 My GPF Dashboard</h2>
+              <h2 id="main_title" class="text-sm sm:text-base font-bold text-slate-800 leading-tight">📈 ภาพรวมพอร์ตลงทุน กบข.</h2>
               <p class="text-[10px] sm:text-xs text-purple-600 font-medium">Quantum AI Analysis Engine</p>
             </div>
           </div>
@@ -169,7 +169,7 @@
             </div>
 
             <div class="pastel-card p-5 border border-sky-200 bg-gradient-to-br from-white to-sky-50/30">
-              <div class="text-xs font-semibold text-sky-800 mb-1">เงินนำส่งสะสมงวดนี้</div>
+              <div class="text-xs font-semibold text-sky-800 mb-1">เงินนำส่งสะสมในปี</div>
               <div id="kpi_contrib_money" class="text-2xl lg:text-3xl font-extrabold text-sky-950 my-1">฿0.00</div>
               <div class="text-[11px] text-sky-600/80 font-medium">สะสมตามงวดเงินเดือน</div>
             </div>
@@ -394,6 +394,17 @@
 
             <div id="tactical_switch_panel" class="p-4 rounded-2xl bg-amber-50/80 border border-dashed border-amber-300 text-xs"></div>
 
+            <!-- 🟢 กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิรายเดือน (Monthly Profit/Loss Bar Chart) -->
+            <div class="pastel-card p-5">
+              <h3 class="text-xs font-bold text-purple-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-chart-column text-purple-600"></i>
+                <span>กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิรายเดือน (Monthly Profit/Loss Bar Chart)</span>
+              </h3>
+              <div class="h-[280px] w-full relative">
+                <canvas id="monthlyBarChartCanvas"></canvas>
+              </div>
+            </div>
+
             <div class="pastel-card p-5">
               <h3 class="text-xs font-bold text-purple-900 mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-spider text-purple-600"></i>
@@ -468,7 +479,6 @@
         </div>
 
         <div id="tabKeysContent" class="space-y-4 text-xs">
-          <!-- 🟢 เพิ่มการตั้งค่าเลือก Primary AI และ Backup AI ตามคำขอ -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-purple-50/60 p-3 rounded-2xl border border-purple-100">
             <div>
               <label class="block font-semibold text-purple-900 mb-1">Primary AI Engine (หลัก)</label>
@@ -572,6 +582,7 @@
       let cachedAiAnalysis = ""; 
       let radarChartInstance = null;
       let donutChartInstance = null;
+      let monthlyBarChartInstance = null;
 
       var globalHeaders = [], ytdData = [], myUnits = {};
       var goldDataRaw = [], thaiStockDataRaw = [];
@@ -763,6 +774,12 @@
 
       async function fetchData() {
         try {
+          const cfg = await callBackend('getAdminConfig');
+          if (cfg && cfg.primaryAi) {
+            const aiSelect = document.getElementById('aiEngineSelect');
+            if (aiSelect) aiSelect.value = cfg.primaryAi;
+          }
+
           const dataNav = await callBackend('getNavData', { username: currentUser });
           processData(dataNav);
 
@@ -897,7 +914,6 @@
         var trueYtdPct = baseValue > 0 ? (trueProfit / baseValue) * 100 : 0;
         globalTrueYtdPctText = (trueYtdPct >= 0 ? '+' : '') + trueYtdPct.toFixed(2) + '%';
 
-        // Update Top KPI Cards
         if(document.getElementById('kpi_total_money')) document.getElementById('kpi_total_money').innerText = maskValue(latestValue);
         if(document.getElementById('kpi_last_update')) document.getElementById('kpi_last_update').innerText = "อัปเดตล่าสุด NAV: " + latestDateStr;
         if(document.getElementById('kpi_true_ytd_pct')) {
@@ -908,7 +924,6 @@
         if(document.getElementById('kpi_baseline_money')) document.getElementById('kpi_baseline_money').innerText = maskValue(yearlyBaselineSum);
         if(document.getElementById('kpi_contrib_money')) document.getElementById('kpi_contrib_money').innerText = maskValue(totalContributionSum);
 
-        // 🟢 อัปเดตส่วนต่างประจำงวดวัน (เปรียบเทียบจากราคาเมื่อวาน)
         if(dailyRecords.length > 0) {
             var latestDay = dailyRecords[dailyRecords.length - 1];
             var sign = latestDay.diff >= 0 ? '+' : '';
@@ -925,7 +940,6 @@
             }
         }
 
-        // Update Profile Analysis values
         if(document.getElementById('user_profile_name_anal')) {
           document.getElementById('user_profile_name_anal').innerText = userDisplayGlobalName || currentUser;
           document.getElementById('user_profile_baseline_anal').innerText = maskValue(yearlyBaselineSum);
@@ -1084,6 +1098,7 @@
         }
 
         renderRadarChart(planAllocations, latestTotalValue);
+        renderMonthlyBarChart();
 
         var oneWeekRow = ytdData[Math.max(0, ytdData.length - 6)]; var oneMonthRow = ytdData[Math.max(0, ytdData.length - 21)]; var startYearRow = ytdData[0];
         var rankings = [];
@@ -1123,6 +1138,95 @@
         var tableHtml = '<table><thead><tr><th>ชื่อแผนกองทุน</th><th>1 สัปดาห์</th><th>1 เดือน</th><th>YTD สะสม</th></tr></thead><tbody>';
         sorted1M.forEach(r => { tableHtml += `<tr><td style="text-align:left; font-weight:500; color:#1e1b4b;">${r.cleanName}</td><td><span class="${r.wPct>=0?'positive':'negative'}">${r.wPct>=0?'+':''}${r.wPct.toFixed(2)}%</span></td><td><span class="${r.mPct>=0?'positive':'negative'}">${r.mPct>=0?'+':''}${r.mPct.toFixed(2)}%</span></td><td><span class="${r.ytdPct>=0?'positive':'negative'}">${r.ytdPct>=0?'+':''}${r.ytdPct.toFixed(2)}%</span></td></tr>`; });
         document.getElementById('rank_table_div').innerHTML = tableHtml + '</tbody></table>';
+      }
+
+      function renderMonthlyBarChart() {
+        const ctx = document.getElementById('monthlyBarChartCanvas');
+        if (!ctx) return;
+        if (monthlyBarChartInstance) monthlyBarChartInstance.destroy();
+
+        let monthlyValues = {};
+        let customIdx = globalHeaders.indexOf(customPlanName);
+        if (customIdx === -1) customIdx = globalHeaders.length - 1;
+
+        ytdData.forEach(row => {
+          let rawDate = row[0];
+          let d = new Date(rawDate);
+          if (isNaN(d.getTime())) {
+            let parts = String(rawDate).split('/');
+            if (parts.length >= 2) {
+              d = new Date(parts[2] || 2026, parts[1] - 1, parts[0]);
+            }
+          }
+          if (!isNaN(d.getTime())) {
+            let mKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            monthlyValues[mKey] = parseFloat(row[customIdx]) || 0;
+          }
+        });
+
+        let sortedKeys = Object.keys(monthlyValues).sort();
+        let labels = [];
+        let dataValues = [];
+        let mNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+        let startOfYearVal = ytdData.length > 0 ? (parseFloat(ytdData[0][customIdx]) || 0) : 0;
+        let runningPrev = startOfYearVal;
+
+        sortedKeys.forEach(k => {
+          let parts = k.split('-');
+          let monthIdx = parseInt(parts[1]) - 1;
+          let currentVal = monthlyValues[k];
+          let monthlyProfit = currentVal - runningPrev;
+
+          labels.push(mNames[monthIdx]);
+          dataValues.push(monthlyProfit);
+          runningPrev = currentVal;
+        });
+
+        monthlyBarChartInstance = new Chart(ctx.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'ผลกำไร/ขาดทุนรายเดือน',
+              data: dataValues,
+              backgroundColor: dataValues.map(v => v >= 0 ? '#34d399' : '#f87171'),
+              borderColor: dataValues.map(v => v >= 0 ? '#059669' : '#dc2626'),
+              borderWidth: 1,
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    let val = context.raw;
+                    return ' กำไร/ขาดทุน: ' + (val >= 0 ? '+' : '') + maskValue(val);
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                ticks: {
+                  font: { family: 'Prompt', size: 10 },
+                  callback: function(value) {
+                    return (value >= 0 ? '+' : '') + (Math.abs(value) >= 1000 ? (value/1000).toFixed(0) + 'k' : value) + ' ฿';
+                  }
+                },
+                grid: { color: 'rgba(124, 58, 237, 0.1)' }
+              },
+              x: {
+                ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
       }
 
       function renderRadarChart(planAllocations, totalVal) {
