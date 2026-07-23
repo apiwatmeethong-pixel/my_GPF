@@ -808,11 +808,12 @@
               globalHeaders.push(customPlanName);
             }
 
+            // คำนวณมูลค่าพอร์ตรวมสุทธิในแต่ละวัน
             for (var i = 0; i < data.length; i++) {
               var dailyTotalMoney = 0;
               for (var plan in myUnits) {
                 var planIdx = globalHeaders.indexOf(plan);
-                if (planIdx !== -1) dailyTotalMoney += ((parseFloat(data[i][planIdx]) || 0) * myUnits[plan]);
+                if (planIdx !== -1) dailyTotalMoney += ((parseFloat(data[i][planIdx]) || 0) * (parseFloat(myUnits[plan]) || 0));
               }
               if (data[i].length < globalHeaders.length) {
                 data[i].push(dailyTotalMoney); 
@@ -830,26 +831,30 @@
             ytdData = data.filter(row => String(row[0]).includes(currentYearStr));
             if (ytdData.length === 0) ytdData = data; 
 
+            // 🟢 คำนวณผลต่างรายวัน (Daily Changes) ใหม่ให้ถูกต้องแน่นอน
             dailyRecords = [];
             var customIdx = globalHeaders.indexOf(customPlanName);
             
             for(var i = 1; i < ytdData.length; i++) {
-                var todayVal = parseFloat(ytdData[i][customIdx]);
-                var ydayVal = parseFloat(ytdData[i-1][customIdx]);
+                var todayVal = parseFloat(ytdData[i][customIdx]) || 0;
+                var ydayVal = parseFloat(ytdData[i-1][customIdx]) || 0;
                 var diff = todayVal - ydayVal;
                 var pct = ydayVal > 0 ? (diff / ydayVal) * 100 : 0;
                 var planDiffs = {};
                 for(var plan in myUnits) {
                     var pIdx = globalHeaders.indexOf(plan);
                     if (pIdx !== -1) {
-                        var pToday = parseFloat(ytdData[i][pIdx]), pYday = parseFloat(ytdData[i-1][pIdx]);
+                        var pToday = parseFloat(ytdData[i][pIdx]) || 0;
+                        var pYday = parseFloat(ytdData[i-1][pIdx]) || 0;
                         planDiffs[plan] = pYday > 0 ? ((pToday - pYday) / pYday) * 100 : 0;
                     }
                 }
                 dailyRecords.push({ date: formatShortDate(ytdData[i][0]), dateRaw: ytdData[i][0], total: todayVal, diff: diff, pct: pct, planDiffs: planDiffs });
             }
+
             updateSummaryBox(); 
             createCheckboxes();
+            if(!document.getElementById('page-daily').classList.contains('hidden')) drawDailyDashboard();
             if(!document.getElementById('page-analysis').classList.contains('hidden')) drawAnalysisDashboard();
         } catch(e) { console.error("Data Struct Error: ", e); }
       }
@@ -862,33 +867,39 @@
         var latestValue = parseFloat(latestRow[customIdx]) || 0; 
         var latestDateStr = formatShortDate(latestRow[0]);
 
-        // Calculate Profits
+        // คำนวณกำไร/ขาดทุนสุทธิสะสมปีนี้
         var trueProfit = yearlyBaselineSum > 0 ? (latestValue - yearlyBaselineSum - totalContributionSum) : (latestValue - baseValue - totalContributionSum);
         var trueYtdPct = baseValue > 0 ? (trueProfit / baseValue) * 100 : 0;
         globalTrueYtdPctText = (trueYtdPct >= 0 ? '+' : '') + trueYtdPct.toFixed(2) + '%';
 
-        // 🟢 Update Top KPI 4 Cards
-        document.getElementById('kpi_total_money').innerText = maskValue(latestValue);
-        document.getElementById('kpi_last_update').innerText = "อัปเดตล่าสุด NAV: " + latestDateStr;
+        // อัปเดตการ์ด KPI 4 ช่องบน
+        if(document.getElementById('kpi_total_money')) document.getElementById('kpi_total_money').innerText = maskValue(latestValue);
+        if(document.getElementById('kpi_last_update')) document.getElementById('kpi_last_update').innerText = "อัปเดตล่าสุด NAV: " + latestDateStr;
+        if(document.getElementById('kpi_true_ytd_pct')) {
+          document.getElementById('kpi_true_ytd_pct').innerText = globalTrueYtdPctText;
+          document.getElementById('kpi_true_ytd_pct').className = "text-2xl lg:text-3xl font-extrabold my-1 " + (trueYtdPct >= 0 ? "text-emerald-600" : "text-rose-600");
+        }
+        if(document.getElementById('kpi_profit_baht')) document.getElementById('kpi_profit_baht').innerText = "กำไร/ขาดทุน: " + maskValue(trueProfit);
+        if(document.getElementById('kpi_baseline_money')) document.getElementById('kpi_baseline_money').innerText = maskValue(yearlyBaselineSum);
+        if(document.getElementById('kpi_contrib_money')) document.getElementById('kpi_contrib_money').innerText = maskValue(totalContributionSum);
 
-        document.getElementById('kpi_true_ytd_pct').innerText = globalTrueYtdPctText;
-        document.getElementById('kpi_true_ytd_pct').className = "text-2xl lg:text-3xl font-extrabold my-1 " + (trueYtdPct >= 0 ? "text-emerald-600" : "text-rose-600");
-        
-        document.getElementById('kpi_profit_baht').innerText = "กำไร/ขาดทุน: " + maskValue(trueProfit);
-        document.getElementById('kpi_baseline_money').innerText = maskValue(yearlyBaselineSum);
-        document.getElementById('kpi_contrib_money').innerText = maskValue(totalContributionSum);
-
-        // Update Profile Analysis values
-        if(document.getElementById('user_profile_name_anal')) {
-          document.getElementById('user_profile_name_anal').innerText = userDisplayGlobalName;
-          document.getElementById('user_profile_baseline_anal').innerText = maskValue(yearlyBaselineSum);
-          document.getElementById('user_profile_contrib_anal').innerText = maskValue(totalContributionSum);
-          document.getElementById('user_profile_current_anal').innerText = maskValue(latestValue);
-          document.getElementById('user_profile_profit_anal').innerText = maskValue(trueProfit);
-          document.getElementById('user_profile_ytd_anal').innerText = globalTrueYtdPctText;
+        // 🟢 อัปเดตผลกำไรส่วนต่างประจำงวดวัน (รายวัน)
+        if(dailyRecords.length > 0) {
+            var latestDay = dailyRecords[dailyRecords.length - 1];
+            var sign = latestDay.diff >= 0 ? '+' : '';
+            var dailyChangeMoneyEl = document.getElementById('daily_change_money');
+            var dailyChangePctEl = document.getElementById('daily_change_pct');
+            
+            if (dailyChangeMoneyEl) {
+              dailyChangeMoneyEl.innerText = sign + (isMasked ? "XX,XXX.XX" : latestDay.diff.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })) + ' ฿';
+              dailyChangeMoneyEl.className = "text-3xl font-extrabold my-1 " + (latestDay.diff >= 0 ? "text-emerald-600" : "text-rose-600");
+            }
+            if (dailyChangePctEl) {
+              dailyChangePctEl.innerText = sign + latestDay.pct.toFixed(2) + '%';
+              dailyChangePctEl.className = "inline-block text-xs font-bold px-3 py-1 rounded-full border shadow-xs " + (latestDay.diff >= 0 ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200");
+            }
         }
 
-        // Render Allocation Donut Chart & Holdings Table
         renderAllocationDonutChart(latestRow, latestValue);
         renderHoldingsTable(latestRow, latestValue);
       }
