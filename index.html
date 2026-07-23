@@ -3,9 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My GPF Dashboard - Quantum AI Multi-Engine</title>
+  <title>My GPF Dashboard - Quantum AI</title>
   
-  <!-- Tailwind CSS & FontAwesome & Chart.js & SweetAlert2 -->
+  <!-- Favicon Fix (SVG Data URL Prevent 404) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
+
+  <!-- Tailwind CSS & Libraries -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,47 +18,49 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
     * { font-family: 'Sarabun', sans-serif; }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
+    
+    .pastel-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(238, 242, 255, 0.9);
+      box-shadow: 0 10px 30px -5px rgba(199, 210, 254, 0.35);
     }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen">
+<body class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-slate-700 min-h-screen">
 
   <!-- LOGIN SCREEN -->
-  <div id="loginView" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
-    <div class="glass-card rounded-2xl p-8 max-w-md w-full shadow-2xl border border-slate-700/50">
+  <div id="loginView" class="min-h-screen flex items-center justify-center p-4">
+    <div class="pastel-card rounded-3xl p-8 max-w-md w-full border border-purple-100">
       <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-indigo-600/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-500/30">
-          <i class="fa-solid font-bold text-indigo-400 text-3xl fa-chart-line"></i>
+        <div class="w-20 h-20 bg-gradient-to-tr from-purple-200 to-indigo-200 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-200/50">
+          <i class="fa-solid fa-chart-line text-indigo-600 text-3xl"></i>
         </div>
-        <h1 class="text-2xl font-bold text-white mb-1">My GPF Dashboard</h1>
-        <p class="text-slate-400 text-sm">ระบบวิเคราะห์พอร์ต กบข. ด้วย Quantum AI</p>
+        <h1 class="text-2xl font-bold text-slate-800 mb-1">My GPF Dashboard</h1>
+        <p class="text-purple-600 text-sm font-medium">ระบบวิเคราะห์พอร์ต กบข. ด้วย Quantum AI</p>
       </div>
 
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
         <div>
-          <label class="block text-slate-300 text-sm font-medium mb-1.5">ชื่อผู้ใช้งาน (Username)</label>
+          <label class="block text-slate-600 text-xs font-semibold mb-1.5">ชื่อผู้ใช้งาน (Username)</label>
           <div class="relative">
-            <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-slate-400"></i>
+            <i class="fa-solid fa-user absolute left-4 top-3.5 text-purple-400"></i>
             <input type="text" id="loginUsername" required placeholder="เช่น mithong หรือ admin"
-                   class="w-full bg-slate-800/80 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all">
+                   class="w-full bg-purple-50/50 border border-purple-200 text-slate-800 placeholder-slate-400 rounded-2xl pl-11 pr-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-purple-400 focus:outline-none transition-all">
           </div>
         </div>
 
         <div>
-          <label class="block text-slate-300 text-sm font-medium mb-1.5">รหัสผ่าน (Password)</label>
+          <label class="block text-slate-600 text-xs font-semibold mb-1.5">รหัสผ่าน (Password)</label>
           <div class="relative">
-            <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-slate-400"></i>
+            <i class="fa-solid fa-lock absolute left-4 top-3.5 text-purple-400"></i>
             <input type="password" id="loginPassword" required placeholder="••••••••"
-                   class="w-full bg-slate-800/80 border border-slate-700 text-white rounded-xl pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all">
+                   class="w-full bg-purple-50/50 border border-purple-200 text-slate-800 placeholder-slate-400 rounded-2xl pl-11 pr-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-purple-400 focus:outline-none transition-all">
           </div>
         </div>
 
         <button type="submit" id="btnLogin"
-                class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all">
+                class="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-purple-300/60 flex items-center justify-center gap-2 transition-all">
           <span>เข้าสู่ระบบ</span>
           <i class="fa-solid fa-arrow-right"></i>
         </button>
@@ -66,30 +71,30 @@
   <!-- MAIN DASHBOARD SCREEN -->
   <div id="dashboardView" class="hidden min-h-screen pb-12">
     <!-- Navbar -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 shadow-md">
+    <header class="bg-white/80 backdrop-blur-md border-b border-purple-100 sticky top-0 z-30 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-indigo-600/30 rounded-xl flex items-center justify-center border border-indigo-500/40">
-            <i class="fa-solid fa-chart-pie text-indigo-400 text-lg"></i>
+          <div class="w-10 h-10 bg-purple-100 rounded-2xl flex items-center justify-center border border-purple-200">
+            <i class="fa-solid fa-chart-pie text-purple-600 text-lg"></i>
           </div>
           <div>
-            <h2 class="text-lg font-bold text-white leading-tight">My GPF Dashboard</h2>
-            <p class="text-xs text-slate-400">Quantum AI Analysis Engine</p>
+            <h2 class="text-base font-bold text-slate-800 leading-tight">My GPF Dashboard</h2>
+            <p class="text-xs text-purple-500 font-medium">Quantum AI Analysis Engine</p>
           </div>
         </div>
 
         <div class="flex items-center gap-3">
           <div class="text-right hidden sm:block">
-            <div id="userDisplayName" class="text-sm font-medium text-white">-</div>
-            <span id="userRoleBadge" class="text-[10px] bg-slate-800 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30">User</span>
+            <div id="userDisplayName" class="text-sm font-semibold text-slate-800">-</div>
+            <span id="userRoleBadge" class="text-[10px] bg-purple-100 text-purple-700 px-2.5 py-0.5 rounded-full font-bold">User</span>
           </div>
 
-          <button id="btnAdminPanel" onclick="openAdminModal()" class="hidden bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all">
+          <button id="btnAdminPanel" onclick="openAdminModal()" class="hidden bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
             <i class="fa-solid fa-gear"></i>
             <span>แอดมิน</span>
           </button>
 
-          <button onclick="handleLogout()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 px-3 py-1.5 rounded-xl text-xs font-medium flex items-center gap-1.5 transition-all">
+          <button onclick="handleLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span>ออกจากระบบ</span>
           </button>
@@ -102,52 +107,58 @@
       
       <!-- Summary Metric Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="glass-card p-5 rounded-2xl shadow-sm border-indigo-100">
-          <p class="text-xs font-medium text-slate-500 mb-1">มูลค่าพอร์ตลงทุนรวม</p>
-          <h3 id="cardTotalVal" class="text-2xl font-bold text-indigo-600">0.00 บาท</h3>
-          <span class="text-xs text-slate-400 mt-2 block">อัปเดตล่าสุด NAV: <span id="cardNavDate">-</span></span>
+        <div class="bg-gradient-to-br from-indigo-50 to-indigo-100/50 p-5 rounded-2xl border border-indigo-200/60 shadow-sm">
+          <p class="text-xs font-medium text-indigo-600/80 mb-1">มูลค่าพอร์ตลงทุนรวม</p>
+          <h3 id="cardTotalVal" class="text-2xl font-bold text-indigo-900">0.00 บาท</h3>
+          <span class="text-xs text-indigo-400 mt-2 block">อัปเดตล่าสุด NAV: <span id="cardNavDate">-</span></span>
         </div>
 
-        <div class="glass-card p-5 rounded-2xl shadow-sm border-emerald-100">
-          <p class="text-xs font-medium text-slate-500 mb-1">ผลตอบแทนรวม (%)</p>
-          <h3 id="cardReturnPercent" class="text-2xl font-bold text-emerald-600">+0.00%</h3>
-          <span class="text-xs text-slate-400 mt-2 block">กำไร/ขาดทุน: <span id="cardProfitLoss">0.00</span> บาท</span>
+        <div class="bg-gradient-to-br from-emerald-50 to-teal-100/50 p-5 rounded-2xl border border-emerald-200/60 shadow-sm">
+          <p class="text-xs font-medium text-emerald-600/80 mb-1">ผลตอบแทนรวม (%)</p>
+          <h3 id="cardReturnPercent" class="text-2xl font-bold text-emerald-800">+0.00%</h3>
+          <span class="text-xs text-emerald-600/70 mt-2 block">กำไร/ขาดทุน: <span id="cardProfitLoss">0.00</span> บาท</span>
         </div>
 
-        <div class="glass-card p-5 rounded-2xl shadow-sm border-amber-100">
-          <p class="text-xs font-medium text-slate-500 mb-1">เงินยกมาต้นปี</p>
-          <h3 id="cardBaseline" class="text-2xl font-bold text-amber-600">0.00 บาท</h3>
-          <span class="text-xs text-slate-400 mt-2 block">ยอดยกมาจากปีก่อนหน้า</span>
+        <div class="bg-gradient-to-br from-amber-50 to-orange-100/50 p-5 rounded-2xl border border-amber-200/60 shadow-sm">
+          <p class="text-xs font-medium text-amber-700/80 mb-1">เงินยกมาต้นปี</p>
+          <h3 id="cardBaseline" class="text-2xl font-bold text-amber-900">0.00 บาท</h3>
+          <span class="text-xs text-amber-600/70 mt-2 block">ยอดยกมาจากปีก่อนหน้า</span>
         </div>
 
-        <div class="glass-card p-5 rounded-2xl shadow-sm border-blue-100">
-          <p class="text-xs font-medium text-slate-500 mb-1">เงินนำส่งสะสมงวดนี้</p>
-          <h3 id="cardCashflow" class="text-2xl font-bold text-blue-600">0.00 บาท</h3>
-          <span class="text-xs text-slate-400 mt-2 block">สะสมตามงวดเงินเดือน</span>
+        <div class="bg-gradient-to-br from-sky-50 to-blue-100/50 p-5 rounded-2xl border border-sky-200/60 shadow-sm">
+          <p class="text-xs font-medium text-sky-700/80 mb-1">เงินนำส่งสะสมงวดนี้</p>
+          <h3 id="cardCashflow" class="text-2xl font-bold text-sky-900">0.00 บาท</h3>
+          <span class="text-xs text-sky-600/70 mt-2 block">สะสมตามงวดเงินเดือน</span>
         </div>
       </div>
 
       <!-- Charts & Table Section -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Chart -->
-        <div class="glass-card p-5 rounded-2xl shadow-sm lg:col-span-1 flex flex-col items-center justify-center">
-          <h4 class="text-sm font-bold text-slate-700 mb-4 self-start">สัดส่วนการลงทุน (Allocation)</h4>
+        <div class="pastel-card p-5 rounded-3xl lg:col-span-1 flex flex-col items-center justify-center">
+          <h4 class="text-sm font-bold text-slate-800 mb-4 self-start flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-purple-500"></i>
+            <span>สัดส่วนการลงทุน (Allocation)</span>
+          </h4>
           <div class="w-full max-w-[240px] h-[240px] relative">
             <canvas id="allocationChart"></canvas>
           </div>
         </div>
 
         <!-- Table Holdings -->
-        <div class="glass-card p-5 rounded-2xl shadow-sm lg:col-span-2 overflow-x-auto">
-          <h4 class="text-sm font-bold text-slate-700 mb-4">ตารางแผนการลงทุนปัจจุบัน</h4>
-          <table class="w-full text-sm text-left text-slate-600">
-            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b">
+        <div class="pastel-card p-5 rounded-3xl lg:col-span-2 overflow-x-auto">
+          <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-table-list text-purple-500"></i>
+            <span>ตารางแผนการลงทุนปัจจุบัน</span>
+          </h4>
+          <table class="w-full text-xs sm:text-sm text-left text-slate-600">
+            <thead class="text-xs text-purple-700 uppercase bg-purple-50/80 rounded-xl">
               <tr>
-                <th class="py-3 px-4">แผนลงทุน</th>
+                <th class="py-3 px-4 rounded-l-xl">แผนลงทุน</th>
                 <th class="py-3 px-4 text-right">จำนวนหน่วย</th>
                 <th class="py-3 px-4 text-right">NAV ต่อหน่วย</th>
                 <th class="py-3 px-4 text-right">มูลค่ารวม (บาท)</th>
-                <th class="py-3 px-4 text-right">สัดส่วน (%)</th>
+                <th class="py-3 px-4 text-right rounded-r-xl">สัดส่วน (%)</th>
               </tr>
             </thead>
             <tbody id="holdingsTableBody">
@@ -158,18 +169,18 @@
       </div>
 
       <!-- QUANTUM AI ANALYSIS PANEL -->
-      <div class="glass-card p-6 rounded-2xl shadow-lg border-2 border-indigo-500/20 relative">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b">
+      <div class="pastel-card p-6 rounded-3xl border-2 border-purple-200/80 relative">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-purple-100">
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-xl">🤖</span>
+              <span class="text-2xl">🤖</span>
               <h3 class="text-lg font-bold text-slate-800">Quantum AI Portfolio Evaluator</h3>
             </div>
-            <p class="text-xs text-slate-500 mt-0.5">วิเคราะห์ประมวลผลพอร์ตลงทุนเชิงลึกด้วยเอไอประสิทธิภาพสูง</p>
+            <p class="text-xs text-purple-600 mt-0.5">วิเคราะห์ประมวลผลพอร์ตลงทุนเชิงลึกด้วยเอไอประสิทธิภาพสูง</p>
           </div>
 
           <div class="flex items-center gap-2 w-full sm:w-auto">
-            <select id="selectAiEngine" class="bg-slate-50 border border-slate-300 text-slate-700 text-xs rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <select id="selectAiEngine" class="bg-white border border-purple-200 text-slate-700 text-xs rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-purple-400 focus:outline-none">
               <option value="gemini">Google Gemini 1.5 Flash</option>
               <option value="groq">Groq (Llama 3.3 70B - Ultra Fast)</option>
               <option value="openrouter">OpenRouter (Multi-Model Free)</option>
@@ -179,7 +190,7 @@
             </select>
 
             <button onclick="runQuantumAI()" id="btnRunAi"
-                    class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md shadow-indigo-600/20 whitespace-nowrap flex items-center gap-1.5 transition-all">
+                    class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md shadow-purple-200 whitespace-nowrap flex items-center gap-1.5 transition-all">
               <i class="fa-solid fa-wand-magic-sparkles"></i>
               <span>วิเคราะห์พอร์ต</span>
             </button>
@@ -187,9 +198,9 @@
         </div>
 
         <!-- Result Box -->
-        <div id="aiResultBox" class="bg-slate-900 text-slate-200 rounded-xl p-5 min-h-[160px] text-sm leading-relaxed border border-slate-800">
-          <div class="text-slate-500 text-center py-8">
-            กดปุ่ม <span class="text-indigo-400 font-medium">"วิเคราะห์พอร์ต"</span> เพื่อให้ AI สรุปและประเมินสัดส่วนพอร์ต กบข. ของคุณ
+        <div id="aiResultBox" class="bg-slate-900 text-slate-200 rounded-2xl p-5 min-h-[160px] text-sm leading-relaxed border border-slate-800 shadow-inner">
+          <div class="text-slate-400 text-center py-8">
+            กดปุ่ม <span class="text-purple-300 font-semibold">"วิเคราะห์พอร์ต"</span> เพื่อให้ AI สรุปและประเมินสัดส่วนพอร์ต กบข. ของคุณ
           </div>
         </div>
       </div>
@@ -198,9 +209,9 @@
   </div>
 
   <!-- ADMIN MODAL -->
-  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl max-w-2xl w-full p-6 shadow-2xl bg-white max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center pb-4 border-b mb-4">
+  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="pastel-card rounded-3xl max-w-2xl w-full p-6 shadow-2xl bg-white max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-4 border-b border-purple-100 mb-4">
         <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
           <i class="fa-solid fa-sliders text-amber-500"></i>
           <span>Admin Control Center</span>
@@ -209,9 +220,9 @@
       </div>
 
       <!-- Admin Tabs -->
-      <div class="flex border-b mb-6 text-sm font-medium">
-        <button id="tabBtnKeys" onclick="switchAdminTab('keys')" class="py-2 px-4 border-b-2 border-indigo-600 text-indigo-600 font-bold">ตั้งค่า API Keys</button>
-        <button id="tabBtnUsers" onclick="switchAdminTab('users')" class="py-2 px-4 text-slate-500 border-b-2 border-transparent">จัดการผู้ใช้ (Users)</button>
+      <div class="flex border-b border-purple-100 mb-6 text-sm font-medium">
+        <button id="tabBtnKeys" onclick="switchAdminTab('keys')" class="py-2 px-4 border-b-2 border-purple-600 text-purple-600 font-bold">ตั้งค่า API Keys</button>
+        <button id="tabBtnUsers" onclick="switchAdminTab('users')" class="py-2 px-4 text-slate-400 border-b-2 border-transparent">จัดการผู้ใช้ (Users)</button>
       </div>
 
       <!-- Tab 1: API Keys -->
@@ -219,34 +230,34 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Google Gemini API Key</label>
-            <input type="password" id="inputGeminiKey" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs">
+            <input type="password" id="inputGeminiKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Groq API Key</label>
-            <input type="password" id="inputGroqKey" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs">
+            <input type="password" id="inputGroqKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">OpenRouter API Key</label>
-            <input type="password" id="inputOpenrouterKey" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs">
+            <input type="password" id="inputOpenrouterKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">GitHub Models Personal Access Token</label>
-            <input type="password" id="inputGithubKey" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">GitHub Models PAT</label>
+            <input type="password" id="inputGithubKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">DeepSeek API Key</label>
-            <input type="password" id="inputDeepseekKey" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs">
+            <input type="password" id="inputDeepseekKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">OpenAI API Key</label>
-            <input type="password" id="inputOpenaiKey" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs">
+            <input type="password" id="inputOpenaiKey" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4 pt-2">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">AI หลัก (Primary AI)</label>
-            <select id="selectPrimaryAi" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs">
+            <select id="selectPrimaryAi" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
               <option value="gemini">Google Gemini</option>
               <option value="groq">Groq</option>
               <option value="openrouter">OpenRouter</option>
@@ -257,7 +268,7 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">AI สำรอง (Backup AI)</label>
-            <select id="selectBackupAi" class="w-full bg-slate-50 border rounded-xl px-3 py-2 text-xs">
+            <select id="selectBackupAi" class="w-full bg-purple-50/50 border border-purple-200 rounded-xl px-3 py-2 text-xs">
               <option value="groq">Groq</option>
               <option value="gemini">Google Gemini</option>
               <option value="openrouter">OpenRouter</option>
@@ -268,29 +279,29 @@
           </div>
         </div>
 
-        <button onclick="saveAdminSettings()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-medium py-2.5 rounded-xl text-xs mt-4">
+        <button onclick="saveAdminSettings()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-medium py-2.5 rounded-xl text-xs mt-4 shadow-md shadow-amber-200">
           บันทึกการตั้งค่า API Keys
         </button>
       </div>
 
       <!-- Tab 2: Users Management -->
       <div id="tabUsersContent" class="hidden space-y-4">
-        <form onsubmit="handleSaveUser(event)" class="bg-slate-50 p-3 rounded-xl border space-y-3">
+        <form onsubmit="handleSaveUser(event)" class="bg-purple-50/50 p-3 rounded-2xl border border-purple-100 space-y-3">
           <div class="grid grid-cols-2 gap-3">
-            <input type="text" id="uUsername" placeholder="Username" required class="bg-white border text-xs rounded-lg px-3 py-2">
-            <input type="text" id="uPassword" placeholder="Password" required class="bg-white border text-xs rounded-lg px-3 py-2">
-            <input type="text" id="uFullName" placeholder="ชื่อ-นามสกุล" required class="bg-white border text-xs rounded-lg px-3 py-2">
-            <select id="uRole" class="bg-white border text-xs rounded-lg px-3 py-2">
+            <input type="text" id="uUsername" placeholder="Username" required class="bg-white border border-purple-200 text-xs rounded-xl px-3 py-2">
+            <input type="text" id="uPassword" placeholder="Password" required class="bg-white border border-purple-200 text-xs rounded-xl px-3 py-2">
+            <input type="text" id="uFullName" placeholder="ชื่อ-นามสกุล" required class="bg-white border border-purple-200 text-xs rounded-xl px-3 py-2">
+            <select id="uRole" class="bg-white border border-purple-200 text-xs rounded-xl px-3 py-2">
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
           </div>
-          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-lg text-xs">เพิ่ม/อัปเดตผู้ใช้งาน</button>
+          <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-xl text-xs font-semibold">เพิ่ม/อัปเดตผู้ใช้งาน</button>
         </form>
 
         <div class="overflow-x-auto">
-          <table class="w-full text-xs text-left border">
-            <thead class="bg-slate-100">
+          <table class="w-full text-xs text-left border border-purple-100 rounded-xl">
+            <thead class="bg-purple-50 text-purple-700">
               <tr>
                 <th class="p-2 border">Username</th>
                 <th class="p-2 border">ชื่อ-นามสกุล</th>
@@ -306,40 +317,64 @@
   </div>
 
   <script>
+    // Embedded Locked Google Apps Script Web App Endpoint
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxGNpmQ9_wdp_k4Mo87mub3x03XNnxFntNq__3wJeHDkk-6UTK8Lh52FPEwry0ClkCs/exec";
+
     let currentUser = null;
     let allocationChartInstance = null;
 
+    // Universal Backend Request Handler
+    async function apiCall(action, data = {}) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        return new Promise((resolve, reject) => {
+          google.script.run
+            .withSuccessHandler(resolve)
+            .withFailureHandler(reject)
+            [action](...Object.values(data));
+        });
+      } else {
+        try {
+          const res = await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: action, data: data })
+          });
+          return await res.json();
+        } catch (e) {
+          throw new Error("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์: " + e.message);
+        }
+      }
+    }
+
     // Login Handler
-    function handleLogin(e) {
+    async function handleLogin(e) {
       e.preventDefault();
       const u = document.getElementById('loginUsername').value;
       const p = document.getElementById('loginPassword').value;
 
-      Swal.fire({ title: 'กำลังตรวจสอบ...', didOpen: () => Swal.showLoading() });
+      Swal.fire({ title: 'กำลังเข้าสู่ระบบ...', didOpen: () => Swal.showLoading() });
 
-      google.script.run
-        .withSuccessHandler(res => {
-          Swal.close();
-          if (res.success) {
-            currentUser = res.user;
-            document.getElementById('loginView').classList.add('hidden');
-            document.getElementById('dashboardView').classList.remove('hidden');
-            document.getElementById('userDisplayName').innerText = currentUser.fullName;
-            document.getElementById('userRoleBadge').innerText = currentUser.role;
+      try {
+        const res = await apiCall('loginUser', { username: u, password: p });
+        Swal.close();
+        if (res.success) {
+          currentUser = res.user;
+          document.getElementById('loginView').classList.add('hidden');
+          document.getElementById('dashboardView').classList.remove('hidden');
+          document.getElementById('userDisplayName').innerText = currentUser.fullName;
+          document.getElementById('userRoleBadge').innerText = currentUser.role;
 
-            if (currentUser.role === 'admin') {
-              document.getElementById('btnAdminPanel').classList.remove('hidden');
-            }
-            loadDashboardData();
-          } else {
-            Swal.fire('เข้าสู่ระบบไม่สำเร็จ', res.message, 'error');
+          if (currentUser.role === 'admin') {
+            document.getElementById('btnAdminPanel').classList.remove('hidden');
           }
-        })
-        .withFailureHandler(err => {
-          Swal.close();
-          Swal.fire('ข้อผิดพลาด', err.toString(), 'error');
-        })
-        .loginUser(u, p);
+          loadDashboardData();
+        } else {
+          Swal.fire('เข้าสู่ระบบไม่สำเร็จ', res.message, 'error');
+        }
+      } catch (err) {
+        Swal.close();
+        Swal.fire('ข้อผิดพลาด', err.message, 'error');
+      }
     }
 
     // Logout
@@ -350,43 +385,41 @@
       document.getElementById('loginForm').reset();
     }
 
-    // Load Dashboard
-    function loadDashboardData() {
-      google.script.run
-        .withSuccessHandler(data => {
-          document.getElementById('cardTotalVal').innerText = data.totalPortfolioValue.toLocaleString(undefined, {minimumFractionDigits: 2}) + ' บาท';
-          document.getElementById('cardReturnPercent').innerText = (data.returnPercent >= 0 ? '+' : '') + data.returnPercent + '%';
-          document.getElementById('cardProfitLoss').innerText = data.profitLoss.toLocaleString(undefined, {minimumFractionDigits: 2});
-          document.getElementById('cardBaseline').innerText = data.baselineValue.toLocaleString(undefined, {minimumFractionDigits: 2}) + ' บาท';
-          document.getElementById('cardCashflow').innerText = data.totalCashflow.toLocaleString(undefined, {minimumFractionDigits: 2}) + ' บาท';
-          document.getElementById('cardNavDate').innerText = data.latestNavDate;
+    // Load Dashboard Data
+    async function loadDashboardData() {
+      try {
+        const data = await apiCall('getDashboardData', { username: currentUser.username });
+        document.getElementById('cardTotalVal').innerText = data.totalPortfolioValue.toLocaleString(undefined, {minimumFractionDigits: 2}) + ' บาท';
+        document.getElementById('cardReturnPercent').innerText = (data.returnPercent >= 0 ? '+' : '') + data.returnPercent + '%';
+        document.getElementById('cardProfitLoss').innerText = data.profitLoss.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('cardBaseline').innerText = data.baselineValue.toLocaleString(undefined, {minimumFractionDigits: 2}) + ' บาท';
+        document.getElementById('cardCashflow').innerText = data.totalCashflow.toLocaleString(undefined, {minimumFractionDigits: 2}) + ' บาท';
+        document.getElementById('cardNavDate').innerText = data.latestNavDate;
 
-          // Render Table
-          const tbody = document.getElementById('holdingsTableBody');
-          tbody.innerHTML = '';
-          if (data.holdings.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">ไม่พบรายการแผนลงทุน</td></tr>';
-          } else {
-            data.holdings.forEach(item => {
-              tbody.innerHTML += `
-                <tr class="border-b hover:bg-slate-50">
-                  <td class="py-3 px-4 font-medium text-slate-800">${item.planName}</td>
-                  <td class="py-3 px-4 text-right">${item.units.toLocaleString(undefined, {minimumFractionDigits: 4})}</td>
-                  <td class="py-3 px-4 text-right">${item.navUnit.toFixed(4)}</td>
-                  <td class="py-3 px-4 text-right font-semibold">${item.totalVal.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-                  <td class="py-3 px-4 text-right">${item.allocationPercent}%</td>
-                </tr>
-              `;
-            });
-          }
-
-          // Render Chart
-          renderChart(data.holdings);
-        })
-        .getDashboardData(currentUser.username);
+        const tbody = document.getElementById('holdingsTableBody');
+        tbody.innerHTML = '';
+        if (data.holdings.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">ไม่พบรายการแผนลงทุน</td></tr>';
+        } else {
+          data.holdings.forEach(item => {
+            tbody.innerHTML += `
+              <tr class="border-b border-purple-50 hover:bg-purple-50/40 transition-colors">
+                <td class="py-3 px-4 font-semibold text-slate-800">${item.planName}</td>
+                <td class="py-3 px-4 text-right">${item.units.toLocaleString(undefined, {minimumFractionDigits: 4})}</td>
+                <td class="py-3 px-4 text-right">${item.navUnit.toFixed(4)}</td>
+                <td class="py-3 px-4 text-right font-bold text-purple-900">${item.totalVal.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+                <td class="py-3 px-4 text-right font-semibold text-purple-600">${item.allocationPercent}%</td>
+              </tr>
+            `;
+          });
+        }
+        renderChart(data.holdings);
+      } catch (err) {
+        console.error(err);
+      }
     }
 
-    // Render Chart.js
+    // Render Chart.js (Pastel Palette)
     function renderChart(holdings) {
       const ctx = document.getElementById('allocationChart').getContext('2d');
       if (allocationChartInstance) allocationChartInstance.destroy();
@@ -400,7 +433,7 @@
           labels: labels,
           datasets: [{
             data: values,
-            backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6']
+            backgroundColor: ['#818cf8', '#34d399', '#fbbf24', '#38bdf8', '#f472b6', '#a78bfa']
           }]
         },
         options: {
@@ -411,38 +444,36 @@
       });
     }
 
-    // Quantum AI Evaluation
-    function runQuantumAI() {
+    // Quantum AI Analysis
+    async function runQuantumAI() {
       const engine = document.getElementById('selectAiEngine').value;
       const resultBox = document.getElementById('aiResultBox');
       const btn = document.getElementById('btnRunAi');
 
       btn.disabled = true;
-      resultBox.innerHTML = '<div class="text-center py-6 text-indigo-400"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Quantum AI กำลังประมวลผลข้อมูลพอร์ต...</div>';
+      resultBox.innerHTML = '<div class="text-center py-6 text-purple-300"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Quantum AI กำลังประมวลผลข้อมูลพอร์ต...</div>';
 
-      google.script.run
-        .withSuccessHandler(res => {
-          btn.disabled = false;
-          if (res.success) {
-            const parsedText = marked.parse(res.text);
-            resultBox.innerHTML = `
-              <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2 text-xs">
-                <span class="bg-indigo-500/20 text-indigo-300 px-2.5 py-1 rounded-full border border-indigo-500/30">
-                  Engine: <strong>${res.engineName}</strong>
-                </span>
-                <span class="text-slate-500">${new Date().toLocaleTimeString()}</span>
-              </div>
-              <div class="prose prose-invert max-w-none text-slate-300 text-xs sm:text-sm leading-relaxed">${parsedText}</div>
-            `;
-          } else {
-            resultBox.innerHTML = `<div class="text-rose-400 py-4">เกิดข้อผิดพลาดในการเรียกใช้ AI: ${res.error || 'ไม่ทราบสาเหตุ'}</div>`;
-          }
-        })
-        .withFailureHandler(err => {
-          btn.disabled = false;
-          resultBox.innerHTML = `<div class="text-rose-400 py-4">ข้อผิดพลาด: ${err.toString()}</div>`;
-        })
-        .generateQuantumAIAnalysis(currentUser.username, engine);
+      try {
+        const res = await apiCall('generateQuantumAIAnalysis', { username: currentUser.username, requestedEngine: engine });
+        btn.disabled = false;
+        if (res.success) {
+          const parsedText = marked.parse(res.text);
+          resultBox.innerHTML = `
+            <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2 text-xs">
+              <span class="bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-500/30 font-medium">
+                Engine: <strong>${res.engineName}</strong>
+              </span>
+              <span class="text-slate-500">${new Date().toLocaleTimeString()}</span>
+            </div>
+            <div class="prose prose-invert max-w-none text-slate-300 text-xs sm:text-sm leading-relaxed">${parsedText}</div>
+          `;
+        } else {
+          resultBox.innerHTML = `<div class="text-rose-400 py-4">เกิดข้อผิดพลาดในการเรียกใช้ AI: ${res.error || 'ไม่ทราบสาเหตุ'}</div>`;
+        }
+      } catch (err) {
+        btn.disabled = false;
+        resultBox.innerHTML = `<div class="text-rose-400 py-4">ข้อผิดพลาด: ${err.message}</div>`;
+      }
     }
 
     // Admin Modal Actions
@@ -460,18 +491,19 @@
       if (tab === 'keys') {
         document.getElementById('tabKeysContent').classList.remove('hidden');
         document.getElementById('tabUsersContent').classList.add('hidden');
-        document.getElementById('tabBtnKeys').classList.add('border-indigo-600', 'text-indigo-600', 'font-bold');
-        document.getElementById('tabBtnUsers').classList.remove('border-indigo-600', 'text-indigo-600', 'font-bold');
+        document.getElementById('tabBtnKeys').classList.add('border-purple-600', 'text-purple-600', 'font-bold');
+        document.getElementById('tabBtnUsers').classList.remove('border-purple-600', 'text-purple-600', 'font-bold');
       } else {
         document.getElementById('tabKeysContent').classList.add('hidden');
         document.getElementById('tabUsersContent').classList.remove('hidden');
-        document.getElementById('tabBtnUsers').classList.add('border-indigo-600', 'text-indigo-600', 'font-bold');
-        document.getElementById('tabBtnKeys').classList.remove('border-indigo-600', 'text-indigo-600', 'font-bold');
+        document.getElementById('tabBtnUsers').classList.add('border-purple-600', 'text-purple-600', 'font-bold');
+        document.getElementById('tabBtnKeys').classList.remove('border-purple-600', 'text-purple-600', 'font-bold');
       }
     }
 
-    function loadAdminConfig() {
-      google.script.run.withSuccessHandler(cfg => {
+    async function loadAdminConfig() {
+      try {
+        const cfg = await apiCall('getAdminConfig');
         document.getElementById('inputGeminiKey').value = cfg.geminiKey || '';
         document.getElementById('inputGroqKey').value = cfg.groqKey || '';
         document.getElementById('inputOpenrouterKey').value = cfg.openrouterKey || '';
@@ -480,10 +512,10 @@
         document.getElementById('inputOpenaiKey').value = cfg.openaiKey || '';
         document.getElementById('selectPrimaryAi').value = cfg.primaryAi || 'gemini';
         document.getElementById('selectBackupAi').value = cfg.backupAi || 'groq';
-      }).getAdminConfig();
+      } catch (e) { console.error(e); }
     }
 
-    function saveAdminSettings() {
+    async function saveAdminSettings() {
       const config = {
         geminiKey: document.getElementById('inputGeminiKey').value,
         groqKey: document.getElementById('inputGroqKey').value,
@@ -495,31 +527,33 @@
         backupAi: document.getElementById('selectBackupAi').value
       };
 
-      google.script.run.withSuccessHandler(res => {
+      try {
+        const res = await apiCall('saveAdminConfig', { configObj: config });
         Swal.fire('สำเร็จ', res.message, 'success');
-      }).saveAdminConfig(config);
+      } catch (e) { Swal.fire('ข้อผิดพลาด', e.message, 'error'); }
     }
 
-    function loadAdminUsers() {
-      google.script.run.withSuccessHandler(users => {
+    async function loadAdminUsers() {
+      try {
+        const users = await apiCall('getUsersList');
         const tbody = document.getElementById('adminUsersTableBody');
         tbody.innerHTML = '';
         users.forEach(u => {
           tbody.innerHTML += `
-            <tr class="border-b hover:bg-slate-50">
+            <tr class="border-b border-purple-50 hover:bg-purple-50/30">
               <td class="p-2">${u.username}</td>
               <td class="p-2">${u.fullName}</td>
-              <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] ${u.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100'}">${u.role}</span></td>
+              <td class="p-2"><span class="px-2 py-0.5 rounded text-[10px] font-semibold ${u.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100'}">${u.role}</span></td>
               <td class="p-2 text-center">
                 <button onclick="deleteUser('${u.username}')" class="text-rose-500 hover:text-rose-700 text-xs"><i class="fa-solid fa-trash"></i></button>
               </td>
             </tr>
           `;
         });
-      }).getUsersList();
+      } catch (e) { console.error(e); }
     }
 
-    function handleSaveUser(e) {
+    async function handleSaveUser(e) {
       e.preventDefault();
       const userData = {
         username: document.getElementById('uUsername').value,
@@ -528,10 +562,11 @@
         role: document.getElementById('uRole').value
       };
 
-      google.script.run.withSuccessHandler(res => {
+      try {
+        const res = await apiCall('saveUser', { userData: userData });
         Swal.fire('สำเร็จ', res.message, 'success');
         loadAdminUsers();
-      }).saveUser(userData);
+      } catch (err) { Swal.fire('ข้อผิดพลาด', err.message, 'error'); }
     }
 
     function deleteUser(username) {
@@ -540,12 +575,13 @@
         text: `ต้องการลบผู้ใช้ ${username} หรือไม่?`,
         icon: 'warning',
         showCancelButton: true
-      }).then(res => {
+      }).then(async res => {
         if (res.isConfirmed) {
-          google.script.run.withSuccessHandler(r => {
+          try {
+            const r = await apiCall('deleteUser', { username: username });
             Swal.fire('ลบแล้ว', r.message, 'success');
             loadAdminUsers();
-          }).deleteUser(username);
+          } catch (err) { Swal.fire('ข้อผิดพลาด', err.message, 'error'); }
         }
       });
     }
