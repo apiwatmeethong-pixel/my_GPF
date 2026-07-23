@@ -87,7 +87,7 @@
         <div class="space-y-4">
           <div>
             <label class="block text-slate-600 text-xs font-semibold mb-1.5">ชื่อผู้ใช้งาน (User)</label>
-            <input type="text" id="username" placeholder="  " onkeypress="if(event.key === 'Enter') login()"
+            <input type="text" id="username" placeholder="จำไม่ได้ติดต่อ" onkeypress="if(event.key === 'Enter') login()"
                    class="w-full bg-purple-50/50 border border-purple-200 text-slate-800 placeholder-slate-400 rounded-2xl px-4 py-3 text-xs focus:bg-white focus:ring-2 focus:ring-purple-400 focus:outline-none transition-all">
           </div>
 
@@ -147,31 +147,27 @@
         <!-- PAGE 1: PORTFOLIO SUMMARY (รวม) -->
         <div id="page-portfolio" class="space-y-6">
           
-          <!-- 🟢 4 KPI Top Cards Section (ถอดแบบตามภาพดั้งเดิม) -->
+          <!-- 4 KPI Top Cards Section -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
-            <!-- Card 1: มูลค่าพอร์ตลงทุุนรวม -->
             <div class="pastel-card p-5 border border-purple-200 bg-gradient-to-br from-white to-purple-50/30">
               <div class="text-xs font-semibold text-purple-700 mb-1">มูลค่าพอร์ตลงทุนรวม</div>
               <div id="kpi_total_money" class="text-2xl lg:text-3xl font-extrabold text-indigo-950 my-1">กำลังคำนวณ...</div>
               <div id="kpi_last_update" class="text-[11px] text-purple-400 font-medium">อัปเดตล่าสุด NAV: -</div>
             </div>
 
-            <!-- Card 2: ผลตอบแทนรวม (%) -->
             <div class="pastel-card p-5 border border-emerald-200 bg-gradient-to-br from-white to-emerald-50/30">
               <div class="text-xs font-semibold text-emerald-800 mb-1">ผลตอบแทนรวม (%)</div>
               <div id="kpi_true_ytd_pct" class="text-2xl lg:text-3xl font-extrabold text-emerald-600 my-1">+0.00%</div>
               <div id="kpi_profit_baht" class="text-[11px] text-emerald-600 font-medium">กำไร/ขาดทุน: ฿0.00</div>
             </div>
 
-            <!-- Card 3: เงินยกมาต้นปี -->
             <div class="pastel-card p-5 border border-amber-200 bg-gradient-to-br from-white via-amber-50/20 to-amber-50/40">
               <div class="text-xs font-semibold text-amber-800 mb-1">เงินยกมาต้นปี</div>
               <div id="kpi_baseline_money" class="text-2xl lg:text-3xl font-extrabold text-amber-950 my-1">฿0.00</div>
               <div class="text-[11px] text-amber-600/80 font-medium">ยอดยกมาจากปีก่อนหน้า</div>
             </div>
 
-            <!-- Card 4: เงินนำส่งสะสมงวดนี้ -->
             <div class="pastel-card p-5 border border-sky-200 bg-gradient-to-br from-white to-sky-50/30">
               <div class="text-xs font-semibold text-sky-800 mb-1">เงินนำส่งสะสมงวดนี้</div>
               <div id="kpi_contrib_money" class="text-2xl lg:text-3xl font-extrabold text-sky-950 my-1">฿0.00</div>
@@ -180,10 +176,9 @@
 
           </div>
 
-          <!-- 🟢 Middle Section: Allocation Donut Chart + Holdings Table -->
+          <!-- Middle Section: Allocation Donut Chart + Holdings Table -->
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            <!-- Left: สัดส่วนการลงทุน (Allocation Chart) -->
             <div class="lg:col-span-4 pastel-card p-5 flex flex-col justify-between min-h-[360px]">
               <h3 class="text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
                 <i class="fa-solid fa-chart-pie text-purple-600"></i>
@@ -194,7 +189,6 @@
               </div>
             </div>
 
-            <!-- Right: ตารางแผนการลงทุนปัจจุบัน -->
             <div class="lg:col-span-8 pastel-card p-5 min-h-[360px]">
               <div class="flex justify-between items-center mb-4">
                 <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -226,7 +220,7 @@
 
           </div>
 
-          <!-- 🤖 Quantum AI Portfolio Evaluator Section (ถอดแบบกล่อง AI จากภาพสอง) -->
+          <!-- Quantum AI Portfolio Evaluator Section -->
           <div class="pastel-card p-6 border-2 border-purple-200">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
               <div>
@@ -237,7 +231,6 @@
                 <p class="text-xs text-purple-600 font-medium">วิเคราะห์ประมวลผลพอร์ตลงทุนเชิงลึกด้วยเอไอประสิทธิภาพสูง</p>
               </div>
 
-              <!-- Controls: Engine Selector + Analyze Button -->
               <div class="flex items-center gap-2">
                 <select id="aiEngineSelect" class="bg-white border border-purple-300 text-slate-700 text-xs rounded-xl px-3 py-2 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-xs">
                   <option value="gemini">Google Gemini 1.5 Flash</option>
@@ -255,7 +248,6 @@
               </div>
             </div>
 
-            <!-- Dark AI Result Window -->
             <div class="bg-slate-900 rounded-2xl p-5 min-h-[180px] shadow-inner text-slate-200">
               <div id="aiEvaluatorResult" class="prose-ai text-center py-8">
                 กดปุ่ม <strong class="text-purple-300 font-bold">"วิเคราะห์พอร์ต"</strong> เพื่อให้ AI สรุปและประเมินสัดส่วนพอร์ต กบข. ของคุณ
@@ -400,10 +392,8 @@
               </div>
             </div>
 
-            <!-- Tactical Switch Panel -->
             <div id="tactical_switch_panel" class="p-4 rounded-2xl bg-amber-50/80 border border-dashed border-amber-300 text-xs"></div>
 
-            <!-- Radar / Spider Chart -->
             <div class="pastel-card p-5">
               <h3 class="text-xs font-bold text-purple-900 mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-spider text-purple-600"></i>
@@ -416,7 +406,6 @@
 
           </div>
 
-          <!-- Leaderboard Table -->
           <div class="pastel-card p-5">
             <h3 class="text-xs font-bold text-amber-900 mb-3 flex items-center gap-2">
               <i class="fa-solid fa-bolt text-amber-500"></i>
@@ -474,11 +463,37 @@
         </div>
 
         <div class="flex border-b border-purple-100 mb-4 text-xs font-medium">
-          <button id="tabBtnKeys" onclick="switchAdminTab('keys')" class="py-2 px-3 border-b-2 border-purple-600 text-purple-600 font-bold">ตั้งค่า API Keys</button>
+          <button id="tabBtnKeys" onclick="switchAdminTab('keys')" class="py-2 px-3 border-b-2 border-purple-600 text-purple-600 font-bold">ตั้งค่า API Keys & AI Engine</button>
           <button id="tabBtnUsers" onclick="switchAdminTab('users')" class="py-2 px-3 text-slate-400 border-b-2 border-transparent">จัดการผู้ใช้ (Users)</button>
         </div>
 
-        <div id="tabKeysContent" class="space-y-3 text-xs">
+        <div id="tabKeysContent" class="space-y-4 text-xs">
+          <!-- 🟢 เพิ่มการตั้งค่าเลือก Primary AI และ Backup AI ตามคำขอ -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-purple-50/60 p-3 rounded-2xl border border-purple-100">
+            <div>
+              <label class="block font-semibold text-purple-900 mb-1">Primary AI Engine (หลัก)</label>
+              <select id="inputPrimaryAi" class="w-full bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs">
+                <option value="gemini">Google Gemini 1.5 Flash</option>
+                <option value="groq">Groq (Llama 3.3 70B)</option>
+                <option value="openrouter">OpenRouter (Multi-Model)</option>
+                <option value="github">GitHub Models (GPT-4o mini)</option>
+                <option value="deepseek">DeepSeek V3</option>
+                <option value="openai">OpenAI GPT-4o mini</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-purple-900 mb-1">Backup AI Engine (สำรอง)</label>
+              <select id="inputBackupAi" class="w-full bg-white border border-purple-200 rounded-xl px-3 py-2 text-xs">
+                <option value="groq">Groq (Llama 3.3 70B)</option>
+                <option value="gemini">Google Gemini 1.5 Flash</option>
+                <option value="openrouter">OpenRouter (Multi-Model)</option>
+                <option value="github">GitHub Models (GPT-4o mini)</option>
+                <option value="deepseek">DeepSeek V3</option>
+                <option value="openai">OpenAI GPT-4o mini</option>
+              </select>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block font-semibold text-slate-600 mb-1">Google Gemini Key</label>
@@ -507,7 +522,7 @@
           </div>
 
           <button onclick="saveAdminSettings()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 rounded-xl text-xs mt-3 shadow-md">
-            บันทึกการตั้งค่า API Keys
+            บันทึกการตั้งค่า API Keys & AI Engines
           </button>
         </div>
 
@@ -562,7 +577,6 @@
       var goldDataRaw = [], thaiStockDataRaw = [];
       var dailyRecords = []; 
 
-      // Universal Backend Caller
       async function callBackend(action, params = {}) {
         if (typeof google !== 'undefined' && google.script && google.script.run) {
           return new Promise((resolve, reject) => {
@@ -586,6 +600,7 @@
       }
 
       function maskValue(num, isCurrency = true) {
+        if (isNaN(num)) num = 0;
         if (!isMasked) {
           return isCurrency 
             ? '฿' + num.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -601,6 +616,7 @@
 
       function shareToSocial() {
         let customIdx = globalHeaders.indexOf(customPlanName);
+        if (customIdx === -1) customIdx = globalHeaders.length - 1;
         let latestValue = (ytdData.length > 0 && customIdx !== -1) ? (parseFloat(ytdData[ytdData.length - 1][customIdx]) || 0) : 0;
         let reportText = `📊 รายงานสรุปพอร์ตการลงทุน กบข. ประจำวันนี้\n👤 นักลงทุน: ${userDisplayGlobalName}\n📈 ผลงานประจำปี (True YTD): ${globalTrueYtdPctText}\n💰 มูลค่าพอร์ตรวมสุทธิ: ${maskValue(latestValue)}\n💵 ยอดนำส่งสะสมปีนี้: ${maskValue(totalContributionSum)}\n💼 ตรวจสอบผ่านระบบ Quantum AI Portfolio Management`;
         
@@ -785,6 +801,15 @@
         var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🇹🇭 พยากรณ์ระบบหุ้นไทย', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
         document.getElementById('main_title').innerHTML = titles[pageId] || '';
 
+        if(ytdData.length === 0 && currentUser !== "") {
+          fetchData().then(() => {
+            if(pageId === 'portfolio') updateDashboard();
+            if(pageId === 'daily') drawDailyDashboard();
+            if(pageId === 'analysis') drawAnalysisDashboard();
+          });
+          return;
+        }
+
         if(pageId === 'portfolio' && ytdData.length > 0) updateDashboard();
         if(pageId === 'daily' && dailyRecords.length > 0) drawDailyDashboard();
         if(pageId === 'thaistock' && thaiStockDataRaw.length > 0) drawThaiStockDashboard();
@@ -808,17 +833,17 @@
               globalHeaders.push(customPlanName);
             }
 
-            // คำนวณมูลค่าพอร์ตรวมสุทธิในแต่ละวัน
             for (var i = 0; i < data.length; i++) {
               var dailyTotalMoney = 0;
               for (var plan in myUnits) {
                 var planIdx = globalHeaders.indexOf(plan);
                 if (planIdx !== -1) dailyTotalMoney += ((parseFloat(data[i][planIdx]) || 0) * (parseFloat(myUnits[plan]) || 0));
               }
-              if (data[i].length < globalHeaders.length) {
+              var cIdx = globalHeaders.indexOf(customPlanName);
+              if (data[i].length <= cIdx) {
                 data[i].push(dailyTotalMoney); 
               } else {
-                data[i][globalHeaders.indexOf(customPlanName)] = dailyTotalMoney;
+                data[i][cIdx] = dailyTotalMoney;
               }
             }
 
@@ -831,7 +856,6 @@
             ytdData = data.filter(row => String(row[0]).includes(currentYearStr));
             if (ytdData.length === 0) ytdData = data; 
 
-            // 🟢 คำนวณผลต่างรายวัน (Daily Changes) ใหม่ให้ถูกต้องแน่นอน
             dailyRecords = [];
             var customIdx = globalHeaders.indexOf(customPlanName);
             
@@ -862,17 +886,18 @@
       function updateSummaryBox() {
         if(ytdData.length === 0) return;
         var customIdx = globalHeaders.indexOf(customPlanName);
-        var baseValue = yearlyBaselineSum > 0 ? yearlyBaselineSum : parseFloat(ytdData[0][customIdx]); 
+        if (customIdx === -1) customIdx = globalHeaders.length - 1;
+
+        var baseValue = yearlyBaselineSum > 0 ? yearlyBaselineSum : parseFloat(ytdData[0][customIdx]) || 0; 
         var latestRow = ytdData[ytdData.length - 1];
         var latestValue = parseFloat(latestRow[customIdx]) || 0; 
         var latestDateStr = formatShortDate(latestRow[0]);
 
-        // คำนวณกำไร/ขาดทุนสุทธิสะสมปีนี้
         var trueProfit = yearlyBaselineSum > 0 ? (latestValue - yearlyBaselineSum - totalContributionSum) : (latestValue - baseValue - totalContributionSum);
         var trueYtdPct = baseValue > 0 ? (trueProfit / baseValue) * 100 : 0;
         globalTrueYtdPctText = (trueYtdPct >= 0 ? '+' : '') + trueYtdPct.toFixed(2) + '%';
 
-        // อัปเดตการ์ด KPI 4 ช่องบน
+        // Update Top KPI Cards
         if(document.getElementById('kpi_total_money')) document.getElementById('kpi_total_money').innerText = maskValue(latestValue);
         if(document.getElementById('kpi_last_update')) document.getElementById('kpi_last_update').innerText = "อัปเดตล่าสุด NAV: " + latestDateStr;
         if(document.getElementById('kpi_true_ytd_pct')) {
@@ -883,7 +908,7 @@
         if(document.getElementById('kpi_baseline_money')) document.getElementById('kpi_baseline_money').innerText = maskValue(yearlyBaselineSum);
         if(document.getElementById('kpi_contrib_money')) document.getElementById('kpi_contrib_money').innerText = maskValue(totalContributionSum);
 
-        // 🟢 อัปเดตผลกำไรส่วนต่างประจำงวดวัน (รายวัน)
+        // 🟢 อัปเดตส่วนต่างประจำงวดวัน (เปรียบเทียบจากราคาเมื่อวาน)
         if(dailyRecords.length > 0) {
             var latestDay = dailyRecords[dailyRecords.length - 1];
             var sign = latestDay.diff >= 0 ? '+' : '';
@@ -900,6 +925,16 @@
             }
         }
 
+        // Update Profile Analysis values
+        if(document.getElementById('user_profile_name_anal')) {
+          document.getElementById('user_profile_name_anal').innerText = userDisplayGlobalName || currentUser;
+          document.getElementById('user_profile_baseline_anal').innerText = maskValue(yearlyBaselineSum);
+          document.getElementById('user_profile_contrib_anal').innerText = maskValue(totalContributionSum);
+          document.getElementById('user_profile_current_anal').innerText = maskValue(latestValue);
+          document.getElementById('user_profile_profit_anal').innerText = maskValue(trueProfit);
+          document.getElementById('user_profile_ytd_anal').innerText = globalTrueYtdPctText;
+        }
+
         renderAllocationDonutChart(latestRow, latestValue);
         renderHoldingsTable(latestRow, latestValue);
       }
@@ -912,11 +947,10 @@
         const dataValues = [];
         const backgroundColors = ['#818cf8', '#34d399', '#fbbf24', '#c084fc', '#38bdf8', '#f472b6'];
 
-        let colorIndex = 0;
         for (let plan in myUnits) {
           let pIdx = globalHeaders.indexOf(plan);
           if (pIdx !== -1) {
-            let units = myUnits[plan] || 0;
+            let units = parseFloat(myUnits[plan]) || 0;
             let navPrice = parseFloat(latestRow[pIdx]) || 0;
             let moneyVal = units * navPrice;
             if (moneyVal > 0) {
@@ -959,7 +993,7 @@
         for (let plan in myUnits) {
           let pIdx = globalHeaders.indexOf(plan);
           if (pIdx !== -1) {
-            let units = myUnits[plan] || 0;
+            let units = parseFloat(myUnits[plan]) || 0;
             let navPrice = parseFloat(latestRow[pIdx]) || 0;
             let moneyVal = units * navPrice;
             let weightPct = totalValue > 0 ? (moneyVal / totalValue) * 100 : 0;
@@ -1013,6 +1047,7 @@
       function generateLocalFallbackAnalysis() {
         const resultDiv = document.getElementById('aiEvaluatorResult');
         let customIdx = globalHeaders.indexOf(customPlanName);
+        if (customIdx === -1) customIdx = globalHeaders.length - 1;
         let latestTotalVal = (ytdData.length > 0 && customIdx !== -1) ? (parseFloat(ytdData[ytdData.length - 1][customIdx]) || 0) : 0;
         let trendStatus = globalTrueYtdPctText.includes('+') ? "เติบโตทวีทรัพย์ในแดนบวก" : "ชะลอตัวชั่วคราวตามแนวโน้มตลาด";
         
@@ -1021,7 +1056,7 @@
             <div class="text-[11px] text-amber-400 font-semibold border-b border-slate-800 pb-2 mb-3">
               <i class="fa-solid fa-triangle-exclamation mr-1"></i> โหมดสำรอง: Quantum Local Fallback Engine
             </div>
-            <p><b>เรียนคุณ ${userDisplayGlobalName}</b> จากการกวาดสแกนโครงสร้างเม็ดเงินลงทุน กบข. ล่าสุด บัญชีของคุณมีมูลค่าสินทรัพย์ครองพอร์ตรวมสุทธิอยู่ที่ <b>${maskValue(latestTotalVal)}</b> โดยมีอัตราผลตอบแทนจริงคำนวณหักลบเงินเติม (True YTD) อยู่ที่ <b>${globalTrueYtdPctText}</b> ซึ่งสถานะจัดอยู่ในเกณฑ์ <u>${trendStatus}</u></p>
+            <p><b>เรียนคุณ ${userDisplayGlobalName || currentUser}</b> จากการกวาดสแกนโครงสร้างเม็ดเงินลงทุน กบข. ล่าสุด บัญชีของคุณมีมูลค่าสินทรัพย์ครองพอร์ตรวมสุทธิอยู่ที่ <b>${maskValue(latestTotalVal)}</b> โดยมีอัตราผลตอบแทนจริงคำนวณหักลบเงินเติม (True YTD) อยู่ที่ <b>${globalTrueYtdPctText}</b> ซึ่งสถานะจัดอยู่ในเกณฑ์ <u>${trendStatus}</u></p>
             <p><b>ข้อแนะนำเชิงกลยุทธ์:</b> เน้นรักษาวินัยการเติมออมเพิ่มสะสมจำนวนหน่วยลงทุนต่อเนื่อง เพื่อสร้างผลกระทบพลังดอกเบี้ยทบต้นระยะยาว และพิจารณาวางจังหวะปรับพอร์ตอิงตามสัญญาณความเร็วของสินทรัพย์ในตาราง Momentum Tracker</p>
           </div>
         `;
@@ -1031,6 +1066,7 @@
       function drawAnalysisDashboard() {
         if (ytdData.length === 0) return;
         var customIdx = globalHeaders.indexOf(customPlanName);
+        if (customIdx === -1) customIdx = globalHeaders.length - 1;
         var latestRow = ytdData[ytdData.length - 1];
         var latestTotalValue = parseFloat(latestRow[customIdx]) || 0;
 
@@ -1039,7 +1075,7 @@
           var pIdx = globalHeaders.indexOf(plan);
           if (pIdx !== -1) {
             var planPrice = parseFloat(latestRow[pIdx]) || 0; 
-            var planWeightMoney = planPrice * myUnits[plan];
+            var planWeightMoney = planPrice * (parseFloat(myUnits[plan]) || 0);
             if (planWeightMoney > 0) {
               var cleanPName = plan.replace('แผนการลงทุน', '').replace('แผน', '');
               planAllocations[cleanPName] = planWeightMoney;
@@ -1145,6 +1181,7 @@
 
       function createCheckboxes() {
         var container = document.getElementById('checkboxes');
+        if (!container) return;
         var html = '';
         var defaultChecked = [customPlanName, 'แผนหุ้นไทย', 'แผนทองคำ'];
         for (var i = 1; i < globalHeaders.length; i++) {
@@ -1158,6 +1195,7 @@
       }
 
       function updateDashboard() {
+        if(ytdData.length === 0) return;
         var checkboxes = document.querySelectorAll('#checkboxes input:checked');
         var selectedPlans = Array.from(checkboxes).map(cb => cb.value);
         var chartData = new google.visualization.DataTable();
@@ -1166,15 +1204,18 @@
 
         selectedPlans.forEach(plan => {
           chartData.addColumn('number', plan.replace('แผนการลงทุน',''));
-          planIndices.push(globalHeaders.indexOf(plan));
-          baseValues.push(parseFloat(ytdData[0][globalHeaders.indexOf(plan)])); 
+          var idx = globalHeaders.indexOf(plan);
+          planIndices.push(idx);
+          baseValues.push(idx !== -1 ? (parseFloat(ytdData[0][idx]) || 0) : 0); 
         });
 
         for (var i = 0; i < ytdData.length; i++) {
           var rowData = [formatShortDate(ytdData[i][0])];
           for (var j = 0; j < selectedPlans.length; j++) {
             var baseVal = baseValues[j];
-            rowData.push(baseVal > 0 ? (parseFloat(ytdData[i][planIndices[j]]) - baseVal) / baseVal : 0);
+            var pIdx = planIndices[j];
+            var val = (pIdx !== -1) ? (parseFloat(ytdData[i][pIdx]) || 0) : 0;
+            rowData.push(baseVal > 0 ? (val - baseVal) / baseVal : 0);
           }
           chartData.addRow(rowData);
         }
@@ -1290,6 +1331,8 @@
       async function loadAdminConfig() {
         try {
           const cfg = await callBackend('getAdminConfig');
+          document.getElementById('inputPrimaryAi').value = cfg.primaryAi || 'gemini';
+          document.getElementById('inputBackupAi').value = cfg.backupAi || 'groq';
           document.getElementById('inputGeminiKey').value = cfg.geminiKey || '';
           document.getElementById('inputGroqKey').value = cfg.groqKey || '';
           document.getElementById('inputOpenrouterKey').value = cfg.openrouterKey || '';
@@ -1301,6 +1344,8 @@
 
       async function saveAdminSettings() {
         const config = {
+          primaryAi: document.getElementById('inputPrimaryAi').value,
+          backupAi: document.getElementById('inputBackupAi').value,
           geminiKey: document.getElementById('inputGeminiKey').value,
           groqKey: document.getElementById('inputGroqKey').value,
           openrouterKey: document.getElementById('inputOpenrouterKey').value,
