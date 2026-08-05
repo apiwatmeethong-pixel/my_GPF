@@ -300,6 +300,28 @@
               </button>
             </div>
           </div>
+
+          <!-- ประวัติเงินนำส่ง: แก้ไข/ล็อคข้อมูล -->
+          <div class="pastel-card p-5">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-xs font-bold text-sky-900 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-sky-600"></i>
+                <span>ประวัติเงินนำส่งของฉัน (แก้ไข/ล็อคข้อมูล)</span>
+              </h3>
+              <button onclick="loadCashflowHistory()" class="bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 px-3 py-1.5 rounded-xl text-[11px] font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-rotate"></i> รีเฟรช
+              </button>
+            </div>
+            <p class="text-[11px] text-slate-500 mb-3">แก้ไขยอดเงินนำส่งย้อนหลังได้หากตัวเลขผิด กด "ล็อค" เมื่อยอดถูกต้องแล้วเพื่อป้องกันการแก้ไขซ้ำ (สามารถกด "ปลดล็อค" เพื่อแก้ไขใหม่ได้เสมอ)</p>
+            <div id="cashflowHistoryContainer" class="table-responsive">
+              <table>
+                <thead><tr><th>วันที่</th><th>จำนวนเงิน (บาท)</th><th class="text-center">สถานะ/จัดการ</th></tr></thead>
+                <tbody id="cashflowHistoryBody">
+                  <tr><td colspan="3" class="text-center py-4 text-slate-400">กำลังโหลดประวัติเงินนำส่ง...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <!-- PAGE 2: DAILY MOVEMENT (รายวัน) -->
@@ -394,12 +416,18 @@
 
             <div id="tactical_switch_panel" class="p-4 rounded-2xl bg-amber-50/80 border border-dashed border-amber-300 text-xs"></div>
 
-            <!-- 🟢 กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิรายเดือน (Monthly Profit/Loss Bar Chart) -->
+            <!-- 🟢 กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิ (Period Profit/Loss Bar Chart) -->
             <div class="pastel-card p-5">
-              <h3 class="text-xs font-bold text-purple-900 mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-chart-column text-purple-600"></i>
-                <span>กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิรายเดือน (Monthly Profit/Loss Bar Chart)</span>
-              </h3>
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <h3 class="text-xs font-bold text-purple-900 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-column text-purple-600"></i>
+                  <span id="periodBarChartTitle">กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิรายเดือน</span>
+                </h3>
+                <div class="flex items-center gap-1 bg-purple-50 border border-purple-200 rounded-full p-1">
+                  <button id="btnPeriodMonth" onclick="setChartPeriod('month')" class="px-3 py-1 rounded-full text-[11px] font-semibold transition-all bg-purple-600 text-white shadow-sm">รายเดือน</button>
+                  <button id="btnPeriodWeek" onclick="setChartPeriod('week')" class="px-3 py-1 rounded-full text-[11px] font-semibold transition-all text-purple-600">รายสัปดาห์</button>
+                </div>
+              </div>
               <div class="h-[280px] w-full relative">
                 <canvas id="monthlyBarChartCanvas"></canvas>
               </div>
@@ -727,6 +755,97 @@
             </div>`;
         }
         container.innerHTML = html;
+        loadCashflowHistory();
+      }
+
+      // ===== ประวัติเงินนำส่ง (Cashflow) : แก้ไข / ล็อค =====
+      let cashflowRecords = [];
+
+      async function loadCashflowHistory() {
+        let tbody = document.getElementById('cashflowHistoryBody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-slate-400">กำลังโหลดประวัติเงินนำส่ง...</td></tr>';
+        try {
+          // Backend (Apps Script) ควรมีฟังก์ชัน getCashflowData(user) คืนค่าอาเรย์ของ
+          // { id: <row index หรือรหัสอ้างอิงแถวในชีท cashflow>, date, amount, locked: true/false }
+          const res = await callBackend('getCashflowData', { user: currentUser });
+          cashflowRecords = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
+          renderCashflowHistory();
+        } catch (err) {
+          console.error('loadCashflowHistory error:', err);
+          if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-rose-400">ไม่สามารถโหลดประวัติเงินนำส่งได้ในขณะนี้</td></tr>';
+        }
+      }
+
+      function renderCashflowHistory() {
+        let tbody = document.getElementById('cashflowHistoryBody');
+        if (!tbody) return;
+        if (!cashflowRecords || cashflowRecords.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-slate-400">ยังไม่มีประวัติเงินนำส่ง</td></tr>';
+          return;
+        }
+
+        let html = '';
+        cashflowRecords.forEach(rec => {
+          let isLocked = !!rec.locked;
+          let dispDate = formatShortDate(rec.date);
+          html += `<tr>
+            <td style="text-align:left">${dispDate}</td>
+            <td>
+              <input type="number" step="any" id="cf_amt_${rec.id}" value="${parseFloat(rec.amount) || 0}" ${isLocked ? 'disabled' : ''}
+                class="w-28 sm:w-32 text-right ${isLocked ? 'bg-slate-100 text-slate-400' : 'bg-white'} border border-purple-200 rounded-lg px-2 py-1 text-xs">
+            </td>
+            <td class="text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                ${isLocked
+                  ? `<span class="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded-lg"><i class="fa-solid fa-lock"></i> ล็อคแล้ว</span>
+                     <button onclick="toggleLockCashflowRow('${rec.id}', false)" class="text-[10px] font-semibold text-slate-500 hover:text-slate-700 px-2 py-1"><i class="fa-solid fa-unlock"></i> ปลดล็อค</button>`
+                  : `<button onclick="saveCashflowRow('${rec.id}')" class="text-[10px] font-semibold text-white bg-purple-600 hover:bg-purple-700 px-2.5 py-1 rounded-lg"><i class="fa-solid fa-save"></i> บันทึก</button>
+                     <button onclick="toggleLockCashflowRow('${rec.id}', true)" class="text-[10px] font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2.5 py-1 rounded-lg"><i class="fa-solid fa-lock"></i> ล็อค</button>`
+                }
+              </div>
+            </td>
+          </tr>`;
+        });
+        tbody.innerHTML = html;
+      }
+
+      async function saveCashflowRow(id) {
+        let input = document.getElementById('cf_amt_' + id);
+        if (!input) return;
+        let newAmount = parseFloat(input.value) || 0;
+        if (newAmount < 0) { Swal.fire('ข้อผิดพลาด', 'ยอดเงินห้ามติดลบครับ', 'error'); return; }
+        try {
+          // Backend ควรมีฟังก์ชัน updateCashflowEntry(id, amount, user) เพื่อแก้ไขค่าในชีท cashflow
+          const res = await callBackend('updateCashflowEntry', { id: id, amount: newAmount, user: currentUser });
+          if (res && (res.status === 'success' || res.success)) {
+            Swal.fire({ icon: 'success', title: 'บันทึกแล้ว', text: 'แก้ไขยอดเงินนำส่งเรียบร้อย', timer: 1200, showConfirmButton: false });
+            await loadCashflowHistory();
+            fetchData();
+          } else {
+            Swal.fire('ข้อผิดพลาด', (res && res.message) || 'ไม่สามารถบันทึกได้', 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          Swal.fire('ข้อผิดพลาด', 'ระบบขัดข้อง ไม่สามารถบันทึกยอดเงินนำส่งได้', 'error');
+        }
+      }
+
+      async function toggleLockCashflowRow(id, lockState) {
+        try {
+          // Backend ควรมีฟังก์ชัน lockCashflowEntry(id, lockState, user) เพื่ออัปเดตสถานะล็อคในชีท cashflow
+          const res = await callBackend('lockCashflowEntry', { id: id, locked: lockState, user: currentUser });
+          if (res && (res.status === 'success' || res.success)) {
+            await loadCashflowHistory();
+            if (lockState) {
+              Swal.fire({ icon: 'success', title: 'ล็อคแล้ว', text: 'รายการนี้ถูกล็อคป้องกันการแก้ไขแล้ว', timer: 1200, showConfirmButton: false });
+            }
+          } else {
+            Swal.fire('ข้อผิดพลาด', (res && res.message) || 'ไม่สามารถเปลี่ยนสถานะล็อคได้', 'error');
+          }
+        } catch (err) {
+          console.error(err);
+          Swal.fire('ข้อผิดพลาด', 'ระบบขัดข้อง ไม่สามารถเปลี่ยนสถานะล็อคได้', 'error');
+        }
       }
 
       async function setYearlyBaseline() {
@@ -1140,55 +1259,102 @@
         document.getElementById('rank_table_div').innerHTML = tableHtml + '</tbody></table>';
       }
 
+      // 'month' หรือ 'week' - โหมดปัจจุบันของกราฟแท่งกำไร/ขาดทุน
+      let chartPeriodMode = 'month';
+
+      function setChartPeriod(mode) {
+        chartPeriodMode = mode;
+        let btnM = document.getElementById('btnPeriodMonth');
+        let btnW = document.getElementById('btnPeriodWeek');
+        if (btnM && btnW) {
+          if (mode === 'month') {
+            btnM.className = "px-3 py-1 rounded-full text-[11px] font-semibold transition-all bg-purple-600 text-white shadow-sm";
+            btnW.className = "px-3 py-1 rounded-full text-[11px] font-semibold transition-all text-purple-600";
+          } else {
+            btnW.className = "px-3 py-1 rounded-full text-[11px] font-semibold transition-all bg-purple-600 text-white shadow-sm";
+            btnM.className = "px-3 py-1 rounded-full text-[11px] font-semibold transition-all text-purple-600";
+          }
+        }
+        let titleEl = document.getElementById('periodBarChartTitle');
+        if (titleEl) titleEl.innerText = mode === 'month' ? 'กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิรายเดือน' : 'กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิรายสัปดาห์';
+        renderMonthlyBarChart();
+      }
+
+      // คำนวณเลขสัปดาห์แบบ ISO (สัปดาห์เริ่มวันจันทร์) คืนค่า { year, week, weekStart }
+      function getISOWeekInfo(d) {
+        let date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        let dayNum = date.getUTCDay() || 7;
+        date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+        let yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+        let weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+        let weekStart = new Date(d);
+        let curDay = d.getDay() || 7;
+        weekStart.setDate(d.getDate() - curDay + 1);
+        return { year: date.getUTCFullYear(), week: weekNo, weekStart: weekStart };
+      }
+
+      function parseRowDate(rawDate) {
+        let d = new Date(rawDate);
+        if (isNaN(d.getTime())) {
+          let parts = String(rawDate).split('/');
+          if (parts.length >= 2) {
+            d = new Date(parts[2] || 2026, parts[1] - 1, parts[0]);
+          }
+        }
+        return d;
+      }
+
       function renderMonthlyBarChart() {
         const ctx = document.getElementById('monthlyBarChartCanvas');
         if (!ctx) return;
         if (monthlyBarChartInstance) monthlyBarChartInstance.destroy();
 
-        let monthlyValues = {};
+        let periodValues = {}; 
+        let periodLabels = {}; 
         let customIdx = globalHeaders.indexOf(customPlanName);
         if (customIdx === -1) customIdx = globalHeaders.length - 1;
+        let mNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 
         ytdData.forEach(row => {
-          let rawDate = row[0];
-          let d = new Date(rawDate);
-          if (isNaN(d.getTime())) {
-            let parts = String(rawDate).split('/');
-            if (parts.length >= 2) {
-              d = new Date(parts[2] || 2026, parts[1] - 1, parts[0]);
-            }
-          }
-          if (!isNaN(d.getTime())) {
-            let mKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-            monthlyValues[mKey] = parseFloat(row[customIdx]) || 0;
+          let d = parseRowDate(row[0]);
+          if (isNaN(d.getTime())) return;
+
+          if (chartPeriodMode === 'month') {
+            let key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            periodValues[key] = parseFloat(row[customIdx]) || 0;
+            periodLabels[key] = mNames[d.getMonth()];
+          } else {
+            let wi = getISOWeekInfo(d);
+            let key = wi.year + '-W' + String(wi.week).padStart(2, '0');
+            periodValues[key] = parseFloat(row[customIdx]) || 0;
+            periodLabels[key] = String(wi.weekStart.getDate()).padStart(2, '0') + '/' + String(wi.weekStart.getMonth() + 1).padStart(2, '0');
           }
         });
 
-        let sortedKeys = Object.keys(monthlyValues).sort();
+        let sortedKeys = Object.keys(periodValues).sort();
         let labels = [];
         let dataValues = [];
-        let mNames = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 
         let startOfYearVal = ytdData.length > 0 ? (parseFloat(ytdData[0][customIdx]) || 0) : 0;
         let runningPrev = startOfYearVal;
 
         sortedKeys.forEach(k => {
-          let parts = k.split('-');
-          let monthIdx = parseInt(parts[1]) - 1;
-          let currentVal = monthlyValues[k];
-          let monthlyProfit = currentVal - runningPrev;
+          let currentVal = periodValues[k];
+          let periodProfit = currentVal - runningPrev;
 
-          labels.push(mNames[monthIdx]);
-          dataValues.push(monthlyProfit);
+          labels.push(periodLabels[k]);
+          dataValues.push(periodProfit);
           runningPrev = currentVal;
         });
+
+        let seriesLabel = chartPeriodMode === 'month' ? 'ผลกำไร/ขาดทุนรายเดือน' : 'ผลกำไร/ขาดทุนรายสัปดาห์';
 
         monthlyBarChartInstance = new Chart(ctx.getContext('2d'), {
           type: 'bar',
           data: {
             labels: labels,
             datasets: [{
-              label: 'ผลกำไร/ขาดทุนรายเดือน',
+              label: seriesLabel,
               data: dataValues,
               backgroundColor: dataValues.map(v => v >= 0 ? '#34d399' : '#f87171'),
               borderColor: dataValues.map(v => v >= 0 ? '#059669' : '#dc2626'),
@@ -1221,7 +1387,7 @@
                 grid: { color: 'rgba(124, 58, 237, 0.1)' }
               },
               x: {
-                ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
+                ticks: { font: { family: 'Prompt', size: chartPeriodMode === 'month' ? 11 : 9, weight: '600' }, maxRotation: chartPeriodMode === 'week' ? 60 : 0, minRotation: chartPeriodMode === 'week' ? 60 : 0 },
                 grid: { display: false }
               }
             }
