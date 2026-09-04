@@ -1903,14 +1903,14 @@
       var latestSet100ChangePct = 0;
 
       const DEFAULT_MARKET_SYMBOLS = [
-        { id: 'SET', symbol: '%5ESET.BK', name: 'SET Index', region: '🇹🇭 ไทย', flag: '🇹🇭', gpfRef: 'ดัชนีตลาดหุ้นไทย (อิงแผนหุ้นไทย)', defaultPrice: 1588.90, defaultChange: 12.64, defaultPct: 0.80 },
-        { id: 'SET100', symbol: 'SET100', name: 'SET 100', region: '🇹🇭 ไทย (Top 100)', flag: '🇹🇭', gpfRef: 'Benchmark แผนหุ้นไทย กบข.', defaultPrice: 2093.81, defaultChange: 8.50, defaultPct: 0.41 },
-        { id: 'SP500', symbol: '%5EGSPC', name: 'S&P 500', region: '🇺🇸 สหรัฐฯ', flag: '🇺🇸', gpfRef: 'เกณฑ์มาตรฐานหลัก แผนหุ้นต่างประเทศ', defaultPrice: 7747.71, defaultChange: 16.72, defaultPct: 0.22 },
-        { id: 'NASDAQ', symbol: '%5EIXIC', name: 'NASDAQ 100', region: '🇺🇸 สหรัฐฯ (Tech)', flag: '💻', gpfRef: 'หุ้นเทคโนโลยีในแผนหุ้นต่างประเทศ', defaultPrice: 26584.06, defaultChange: 42.71, defaultPct: 0.16 },
-        { id: 'MSCI_WORLD', symbol: 'URTH', name: 'MSCI World (URTH)', region: '🌐 หุ้นทั่วโลก', flag: '🌐', gpfRef: 'เกณฑ์มาตรฐานเปรียบเทียบ กบข. สากล', defaultPrice: 210.34, defaultChange: 0.41, defaultPct: 0.20 },
-        { id: 'NIKKEI', symbol: '%5EN225', name: 'Nikkei 225', region: '🇯🇵 ญี่ปุ่น', flag: '🇯🇵', gpfRef: 'ตลาดหุ้นเอเชีย (แผนหุ้นต่างประเทศ)', defaultPrice: 65020.94, defaultChange: -1290.99, defaultPct: -1.95 },
-        { id: 'USDTHB', symbol: 'THB=X', name: 'USD / THB', region: '💵 ค่าเงิน', flag: '💵', gpfRef: 'อัตราแลกเปลี่ยนแปลงมูลค่าสินทรัพย์ต่างประเทศ', defaultPrice: 32.89, defaultChange: -0.18, defaultPct: -0.54 }
-      ];
+  { id: 'SET', symbol: '%5ESET.BK', name: 'SET Index', region: '🇹🇭 ไทย', flag: '🇹🇭', gpfRef: 'ดัชนีตลาดหุ้นไทย (อิงแผนหุ้นไทย)', defaultPrice: 1588.90, defaultChange: 12.64, defaultPct: 0.80 },
+  { id: 'SET100', symbol: 'SET100', name: 'SET 100', region: '🇹🇭 ไทย (Top 100)', flag: '🇹🇭', gpfRef: 'Benchmark แผนหุ้นไทย กบข.', defaultPrice: 2093.81, defaultChange: 8.50, defaultPct: 0.41 },
+  { id: 'SP500', symbol: '%5EGSPC', name: 'S&P 500', region: '🇺🇸 สหรัฐฯ', flag: '🇺🇸', gpfRef: 'เกณฑ์มาตรฐานหลัก แผนหุ้นต่างประเทศ', defaultPrice: 7747.71, defaultChange: 16.72, defaultPct: 0.22 },
+  { id: 'NASDAQ', symbol: '%5EIXIC', name: 'NASDAQ 100', region: '🇺🇸 สหรัฐฯ (Tech)', flag: '💻', gpfRef: 'หุ้นเทคโนโลยีในแผนหุ้นต่างประเทศ', defaultPrice: 26584.06, defaultChange: 42.71, defaultPct: 0.16 },
+  { id: 'MSCI_WORLD', symbol: 'URTH', name: 'MSCI World (URTH)', region: '🌐 หุ้นทั่วโลก', flag: '🌐', gpfRef: 'เกณฑ์มาตรฐานเปรียบเทียบ กบข. สากล', defaultPrice: 210.34, defaultChange: 0.41, defaultPct: 0.20 },
+  { id: 'MSCI_EM', symbol: 'EEM', name: 'MSCI Emerg (EEM)', region: '🌏 ตลาดเกิดใหม่', flag: '🌏', gpfRef: 'หุ้นกลุ่มตลาดเกิดใหม่ (แผนหุ้นต่างประเทศ)', defaultPrice: 43.50, defaultChange: 0.25, defaultPct: 0.58 },
+  { id: 'USDTHB', symbol: 'THB=X', name: 'USD / THB', region: '💵 ค่าเงิน', flag: '💵', gpfRef: 'อัตราแลกเปลี่ยนแปลงมูลค่าสินทรัพย์ต่างประเทศ', defaultPrice: 32.89, defaultChange: -0.18, defaultPct: -0.54 }
+];
 
       function switchMarketSubTab(tab) {
         document.getElementById('subTabGlobalContent').classList.add('hidden');
