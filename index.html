@@ -368,9 +368,8 @@
             </div>
           </div>
 
-          <!-- Top KPI Market Cards Grid (SET, SET100, S&P 500, NASDAQ, MSCI, Nikkei, USD/THB) -->
+          <!-- Top KPI Market Cards Grid -->
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3" id="marketCardsContainer">
-            <!-- Cards injected by JS -->
             <div class="pastel-card p-3 animate-pulse bg-purple-50/30 text-center"><span class="text-xs text-slate-400">กำลังโหลดดัชนี...</span></div>
           </div>
 
@@ -432,7 +431,7 @@
             </div>
           </div>
 
-          <!-- TAB 2: ตัวแบบจำลอง SET 100 & 10 หุ้นไทย (Thai Stocks Model) -->
+          <!-- TAB 2: ตัวแบบจำลอง SET 100 & 10 หุ้นไทย -->
           <div id="subTabSet100Content" class="hidden space-y-6">
             <div class="pastel-card p-5">
               <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
@@ -545,19 +544,202 @@
 
         </div>
 
-        <!-- PAGE 4: GOLD (ทองคำ) -->
+        <!-- PAGE 4: GOLD MARKET DASHBOARD (ทองคำสากล & กบข.) -->
         <div id="page-gold" class="hidden space-y-6">
-          <div class="pastel-card p-5">
-            <h3 class="text-xs font-bold text-amber-800 mb-3 flex items-center gap-2">
-              <i class="fa-solid fa-coins text-amber-600"></i>
-              <span>ตัวแบบจำลองคาดการณ์ NAV ทองคำโลก (SPDR)</span>
-            </h3>
-            <div id="gold_chart_div" class="h-[320px] w-full"></div>
+
+          <!-- Header Banner -->
+          <div class="pastel-card p-5 bg-gradient-to-r from-amber-50/80 via-yellow-50/50 to-orange-50/60 border border-amber-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-coins text-amber-500"></i>
+                  <span>ศูนย์ข้อมูลราคาทองคำโลก & ตัวแบบจำลอง NAV (กบข.)</span>
+                </h3>
+                <p class="text-xs text-amber-800 font-medium mt-0.5">
+                  เชื่อมโยงราคา <b>XAU/USD</b> (ทองแท่งโลก), <b>GLD ETF</b> (SPDR Gold Shares) และ <b>USD/THB</b> ที่ใช้แปลงมูลค่า NAV แผนทองคำ กบข.
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="gold_last_updated" class="text-[11px] text-slate-500 bg-white/80 px-2.5 py-1 rounded-lg border border-amber-100">
+                  <i class="fa-solid fa-clock mr-1 text-amber-500"></i> กำลังอัปเดต...
+                </span>
+                <button onclick="refreshGoldData()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all active:scale-95">
+                  <i class="fa-solid fa-rotate"></i>
+                  <span>รีเฟรช</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="pastel-card p-5">
-            <div class="table-responsive"><div id="gold_table_div"></div></div>
+          <!-- 5 KPI Cards: XAU/USD, SPDR GLD, USD/THB, Gold THB/gram, Gold THB/baht-weight -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3" id="goldKpiCardsContainer">
+            <div class="pastel-card p-3 animate-pulse bg-amber-50/30 text-center col-span-2 sm:col-span-3 lg:col-span-5">
+              <span class="text-xs text-slate-400">กำลังโหลดข้อมูลราคาทองคำ...</span>
+            </div>
           </div>
+
+          <!-- Sub-tabs -->
+          <div class="flex bg-white/70 rounded-2xl p-1 shadow-xs gap-1">
+            <button id="btnGoldTabLive" onclick="switchGoldSubTab('live')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-amber-700 bg-amber-100/80 shadow-xs transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bolt"></i>
+              <span>ราคาสด & อัตราแลกเปลี่ยน</span>
+            </button>
+            <button id="btnGoldTabModel" onclick="switchGoldSubTab('model')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-amber-700 transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-chart-line"></i>
+              <span>ตัวแบบจำลอง NAV กบข. (SPDR)</span>
+            </button>
+            <button id="btnGoldTabInfo" onclick="switchGoldSubTab('info')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-amber-700 transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>ทำความเข้าใจแผนทองคำ กบข.</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: ราคาสด & อัตราแลกเปลี่ยน -->
+          <div id="subGoldTabLive" class="space-y-6">
+
+            <!-- Gold vs USD/THB Comparison Chart (Bar momentum) -->
+            <div class="pastel-card p-5">
+              <h3 class="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-chart-column text-amber-500"></i>
+                <span>เปรียบเทียบแรงส่งประจำวัน: XAU/USD vs GLD vs USD/THB (%)</span>
+              </h3>
+              <div class="h-[220px] w-full relative">
+                <canvas id="goldMomentumBarChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Live Gold Data Table -->
+            <div class="pastel-card p-5">
+              <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-table-list text-amber-600"></i>
+                  <span>ตารางราคาทองคำและอัตราแลกเปลี่ยน Real-time</span>
+                </h3>
+                <span class="text-[11px] text-emerald-600 font-semibold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                  <i class="fa-solid fa-circle-check"></i> Live Feed
+                </span>
+              </div>
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="text-left">สินทรัพย์ / ดัชนี</th>
+                      <th class="text-center">ประเภท</th>
+                      <th class="text-right">ราคา / มูลค่า</th>
+                      <th class="text-right">เปลี่ยนแปลง</th>
+                      <th class="text-right">% เปลี่ยนแปลง</th>
+                      <th class="text-left">ความเกี่ยวข้อง</th>
+                    </tr>
+                  </thead>
+                  <tbody id="goldLiveTableBody">
+                    <tr><td colspan="6" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูลราคาทองคำสด...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Gold Price Formula Explainer -->
+            <div class="pastel-card p-5 bg-amber-50/60 border border-amber-200">
+              <h3 class="text-xs font-bold text-amber-900 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-calculator text-amber-600"></i>
+                <span>สูตรการแปลงราคาทองคำโลก ➔ NAV แผนทองคำ กบข. (บาท)</span>
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-700">
+                <div class="bg-white/80 rounded-xl p-3 border border-amber-200 text-center">
+                  <div class="text-amber-700 font-bold mb-1">ขั้นตอนที่ 1</div>
+                  <div class="font-mono text-xs sm:text-sm font-black text-amber-900" id="goldStep1">XAU/USD × USD/THB</div>
+                  <div class="text-[11px] text-slate-500 mt-1">= ราคาทอง (บาท/troy oz)</div>
+                </div>
+                <div class="bg-white/80 rounded-xl p-3 border border-amber-200 text-center">
+                  <div class="text-amber-700 font-bold mb-1">ขั้นตอนที่ 2</div>
+                  <div class="font-mono text-xs sm:text-sm font-black text-amber-900" id="goldStep2">÷ 31.1035 g/oz</div>
+                  <div class="text-[11px] text-slate-500 mt-1">= ราคาทอง (บาท/กรัม)</div>
+                </div>
+                <div class="bg-white/80 rounded-xl p-3 border border-amber-200 text-center">
+                  <div class="text-amber-700 font-bold mb-1">ผลลัพธ์ NAV</div>
+                  <div class="font-mono text-xs sm:text-sm font-black text-amber-900" id="goldStep3">× จำนวนหน่วยในพอร์ต</div>
+                  <div class="text-[11px] text-slate-500 mt-1">= มูลค่าพอร์ตแผนทองคำ (฿)</div>
+                </div>
+              </div>
+              <div class="mt-3 text-[11px] text-amber-800 bg-amber-100/60 rounded-xl p-3 border border-amber-200 leading-relaxed">
+                <i class="fa-solid fa-circle-info mr-1"></i>
+                <b>หมายเหตุ:</b> NAV ทองคำ กบข. ใช้ราคาทองคำ GLD ETF (SPDR Gold Shares) เป็นเกณฑ์หลัก โดยราคา GLD จะสะท้อนมูลค่า ~1/10 troy ounce ของทองคำ และกองทุน กบข. จะป้องกันความเสี่ยงด้านอัตราแลกเปลี่ยนบางส่วนผ่านสัญญา FX Forward ดังนั้นราคา NAV จริงในสกุลเงินบาทอาจผันแปรต่างจากการคำนวณโดยตรงเล็กน้อย
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: ตัวแบบจำลอง NAV กบข. (SPDR Model) -->
+          <div id="subGoldTabModel" class="hidden space-y-6">
+            <div class="pastel-card p-5">
+              <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                <h3 class="text-xs font-bold text-amber-800 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-line text-amber-600"></i>
+                  <span>ตัวแบบจำลองคาดการณ์ NAV แผนทองคำ กบข. (อิงราคา SPDR GLD)</span>
+                </h3>
+                <div class="text-[11px] text-slate-500 font-medium">
+                  🟡 เส้นทอง = NAV จริง | 🟣 เส้นม่วง = NAV คาดการณ์จากโมเดล
+                </div>
+              </div>
+              <div id="gold_chart_div" class="h-[320px] w-full"></div>
+            </div>
+
+            <div class="pastel-card p-5">
+              <h3 class="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
+                <span>สถิติตัวเลขย้อนหลัง 15 วันล่าสุด (NAV ทองคำ จริง vs คาดการณ์)</span>
+              </h3>
+              <div class="table-responsive"><div id="gold_table_div"></div></div>
+            </div>
+          </div>
+
+          <!-- TAB 3: ทำความเข้าใจแผนทองคำ กบข. -->
+          <div id="subGoldTabInfo" class="hidden space-y-4">
+            <div class="pastel-card p-5 space-y-4">
+              <h3 class="text-xs font-bold text-amber-900 flex items-center gap-2">
+                <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                <span>ทำความเข้าใจแผนทองคำ กบข. และปัจจัยที่ขับเคลื่อน NAV</span>
+              </h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div class="p-4 rounded-2xl bg-yellow-50/80 border border-yellow-200 space-y-2">
+                  <div class="font-bold text-yellow-900 text-sm">🪙 แผนทองคำ กบข. คืออะไร?</div>
+                  <div class="text-slate-700 leading-relaxed">
+                    แผนทองคำของ กบข. ลงทุนในหน่วยลงทุน <b>SPDR Gold Shares (GLD)</b> ซึ่งเป็น ETF ที่มีสินทรัพย์อ้างอิงเป็นทองคำแท่งจริงที่ฝากไว้ที่ HSBC London โดย 1 หน่วยของ GLD แทนสิทธิ์ในทองคำ ~0.1 troy ounce ราคา NAV (ต่อหน่วย) ของแผนทองคำในสกุลบาทจึงขึ้นอยู่กับ 2 ตัวแปรหลักคือ ราคา GLD (USD) และอัตราแลกเปลี่ยน USD/THB
+                  </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-orange-50/80 border border-orange-200 space-y-2">
+                  <div class="font-bold text-orange-900 text-sm">📊 ปัจจัยที่ทำให้ราคา NAV ทองคำ กบข. เปลี่ยนแปลง</div>
+                  <div class="text-slate-700 leading-relaxed space-y-1">
+                    <div>🟡 <b>XAU/USD ขึ้น</b>: ราคาทองสูงขึ้น ➔ NAV เพิ่มขึ้น</div>
+                    <div>💵 <b>USD/THB อ่อนค่าบาท</b>: เงินบาทอ่อน ➔ NAV เพิ่มขึ้น (ได้กำไรแลกเปลี่ยน)</div>
+                    <div>📉 <b>XAU/USD ลง</b>: ราคาทองลดลง ➔ NAV ลดลง</div>
+                    <div>💱 <b>บาทแข็งค่า (USD อ่อน)</b>: ➔ NAV ลดลง (ขาดทุนแลกเปลี่ยน)</div>
+                    <div>📦 <b>GLD Trading Premium/Discount</b>: ETF อาจซื้อขายแพงหรือถูกกว่า NAV ทองจริงเล็กน้อย</div>
+                  </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-2">
+                  <div class="font-bold text-amber-900 text-sm">⚡ สัญญาณที่ควรติดตามก่อนสับเปลี่ยนแผน</div>
+                  <div class="text-slate-700 leading-relaxed space-y-1">
+                    <div>📌 ราคาทอง <b>ทำ All-time High ใหม่</b>: ควรระวังการปรับฐาน</div>
+                    <div>📌 <b>Dollar Index (DXY) แข็งค่า</b>: มักกดดันราคาทองเป็นไปในทิศทางตรงกันข้าม</div>
+                    <div>📌 <b>อัตราดอกเบี้ยสหรัฐฯ ลด</b>: เป็นปัจจัยบวกต่อราคาทอง</div>
+                    <div>📌 <b>ความตึงเครียดภูมิรัฐศาสตร์</b>: ทองมักปรับขึ้นในช่วงวิกฤต (Safe Haven)</div>
+                    <div>📌 <b>เงินบาทอ่อนค่าเกิน 35 บาท/USD</b>: NAV ทองคำ กบข. จะได้ประโยชน์เพิ่มขึ้นอีก</div>
+                  </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-rose-50/80 border border-rose-200 space-y-2">
+                  <div class="font-bold text-rose-900 text-sm">⚠️ ความเสี่ยงสำคัญที่ต้องทราบ (ความเสี่ยงระดับ 7)</div>
+                  <div class="text-slate-700 leading-relaxed">
+                    แผนทองคำ กบข. จัดอยู่ใน <b>ระดับความเสี่ยงสูงสุด (ระดับ 7)</b> เนื่องจากราคาทองคำโลกมีความผันผวนสูงและไม่มีการจ่ายเงินปันผล รายได้จะได้รับในรูปส่วนต่างของ NAV เท่านั้น เหมาะสำหรับผู้ที่ต้องการกระจายความเสี่ยงพอร์ตและรับความเสี่ยงได้สูง โดยกฎหมาย กบข. กำหนดสัดส่วนถือครองทองคำได้ไม่เกิน 25% ของพอร์ตรวม
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- PAGE 5: AI & COMPREHENSIVE ANALYSIS (วิเคราะห์) -->
@@ -605,7 +787,7 @@
 
             <div id="tactical_switch_panel" class="p-4 rounded-2xl bg-amber-50/80 border border-dashed border-amber-300 text-xs"></div>
 
-            <!-- 🟢 กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิ (Period Profit/Loss Bar Chart) -->
+            <!-- 🟢 กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิ -->
             <div class="pastel-card p-5">
               <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <h3 class="text-xs font-bold text-purple-900 flex items-center gap-2">
@@ -954,8 +1136,6 @@
         let tbody = document.getElementById('cashflowHistoryBody');
         if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-slate-400">กำลังโหลดประวัติเงินนำส่ง...</td></tr>';
         try {
-          // Backend (Apps Script) ควรมีฟังก์ชัน getCashflowData(user) คืนค่าอาเรย์ของ
-          // { id: <row index หรือรหัสอ้างอิงแถวในชีท cashflow>, date, amount, locked: true/false }
           const res = await callBackend('getCashflowData', { user: currentUser });
           cashflowRecords = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
           renderCashflowHistory();
@@ -1004,7 +1184,6 @@
         let newAmount = parseFloat(input.value) || 0;
         if (newAmount < 0) { Swal.fire('ข้อผิดพลาด', 'ยอดเงินห้ามติดลบครับ', 'error'); return; }
         try {
-          // Backend ควรมีฟังก์ชัน updateCashflowEntry(id, amount, user) เพื่อแก้ไขค่าในชีท cashflow
           const res = await callBackend('updateCashflowEntry', { id: id, amount: newAmount, user: currentUser });
           if (res && (res.status === 'success' || res.success)) {
             Swal.fire({ icon: 'success', title: 'บันทึกแล้ว', text: 'แก้ไขยอดเงินนำส่งเรียบร้อย', timer: 1200, showConfirmButton: false });
@@ -1021,7 +1200,6 @@
 
       async function toggleLockCashflowRow(id, lockState) {
         try {
-          // Backend ควรมีฟังก์ชัน lockCashflowEntry(id, lockState, user) เพื่ออัปเดตสถานะล็อคในชีท cashflow
           const res = await callBackend('lockCashflowEntry', { id: id, locked: lockState, user: currentUser });
           if (res && (res.status === 'success' || res.success)) {
             await loadCashflowHistory();
@@ -1123,7 +1301,7 @@
           el.classList.add('nav-tab-active'); 
         }
         
-        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🌐 ดัชนีตลาดหุ้นไทยและต่างประเทศ (กบข. Benchmarks)', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
+        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🌐 ดัชนีตลาดหุ้นไทยและต่างประเทศ (กบข. Benchmarks)', 'gold': '🪙 สัญญาณราคาทองคำโลก & แผนทองคำ กบข.', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
         document.getElementById('main_title').innerHTML = titles[pageId] || '';
 
         if(ytdData.length === 0 && currentUser !== "") {
@@ -1141,7 +1319,10 @@
           if(globalIndicesData.length === 0) fetchGlobalMarketIndices();
           if(thaiStockDataRaw.length > 0) drawThaiStockDashboard();
         }
-        if(pageId === 'gold' && goldDataRaw.length > 0) drawGoldDashboard();
+        if(pageId === 'gold') {
+          if(goldLiveSymbolsData.length === 0) fetchRealTimeGoldData();
+          if(goldDataRaw.length > 0) drawGoldDashboard();
+        }
         if(pageId === 'analysis' && ytdData.length > 0) drawAnalysisDashboard();
       }
 
@@ -1451,7 +1632,6 @@
         document.getElementById('rank_table_div').innerHTML = tableHtml + '</tbody></table>';
       }
 
-      // 'month' หรือ 'week' - โหมดปัจจุบันของกราฟแท่งกำไร/ขาดทุน
       let chartPeriodMode = 'month';
 
       function setChartPeriod(mode) {
@@ -1472,7 +1652,6 @@
         renderMonthlyBarChart();
       }
 
-      // คำนวณเลขสัปดาห์แบบ ISO (สัปดาห์เริ่มวันจันทร์) คืนค่า { year, week, weekStart }
       function getISOWeekInfo(d) {
         let date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         let dayNum = date.getUTCDay() || 7;
@@ -1723,7 +1902,6 @@
       var latestSet100Value = null;
       var latestSet100ChangePct = 0;
 
-      // รายการดัชนีสากลและอัตราแลกเปลี่ยนที่มีผลต่อ กบข.
       const DEFAULT_MARKET_SYMBOLS = [
         { id: 'SET', symbol: '%5ESET.BK', name: 'SET Index', region: '🇹🇭 ไทย', flag: '🇹🇭', gpfRef: 'ดัชนีตลาดหุ้นไทย (อิงแผนหุ้นไทย)', defaultPrice: 1588.90, defaultChange: 12.64, defaultPct: 0.80 },
         { id: 'SET100', symbol: 'SET100', name: 'SET 100', region: '🇹🇭 ไทย (Top 100)', flag: '🇹🇭', gpfRef: 'Benchmark แผนหุ้นไทย กบข.', defaultPrice: 2093.81, defaultChange: 8.50, defaultPct: 0.41 },
@@ -1763,7 +1941,6 @@
       async function fetchGlobalMarketIndices() {
         let updatedIndices = JSON.parse(JSON.stringify(DEFAULT_MARKET_SYMBOLS));
         
-        // ถ้ามีข้อมูล SET 100 จาก Google Sheet ให้อัปเดตใส่เข้าไปด้วย
         if (latestSet100Value !== null) {
           let s100 = updatedIndices.find(x => x.id === 'SET100');
           if (s100) {
@@ -1774,7 +1951,7 @@
         }
 
         const promises = updatedIndices.map(async item => {
-          if (item.symbol === 'SET100') return item; // ได้จากชีทแล้ว
+          if (item.symbol === 'SET100') return item;
           try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -1794,9 +1971,7 @@
                 return item;
               }
             }
-          } catch(e) {
-            // fallback gracefully
-          }
+          } catch(e) {}
           item.price = item.defaultPrice;
           item.diff = item.defaultChange;
           item.pct = item.defaultPct;
@@ -1943,7 +2118,6 @@
           var data = response.data.filter(row => row[0] && String(row[0]).trim() !== '');
           if (data.length === 0) return;
 
-          // 1. ดึงข้อมูล 10 หุ้นบิ๊กแคปจากแถวน้ำหนักและชื่อคอลัมน์
           let stockNames = [];
           let stockWeights = [];
           const sectorMap = {
@@ -1980,7 +2154,6 @@
               }
             }
 
-            // คำนวณค่า SET 100 ล่าสุดจากคอลัมน์ 11
             if (lastRow[11]) {
               latestSet100Value = parseFloat(lastRow[11]) || null;
               if (data.length >= 4) {
@@ -1991,7 +2164,6 @@
             }
           }
 
-          // 2. ดึงข้อมูลตัวแบบจำลอง Forecast
           var forecastData = [];
           for (var i = 0; i < data.length; i++) {
             if (String(data[i][0]).includes('วันที่') || String(data[i][0]).includes('Date')) continue;
@@ -2101,6 +2273,251 @@
         }
       }
 
+      // ===== ศูนย์ข้อมูลราคาทองคำ Real-time & SPDR GLD Model =====
+      var goldLiveSymbolsData = [];
+      var goldMomentumBarChartInstance = null;
+
+      const DEFAULT_GOLD_SYMBOLS = [
+        { id: 'XAUUSD', symbol: 'GC=F', name: 'XAU / USD (ทองคำโลก)', type: 'Spot Gold', flag: '🪙', gpfRef: 'ราคาทองคำแท่งสากล (USD/troy oz)', defaultPrice: 2750.00, defaultChange: 15.50, defaultPct: 0.57 },
+        { id: 'GLD', symbol: 'GLD', name: 'SPDR Gold Shares', type: 'ETF (USA)', flag: '📦', gpfRef: 'สินทรัพย์อ้างอิงตรงของแผนทองคำ กบข.', defaultPrice: 252.80, defaultChange: 1.40, defaultPct: 0.56 },
+        { id: 'USDTHB', symbol: 'THB=X', name: 'USD / THB', type: 'Exchange Rate', flag: '💵', gpfRef: 'อัตราแลกเปลี่ยนแปลงมูลค่าเป็นเงินบาท', defaultPrice: 32.89, defaultChange: -0.18, defaultPct: -0.54 }
+      ];
+
+      function switchGoldSubTab(tab) {
+        document.getElementById('subGoldTabLive').classList.add('hidden');
+        document.getElementById('subGoldTabModel').classList.add('hidden');
+        document.getElementById('subGoldTabInfo').classList.add('hidden');
+
+        ['btnGoldTabLive', 'btnGoldTabModel', 'btnGoldTabInfo'].forEach(id => {
+          let b = document.getElementById(id);
+          if (b) b.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-amber-700 transition-all flex items-center justify-center gap-2";
+        });
+
+        if (tab === 'live') {
+          document.getElementById('subGoldTabLive').classList.remove('hidden');
+          document.getElementById('btnGoldTabLive').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-amber-700 bg-amber-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
+          renderGoldMomentumBarChart();
+        } else if (tab === 'model') {
+          document.getElementById('subGoldTabModel').classList.remove('hidden');
+          document.getElementById('btnGoldTabModel').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-amber-700 bg-amber-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
+          if (goldDataRaw.length > 0) drawGoldDashboard();
+        } else if (tab === 'info') {
+          document.getElementById('subGoldTabInfo').classList.remove('hidden');
+          document.getElementById('btnGoldTabInfo').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-amber-700 bg-amber-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
+        }
+      }
+
+      async function fetchRealTimeGoldData() {
+        let symbols = JSON.parse(JSON.stringify(DEFAULT_GOLD_SYMBOLS));
+
+        const promises = symbols.map(async item => {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${item.symbol}?interval=1d&range=5d`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+              const json = await res.json();
+              if (json.chart && json.chart.result && json.chart.result.length > 0) {
+                const meta = json.chart.result[0].meta;
+                const curPrice = meta.regularMarketPrice || item.defaultPrice;
+                const prevClose = meta.chartPreviousClose || meta.previousClose || curPrice;
+                const diff = curPrice - prevClose;
+                const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+                item.price = curPrice;
+                item.diff = diff;
+                item.pct = pct;
+                return item;
+              }
+            }
+          } catch(e) {}
+          item.price = item.defaultPrice;
+          item.diff = item.defaultChange;
+          item.pct = item.defaultPct;
+          return item;
+        });
+
+        goldLiveSymbolsData = await Promise.all(promises);
+
+        const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const timeEl = document.getElementById('gold_last_updated');
+        if (timeEl) timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดต ${timeStr} น.`;
+
+        renderGoldKpiCards();
+        renderGoldLiveTable();
+        renderGoldMomentumBarChart();
+        updateGoldFormulaSteps();
+      }
+
+      function renderGoldKpiCards() {
+        const container = document.getElementById('goldKpiCardsContainer');
+        if (!container || goldLiveSymbolsData.length === 0) return;
+
+        let xau = goldLiveSymbolsData.find(x => x.id === 'XAUUSD') || DEFAULT_GOLD_SYMBOLS[0];
+        let gld = goldLiveSymbolsData.find(x => x.id === 'GLD') || DEFAULT_GOLD_SYMBOLS[1];
+        let fx = goldLiveSymbolsData.find(x => x.id === 'USDTHB') || DEFAULT_GOLD_SYMBOLS[2];
+
+        // คำนวณราคาทองคำต่อกรัม (บาท) = (XAU/USD * USD/THB) / 31.1035
+        let goldPerGram = (xau.price * fx.price) / 31.1035;
+        // คำนวณราคาทองคำแท่งไทย 96.5% (บาท/บาททอง) ≈ (XAU/USD * USD/THB * 0.965 * 15.244) / 31.1035
+        let goldThaiBahtWeight = (xau.price * fx.price * 0.965 * 15.244) / 31.1035;
+
+        let items = [
+          { name: 'XAU / USD (ทองคำโลก)', val: '$' + xau.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), pct: xau.pct, diff: '$' + xau.diff.toFixed(2), icon: '🪙', color: 'amber' },
+          { name: 'SPDR GLD (ETF)', val: '$' + gld.price.toFixed(2), pct: gld.pct, diff: '$' + gld.diff.toFixed(2), icon: '📦', color: 'purple' },
+          { name: 'USD / THB (ค่าเงิน)', val: fx.price.toFixed(2) + ' ฿', pct: fx.pct, diff: fx.diff.toFixed(2), icon: '💵', color: 'emerald' },
+          { name: 'ทองคำโลก (บาท/กรัม)', val: goldPerGram.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ฿', pct: xau.pct + fx.pct, diff: 'คำนวณสด', icon: '⚖️', color: 'yellow' },
+          { name: 'ทองคำแท่ง 96.5% (บาท/บาท)', val: goldThaiBahtWeight.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ฿', pct: xau.pct + fx.pct, diff: 'ประมาณการ', icon: '🏆', color: 'orange' }
+        ];
+
+        let html = '';
+        items.forEach(item => {
+          let isPos = item.pct >= 0;
+          let sign = isPos ? '+' : '';
+          let badgeCls = isPos ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+
+          html += `
+            <div class="pastel-card p-3 border ${isPos ? 'border-amber-200 hover:border-amber-400' : 'border-rose-200 hover:border-rose-400'} bg-white/90 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between gap-1 mb-1">
+                <span class="text-[11px] font-bold text-slate-800 truncate">${item.icon} ${item.name}</span>
+              </div>
+              <div class="text-base sm:text-lg font-black text-slate-900 font-mono leading-tight my-0.5">
+                ${item.val}
+              </div>
+              <div class="flex items-center justify-between text-[10px] mt-1 pt-1 border-t border-slate-50">
+                <span class="text-slate-500 font-mono">${item.diff}</span>
+                <span class="font-bold px-1.5 py-0.5 rounded-full border text-[9px] ${badgeCls}">
+                  ${sign}${item.pct.toFixed(2)}%
+                </span>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      }
+
+      function renderGoldLiveTable() {
+        const tbody = document.getElementById('goldLiveTableBody');
+        if (!tbody || goldLiveSymbolsData.length === 0) return;
+
+        let html = '';
+        goldLiveSymbolsData.forEach(item => {
+          let isPos = item.pct >= 0;
+          let sign = isPos ? '+' : '';
+          let cls = isPos ? 'positive' : 'negative';
+          let priceStr = item.id === 'USDTHB' ? item.price.toFixed(4) + ' ฿' : '$' + item.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+          html += `
+            <tr class="hover:bg-amber-50/40 transition-colors">
+              <td class="text-left font-bold text-slate-800">
+                <div class="flex items-center gap-2">
+                  <span class="text-base">${item.flag}</span>
+                  <div>
+                    <div>${item.name}</div>
+                    <span class="text-[10px] font-mono text-slate-400 font-normal">${item.symbol}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="text-center text-slate-600 font-medium">${item.type}</td>
+              <td class="text-right font-bold text-slate-900 font-mono">${priceStr}</td>
+              <td class="text-right font-mono font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">${sign}${item.diff ? item.diff.toFixed(2) : '0.00'}</td>
+              <td class="text-right"><span class="${cls}">${sign}${item.pct.toFixed(2)}%</span></td>
+              <td class="text-left text-xs text-amber-900 font-medium">
+                <span class="bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md text-[11px]">${item.gpfRef}</span>
+              </td>
+            </tr>
+          `;
+        });
+
+        tbody.innerHTML = html;
+      }
+
+      function renderGoldMomentumBarChart() {
+        const ctx = document.getElementById('goldMomentumBarChart');
+        if (!ctx || goldLiveSymbolsData.length === 0) return;
+        if (goldMomentumBarChartInstance) goldMomentumBarChartInstance.destroy();
+
+        const labels = goldLiveSymbolsData.map(i => i.name.split(' ')[0]);
+        const dataValues = goldLiveSymbolsData.map(i => parseFloat(i.pct.toFixed(2)));
+        const colors = dataValues.map(v => v >= 0 ? '#f59e0b' : '#f43f5e');
+
+        goldMomentumBarChartInstance = new Chart(ctx.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'เปลี่ยนแปลงวันนี้ (%)',
+              data: dataValues,
+              backgroundColor: colors,
+              borderRadius: 6,
+              borderWidth: 1,
+              borderColor: colors
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) { return ' เปลี่ยนแปลง: ' + (ctx.raw >= 0 ? '+' : '') + ctx.raw + '%'; }
+                }
+              }
+            },
+            scales: {
+              y: {
+                ticks: {
+                  callback: function(v) { return (v >= 0 ? '+' : '') + v + '%'; },
+                  font: { family: 'Prompt', size: 10 }
+                },
+                grid: { color: 'rgba(251, 191, 36, 0.2)' }
+              },
+              x: {
+                ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      function updateGoldFormulaSteps() {
+        let xau = goldLiveSymbolsData.find(x => x.id === 'XAUUSD') || DEFAULT_GOLD_SYMBOLS[0];
+        let fx = goldLiveSymbolsData.find(x => x.id === 'USDTHB') || DEFAULT_GOLD_SYMBOLS[2];
+
+        let valStep1 = (xau.price * fx.price).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        let valStep2 = ((xau.price * fx.price) / 31.1035).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        let step1El = document.getElementById('goldStep1');
+        let step2El = document.getElementById('goldStep2');
+
+        if (step1El) step1El.innerHTML = `$${xau.price.toFixed(0)} × ${fx.price.toFixed(2)} ฿ = ${valStep1} ฿/oz`;
+        if (step2El) step2El.innerHTML = `${valStep1} ÷ 31.1035 = ${valStep2} ฿/g`;
+      }
+
+      async function refreshGoldData() {
+        const btn = document.querySelector('button[onclick="refreshGoldData()"]');
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลด...';
+        try {
+          await fetchRealTimeGoldData();
+          const dataGold = await callBackend('getGoldData');
+          processGoldData(dataGold);
+          Swal.fire({
+            icon: 'success',
+            title: 'อัปเดตข้อมูลทองคำสำเร็จ',
+            text: 'ดึงข้อมูลราคาทองคำ XAU/USD, SPDR GLD และอัตราแลกเปลี่ยนล่าสุดเรียบร้อย',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } catch (e) {
+          console.error(e);
+        } finally {
+          if (btn) btn.innerHTML = '<i class="fa-solid fa-rotate"></i> <span>รีเฟรช</span>';
+        }
+      }
+
       function processGoldData(response) { 
         try { 
           if (!response || response.error || !response.data) return; 
@@ -2111,10 +2528,13 @@
       
       function drawGoldDashboard() {
         if(goldDataRaw.length === 0) return;
-        document.getElementById('gold_chart_div').innerHTML = ""; var dt = new google.visualization.DataTable(); dt.addColumn('string', 'วันที่'); dt.addColumn('number', 'NAV จริง'); dt.addColumn('number', 'คาดการณ์');
+        const chartDiv = document.getElementById('gold_chart_div');
+        if (!chartDiv) return;
+
+        chartDiv.innerHTML = ""; var dt = new google.visualization.DataTable(); dt.addColumn('string', 'วันที่'); dt.addColumn('number', 'NAV จริง'); dt.addColumn('number', 'คาดการณ์');
         goldDataRaw.forEach(row => { var navReal = parseFloat(row[3]); var navFore = parseFloat(row[4]); if (!isNaN(navReal) || !isNaN(navFore)) dt.addRow([formatShortDate(row[0]), navReal, navFore]); });
         var options = { fontName: 'Prompt', curveType: 'function', lineWidth: 3, pointsVisible: true, pointSize: 3, colors: ['#f59e0b', '#8b5cf6'], legend: { position: 'top' }, vAxis: { textStyle: {color: '#6b7280'} }, hAxis: { textStyle: {color: '#6b7280'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent' };
-        new google.visualization.LineChart(document.getElementById('gold_chart_div')).draw(dt, options);
+        new google.visualization.LineChart(chartDiv).draw(dt, options);
         var tableHtml = '<table><thead><tr><th>วันที่</th><th>NAV จริง</th><th>คาดการณ์</th><th>ส่วนต่าง</th></tr></thead><tbody>';
         goldDataRaw.slice(-15).reverse().forEach(row => {
             var diffVal = parseFloat(row[5]); var diffClass = isNaN(diffVal) ? '' : (diffVal >= 0 ? 'positive' : 'negative');
@@ -2239,7 +2659,10 @@
           if(thaiStockDataRaw.length > 0) drawThaiStockDashboard();
           if(marketBarChartInstance) marketBarChartInstance.resize();
         }
-        if(!document.getElementById('page-gold').classList.contains('hidden') && goldDataRaw.length > 0) drawGoldDashboard();
+        if(!document.getElementById('page-gold').classList.contains('hidden')) {
+          if(goldDataRaw.length > 0) drawGoldDashboard();
+          if(goldMomentumBarChartInstance) goldMomentumBarChartInstance.resize();
+        }
         if(!document.getElementById('page-analysis').classList.contains('hidden') && ytdData.length > 0) {
           drawAnalysisDashboard();
         }
