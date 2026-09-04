@@ -1938,57 +1938,55 @@
         }
       }
 
-      async function fetchGlobalMarketIndices() {
-        let updatedIndices = JSON.parse(JSON.stringify(DEFAULT_MARKET_SYMBOLS));
-        
-        if (latestSet100Value !== null) {
-          let s100 = updatedIndices.find(x => x.id === 'SET100');
-          if (s100) {
-            s100.price = latestSet100Value;
-            s100.pct = latestSet100ChangePct;
-            s100.diff = (latestSet100Value * latestSet100ChangePct) / 100;
-          }
-        }
+      // 1. ดึงข้อมูลดัชนีตลาดทุนผ่าน Apps Script Backend
+async function fetchGlobalMarketIndices() {
+  let updatedIndices = JSON.parse(JSON.stringify(DEFAULT_MARKET_SYMBOLS));
+  let symbolsToFetch = updatedIndices
+    .filter(x => x.symbol !== 'SET100')
+    .map(x => x.symbol);
 
-        const promises = updatedIndices.map(async item => {
-          if (item.symbol === 'SET100') return item;
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
-            const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${item.symbol}?interval=1d&range=5d`;
-            const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            if (res.ok) {
-              const json = await res.json();
-              if (json.chart && json.chart.result && json.chart.result.length > 0) {
-                const meta = json.chart.result[0].meta;
-                const curPrice = meta.regularMarketPrice || item.defaultPrice;
-                const prevClose = meta.chartPreviousClose || meta.previousClose || curPrice;
-                const diff = curPrice - prevClose;
-                const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
-                item.price = curPrice;
-                item.diff = diff;
-                item.pct = pct;
-                return item;
-              }
-            }
-          } catch(e) {}
+  try {
+    const res = await callBackend('fetchYahooData', { symbols: symbolsToFetch });
+    if (res && res.data) {
+      updatedIndices.forEach(item => {
+        if (res.data[item.symbol]) {
+          let curPrice = res.data[item.symbol].price || item.defaultPrice;
+          let prevClose = res.data[item.symbol].prevClose || curPrice;
+          let diff = curPrice - prevClose;
+          let pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+          item.price = curPrice;
+          item.diff = diff;
+          item.pct = pct;
+        } else {
           item.price = item.defaultPrice;
           item.diff = item.defaultChange;
           item.pct = item.defaultPct;
-          return item;
-        });
+        }
+      });
+    }
+  } catch (e) {
+    console.error('Fetch Yahoo via GAS error:', e);
+  }
 
-        globalIndicesData = await Promise.all(promises);
-        
-        const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const timeEl = document.getElementById('market_last_updated');
-        if (timeEl) timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดต ${timeStr} น.`;
+  if (latestSet100Value !== null) {
+    let s100 = updatedIndices.find(x => x.id === 'SET100');
+    if (s100) {
+      s100.price = latestSet100Value;
+      s100.pct = latestSet100ChangePct;
+      s100.diff = (latestSet100Value * latestSet100ChangePct) / 100;
+    }
+  }
 
-        renderMarketCards();
-        renderGlobalIndicesTable();
-        renderMarketBarChart();
-      }
+  globalIndicesData = updatedIndices;
+  
+  const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const timeEl = document.getElementById('market_last_updated');
+  if (timeEl) timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดต ${timeStr} น.`;
+
+  renderMarketCards();
+  renderGlobalIndicesTable();
+  renderMarketBarChart();
+}
 
       function renderMarketCards() {
         const container = document.getElementById('marketCardsContainer');
@@ -2308,47 +2306,45 @@
         }
       }
 
-      async function fetchRealTimeGoldData() {
-        let symbols = JSON.parse(JSON.stringify(DEFAULT_GOLD_SYMBOLS));
+      // 2. ดึงข้อมูลทองคำ Real-time ผ่าน Apps Script Backend
+async function fetchRealTimeGoldData() {
+  let symbols = JSON.parse(JSON.stringify(DEFAULT_GOLD_SYMBOLS));
+  let symbolsToFetch = symbols.map(x => x.symbol);
 
-        const promises = symbols.map(async item => {
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
-            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${item.symbol}?interval=1d&range=5d`, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            if (res.ok) {
-              const json = await res.json();
-              if (json.chart && json.chart.result && json.chart.result.length > 0) {
-                const meta = json.chart.result[0].meta;
-                const curPrice = meta.regularMarketPrice || item.defaultPrice;
-                const prevClose = meta.chartPreviousClose || meta.previousClose || curPrice;
-                const diff = curPrice - prevClose;
-                const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
-                item.price = curPrice;
-                item.diff = diff;
-                item.pct = pct;
-                return item;
-              }
-            }
-          } catch(e) {}
+  try {
+    const res = await callBackend('fetchYahooData', { symbols: symbolsToFetch });
+    if (res && res.data) {
+      symbols.forEach(item => {
+        if (res.data[item.symbol]) {
+          let curPrice = res.data[item.symbol].price || item.defaultPrice;
+          let prevClose = res.data[item.symbol].prevClose || curPrice;
+          let diff = curPrice - prevClose;
+          let pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+          item.price = curPrice;
+          item.diff = diff;
+          item.pct = pct;
+        } else {
           item.price = item.defaultPrice;
           item.diff = item.defaultChange;
           item.pct = item.defaultPct;
-          return item;
-        });
+        }
+      });
+    }
+  } catch (e) {
+    console.error('Fetch Gold via GAS error:', e);
+  }
 
-        goldLiveSymbolsData = await Promise.all(promises);
+  goldLiveSymbolsData = symbols;
 
-        const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const timeEl = document.getElementById('gold_last_updated');
-        if (timeEl) timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดต ${timeStr} น.`;
+  const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const timeEl = document.getElementById('gold_last_updated');
+  if (timeEl) timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดต ${timeStr} น.`;
 
-        renderGoldKpiCards();
-        renderGoldLiveTable();
-        renderGoldMomentumBarChart();
-        updateGoldFormulaSteps();
-      }
+  renderGoldKpiCards();
+  renderGoldLiveTable();
+  renderGoldMomentumBarChart();
+  updateGoldFormulaSteps();
+}
 
       function renderGoldKpiCards() {
         const container = document.getElementById('goldKpiCardsContainer');
