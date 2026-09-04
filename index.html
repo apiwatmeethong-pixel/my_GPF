@@ -341,19 +341,208 @@
           </div>
         </div>
 
-        <!-- PAGE 3: THAI STOCKS (หุ้นไทย) -->
+        <!-- PAGE 3: THAI & GLOBAL MARKET INDICES (ดัชนีตลาดทุน) -->
         <div id="page-thaistock" class="hidden space-y-6">
-          <div class="pastel-card p-5">
-            <h3 class="text-xs font-bold text-emerald-800 mb-3 flex items-center gap-2">
-              <i class="fa-solid fa-university text-emerald-600"></i>
-              <span>ตัวแบบจำลองคาดการณ์ NAV หุ้นไทย (SET 100)</span>
-            </h3>
-            <div id="thaistock_chart_div" class="h-[320px] w-full"></div>
+          
+          <!-- Banner & Controls -->
+          <div class="pastel-card p-5 bg-gradient-to-r from-purple-50/70 via-indigo-50/50 to-blue-50/60 border border-purple-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-globe text-indigo-600"></i>
+                  <span>ศูนย์ข้อมูลดัชนีตลาดทุนไทย & ต่างประเทศ</span>
+                </h3>
+                <p class="text-xs text-purple-700 font-medium mt-0.5">
+                  เชื่อมโยงดัชนีตลาดหลักทรัพย์ (SET, SET 100) และดัชนีสากล (S&P 500, NASDAQ, MSCI World) ที่มีผลต่อผลตอบแทน กบข.
+                </p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="market_last_updated" class="text-[11px] text-slate-500 bg-white/80 px-2.5 py-1 rounded-lg border border-purple-100">
+                  <i class="fa-solid fa-clock mr-1 text-purple-500"></i> กำลังอัปเดต...
+                </span>
+                <button onclick="refreshMarketData()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all active:scale-95">
+                  <i class="fa-solid fa-rotate"></i>
+                  <span>รีเฟรช</span>
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div class="pastel-card p-5">
-            <div class="table-responsive"><div id="thaistock_table_div"></div></div>
+          <!-- Top KPI Market Cards Grid (SET, SET100, S&P 500, NASDAQ, MSCI, Nikkei, USD/THB) -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3" id="marketCardsContainer">
+            <!-- Cards injected by JS -->
+            <div class="pastel-card p-3 animate-pulse bg-purple-50/30 text-center"><span class="text-xs text-slate-400">กำลังโหลดดัชนี...</span></div>
           </div>
+
+          <!-- Tab Navigation for Market View -->
+          <div class="flex border-b border-purple-200 bg-white/70 rounded-2xl p-1 shadow-xs">
+            <button id="btnTabGlobal" onclick="switchMarketSubTab('global')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-earth-americas"></i>
+              <span>ดัชนีตลาดโลก & อัตราแลกเปลี่ยน</span>
+            </button>
+            <button id="btnTabSet100" onclick="switchMarketSubTab('set100')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-purple-600 transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-chart-line"></i>
+              <span>ตัวแบบจำลอง SET 100 & หุ้นไทย</span>
+            </button>
+            <button id="btnTabBenchmark" onclick="switchMarketSubTab('benchmark')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-purple-600 transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bullseye"></i>
+              <span>ความเชื่อมโยงกับแผน กบข.</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: ดัชนีตลาดโลก & FX (Global Markets) -->
+          <div id="subTabGlobalContent" class="space-y-6">
+            <div class="pastel-card p-5">
+              <div class="flex justify-between items-center mb-3">
+                <h3 class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-table-list text-purple-600"></i>
+                  <span>ตารางสรุปดัชนีตลาดหลักทรัพย์สากล (Global Equities & FX)</span>
+                </h3>
+                <span class="text-[11px] text-emerald-600 font-semibold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                  <i class="fa-solid fa-circle-check"></i> Live Market Feed
+                </span>
+              </div>
+              <div class="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="text-left">ชื่อดัชนี / สินทรัพย์</th>
+                      <th class="text-center">ประเทศ / ตลาด</th>
+                      <th class="text-right">ราคาล่าสุด</th>
+                      <th class="text-right">เปลี่ยนแปลง (จุด)</th>
+                      <th class="text-right">เปลี่ยนแปลง (%)</th>
+                      <th class="text-left">ความเกี่ยวข้องกับแผน กบข.</th>
+                    </tr>
+                  </thead>
+                  <tbody id="globalIndicesTableBody">
+                    <tr><td colspan="6" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูลดัชนีตลาดโลก...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="pastel-card p-5">
+              <h3 class="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-chart-column text-indigo-600"></i>
+                <span>เปรียบเทียบแรงส่งการเปลี่ยนแปลงประจำวัน (Daily Momentum Comparison %)</span>
+              </h3>
+              <div class="h-[280px] w-full relative">
+                <canvas id="marketIndicesBarChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: ตัวแบบจำลอง SET 100 & 10 หุ้นไทย (Thai Stocks Model) -->
+          <div id="subTabSet100Content" class="hidden space-y-6">
+            <div class="pastel-card p-5">
+              <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                <h3 class="text-xs font-bold text-emerald-800 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-line text-emerald-600"></i>
+                  <span>ตัวแบบจำลองคาดการณ์ NAV แผนหุ้นไทย (อิงดัชนี SET 100)</span>
+                </h3>
+                <div class="text-[11px] text-slate-500 font-medium">
+                  เส้นสีเขียว = NAV จริง | เส้นสีส้ม = NAV คาดการณ์จากโมเดล
+                </div>
+              </div>
+              <div id="thaistock_chart_div" class="h-[320px] w-full"></div>
+            </div>
+
+            <!-- Top 10 Big Cap Stocks Table -->
+            <div class="pastel-card p-5">
+              <h3 class="text-xs font-bold text-purple-900 mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-ranking-star text-amber-500"></i>
+                <span>10 หุ้นขนาดใหญ่ในดัชนี SET 100 ที่มีน้ำหนักสูงสุดในตัวแบบจำลอง</span>
+              </h3>
+              <p class="text-[11px] text-slate-500 mb-3">การเคลื่อนไหวของหุ้นกลุ่มนี้เป็นตัวขับเคลื่อนหลักต่อทิศทาง NAV ของแผนหุ้นไทย กบข.</p>
+              <div class="table-responsive">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th class="text-left">ลำดับ</th>
+                      <th class="text-left">ชื่อหุ้น</th>
+                      <th class="text-right">น้ำหนักในโมเดล (%)</th>
+                      <th class="text-right">ราคาล่าสุด (บาท)</th>
+                      <th class="text-left">หมวดธุรกิจ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="thaiTopStocksTableBody">
+                    <tr><td colspan="5" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูลหุ้นบิ๊กแคป...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Historical Table -->
+            <div class="pastel-card p-5">
+              <h3 class="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i>
+                <span>สถิติตัวเลขย้อนหลัง 15 วันล่าสุด (NAV จริง vs คาดการณ์)</span>
+              </h3>
+              <div class="table-responsive"><div id="thaistock_table_div"></div></div>
+            </div>
+          </div>
+
+          <!-- TAB 3: GPF BENCHMARK MATRIX -->
+          <div id="subTabBenchmarkContent" class="hidden space-y-6">
+            <div class="pastel-card p-5">
+              <h3 class="text-xs font-bold text-purple-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-purple-600"></i>
+                <span>เมทริกซ์ความเชื่อมโยงระหว่างดัชนีตลาดหลักทรัพย์กับแผนการลงทุน กบข.</span>
+              </h3>
+              <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+                กบข. กำหนดเกณฑ์มาตรฐาน (Benchmark) ให้แต่ละแผนการลงทุนเพื่อวัดผลการดำเนินงานของผู้จัดการกองทุน โดยสมาชิกสามารถใช้ข้อมูลดัชนีเหล่านี้ในการวิเคราะห์จังหวะสับเปลี่ยนแผน (Tactical Switching) ได้ดังนี้:
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                
+                <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-emerald-900 text-sm">📈 แผนหุ้นไทย</span>
+                    <span class="bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded text-[10px] font-bold">ความเสี่ยงสูง (ระดับ 6)</span>
+                  </div>
+                  <div class="text-slate-700 leading-relaxed">
+                    <b>ดัชนีอ้างอิงหลัก:</b> SET 100 Total Return Index (TRI)<br/>
+                    <b>กลยุทธ์:</b> ลงทุนในหุ้นขนาดใหญ่ 100 ตัวแรกในตลาดหลักทรัพย์แห่งประเทศไทย มีความสัมพันธ์สูงกับกลุ่มพลังงาน (PTT), แบงก์ (KBANK, SCB), อิเล็กทรอนิกส์ (DELTA) และค้าปลีก/ไอซีที
+                  </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-blue-50/80 border border-blue-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-blue-900 text-sm">🌐 แผนหุ้นต่างประเทศ</span>
+                    <span class="bg-blue-200 text-blue-900 px-2 py-0.5 rounded text-[10px] font-bold">ความเสี่ยงสูง (ระดับ 6)</span>
+                  </div>
+                  <div class="text-slate-700 leading-relaxed">
+                    <b>ดัชนีอ้างอิงหลัก:</b> MSCI All Country World Index (ACWI) & S&P 500 Net Total Return<br/>
+                    <b>กลยุทธ์:</b> ลงทุนในหุ้นทั่วโลกกว่า 2,000 บริษัท (เน้นสหรัฐฯ ~60-70%, ยุโรป, ญี่ปุ่น) ขับเคลื่อนด้วยหุ้นเทคโนโลยี (Apple, Microsoft, Nvidia ฯลฯ) และได้รับผลบวกเมื่อเงินบาทอ่อนค่า
+                  </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-amber-900 text-sm">🪙 แผนทองคำ</span>
+                    <span class="bg-amber-200 text-amber-900 px-2 py-0.5 rounded text-[10px] font-bold">ความเสี่ยงสูงมาก (ระดับ 7)</span>
+                  </div>
+                  <div class="text-slate-700 leading-relaxed">
+                    <b>ดัชนีอ้างอิงหลัก:</b> LBMA Gold Price PM & SPDR Gold Shares (GLD)<br/>
+                    <b>กลยุทธ์:</b> สินทรัพย์ทางเลือกเพื่อป้องกันเงินเฟ้อและความไม่สงบทางภูมิรัฐศาสตร์โลก โดยราคาในรูปเงินบาทจะแปรผันตามราคาทองโลก (USD/oz) x อัตราแลกเปลี่ยน (USD/THB)
+                  </div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-indigo-50/80 border border-indigo-200 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="font-bold text-indigo-900 text-sm">💵 แผนตราสารหนี้ & ตลาดเงิน</span>
+                    <span class="bg-indigo-200 text-indigo-900 px-2 py-0.5 rounded text-[10px] font-bold">ความเสี่ยงต่ำ-ปานกลาง</span>
+                  </div>
+                  <div class="text-slate-700 leading-relaxed">
+                    <b>ดัชนีอ้างอิงหลัก:</b> ThaiBMA Government Bond Total Return Index & อัตราดอกเบี้ยนโยบาย ธปท.<br/>
+                    <b>กลยุทธ์:</b> เน้นรักษาเงินต้นและความมั่นคง ผลตอบแทนจะเพิ่มขึ้นเมื่อดอกเบี้ยมีแนวโน้มลดลง (ราคาพันธบัตรปรับขึ้น)
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
         </div>
 
         <!-- PAGE 4: GOLD (ทองคำ) -->
@@ -472,8 +661,8 @@
           </button>
 
           <button onclick="switchPage('thaistock', this)" class="nav-item flex flex-col items-center gap-1 transition-all">
-            <i class="fa-solid fa-chart-line text-lg"></i>
-            <span class="text-[11px]">หุ้นไทย</span>
+            <i class="fa-solid fa-globe text-lg"></i>
+            <span class="text-[11px]">ดัชนีตลาด</span>
           </button>
 
           <button onclick="switchPage('gold', this)" class="nav-item flex flex-col items-center gap-1 transition-all">
@@ -934,7 +1123,7 @@
           el.classList.add('nav-tab-active'); 
         }
         
-        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🇹🇭 พยากรณ์ระบบหุ้นไทย', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
+        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🌐 ดัชนีตลาดหุ้นไทยและต่างประเทศ (กบข. Benchmarks)', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
         document.getElementById('main_title').innerHTML = titles[pageId] || '';
 
         if(ytdData.length === 0 && currentUser !== "") {
@@ -948,7 +1137,10 @@
 
         if(pageId === 'portfolio' && ytdData.length > 0) updateDashboard();
         if(pageId === 'daily' && dailyRecords.length > 0) drawDailyDashboard();
-        if(pageId === 'thaistock' && thaiStockDataRaw.length > 0) drawThaiStockDashboard();
+        if(pageId === 'thaistock') {
+          if(globalIndicesData.length === 0) fetchGlobalMarketIndices();
+          if(thaiStockDataRaw.length > 0) drawThaiStockDashboard();
+        }
         if(pageId === 'gold' && goldDataRaw.length > 0) drawGoldDashboard();
         if(pageId === 'analysis' && ytdData.length > 0) drawAnalysisDashboard();
       }
@@ -1524,32 +1716,389 @@
         document.getElementById('daily_table_div').innerHTML = tableHtml + '</tbody></table>';
       }
 
+      // ===== ดัชนีตลาดทุนไทยและต่างประเทศ (Thai & Global Market Indices) =====
+      var thaiTopStocksRaw = [];
+      var globalIndicesData = [];
+      var marketBarChartInstance = null;
+      var latestSet100Value = null;
+      var latestSet100ChangePct = 0;
+
+      // รายการดัชนีสากลและอัตราแลกเปลี่ยนที่มีผลต่อ กบข.
+      const DEFAULT_MARKET_SYMBOLS = [
+        { id: 'SET', symbol: '%5ESET.BK', name: 'SET Index', region: '🇹🇭 ไทย', flag: '🇹🇭', gpfRef: 'ดัชนีตลาดหุ้นไทย (อิงแผนหุ้นไทย)', defaultPrice: 1588.90, defaultChange: 12.64, defaultPct: 0.80 },
+        { id: 'SET100', symbol: 'SET100', name: 'SET 100', region: '🇹🇭 ไทย (Top 100)', flag: '🇹🇭', gpfRef: 'Benchmark แผนหุ้นไทย กบข.', defaultPrice: 2093.81, defaultChange: 8.50, defaultPct: 0.41 },
+        { id: 'SP500', symbol: '%5EGSPC', name: 'S&P 500', region: '🇺🇸 สหรัฐฯ', flag: '🇺🇸', gpfRef: 'เกณฑ์มาตรฐานหลัก แผนหุ้นต่างประเทศ', defaultPrice: 7747.71, defaultChange: 16.72, defaultPct: 0.22 },
+        { id: 'NASDAQ', symbol: '%5EIXIC', name: 'NASDAQ 100', region: '🇺🇸 สหรัฐฯ (Tech)', flag: '💻', gpfRef: 'หุ้นเทคโนโลยีในแผนหุ้นต่างประเทศ', defaultPrice: 26584.06, defaultChange: 42.71, defaultPct: 0.16 },
+        { id: 'MSCI_WORLD', symbol: 'URTH', name: 'MSCI World (URTH)', region: '🌐 หุ้นทั่วโลก', flag: '🌐', gpfRef: 'เกณฑ์มาตรฐานเปรียบเทียบ กบข. สากล', defaultPrice: 210.34, defaultChange: 0.41, defaultPct: 0.20 },
+        { id: 'NIKKEI', symbol: '%5EN225', name: 'Nikkei 225', region: '🇯🇵 ญี่ปุ่น', flag: '🇯🇵', gpfRef: 'ตลาดหุ้นเอเชีย (แผนหุ้นต่างประเทศ)', defaultPrice: 65020.94, defaultChange: -1290.99, defaultPct: -1.95 },
+        { id: 'USDTHB', symbol: 'THB=X', name: 'USD / THB', region: '💵 ค่าเงิน', flag: '💵', gpfRef: 'อัตราแลกเปลี่ยนแปลงมูลค่าสินทรัพย์ต่างประเทศ', defaultPrice: 32.89, defaultChange: -0.18, defaultPct: -0.54 }
+      ];
+
+      function switchMarketSubTab(tab) {
+        document.getElementById('subTabGlobalContent').classList.add('hidden');
+        document.getElementById('subTabSet100Content').classList.add('hidden');
+        document.getElementById('subTabBenchmarkContent').classList.add('hidden');
+
+        ['btnTabGlobal', 'btnTabSet100', 'btnTabBenchmark'].forEach(id => {
+          let b = document.getElementById(id);
+          if (b) {
+            b.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-purple-600 transition-all flex items-center justify-center gap-2";
+          }
+        });
+
+        if (tab === 'global') {
+          document.getElementById('subTabGlobalContent').classList.remove('hidden');
+          document.getElementById('btnTabGlobal').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
+          renderMarketBarChart();
+        } else if (tab === 'set100') {
+          document.getElementById('subTabSet100Content').classList.remove('hidden');
+          document.getElementById('btnTabSet100').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
+          drawThaiStockDashboard();
+        } else if (tab === 'benchmark') {
+          document.getElementById('subTabBenchmarkContent').classList.remove('hidden');
+          document.getElementById('btnTabBenchmark').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
+        }
+      }
+
+      async function fetchGlobalMarketIndices() {
+        let updatedIndices = JSON.parse(JSON.stringify(DEFAULT_MARKET_SYMBOLS));
+        
+        // ถ้ามีข้อมูล SET 100 จาก Google Sheet ให้อัปเดตใส่เข้าไปด้วย
+        if (latestSet100Value !== null) {
+          let s100 = updatedIndices.find(x => x.id === 'SET100');
+          if (s100) {
+            s100.price = latestSet100Value;
+            s100.pct = latestSet100ChangePct;
+            s100.diff = (latestSet100Value * latestSet100ChangePct) / 100;
+          }
+        }
+
+        const promises = updatedIndices.map(async item => {
+          if (item.symbol === 'SET100') return item; // ได้จากชีทแล้ว
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${item.symbol}?interval=1d&range=5d`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+              const json = await res.json();
+              if (json.chart && json.chart.result && json.chart.result.length > 0) {
+                const meta = json.chart.result[0].meta;
+                const curPrice = meta.regularMarketPrice || item.defaultPrice;
+                const prevClose = meta.chartPreviousClose || meta.previousClose || curPrice;
+                const diff = curPrice - prevClose;
+                const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+                item.price = curPrice;
+                item.diff = diff;
+                item.pct = pct;
+                return item;
+              }
+            }
+          } catch(e) {
+            // fallback gracefully
+          }
+          item.price = item.defaultPrice;
+          item.diff = item.defaultChange;
+          item.pct = item.defaultPct;
+          return item;
+        });
+
+        globalIndicesData = await Promise.all(promises);
+        
+        const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const timeEl = document.getElementById('market_last_updated');
+        if (timeEl) timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดต ${timeStr} น.`;
+
+        renderMarketCards();
+        renderGlobalIndicesTable();
+        renderMarketBarChart();
+      }
+
+      function renderMarketCards() {
+        const container = document.getElementById('marketCardsContainer');
+        if (!container || globalIndicesData.length === 0) return;
+
+        let html = '';
+        globalIndicesData.forEach(item => {
+          let isPositive = item.pct >= 0;
+          let sign = isPositive ? '+' : '';
+          let badgeClass = isPositive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+          let priceFmt = item.price >= 1000 ? item.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.price.toFixed(2);
+          if (item.id === 'USDTHB') priceFmt = item.price.toFixed(2) + ' ฿';
+
+          html += `
+            <div class="pastel-card p-3 border ${isPositive ? 'border-emerald-100 hover:border-emerald-300' : 'border-rose-100 hover:border-rose-300'} bg-white/90 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between gap-1 mb-1">
+                <span class="text-[11px] font-bold text-slate-800 truncate">${item.flag} ${item.name}</span>
+                <span class="text-[9px] text-slate-400 font-mono">${item.region.split(' ')[0]}</span>
+              </div>
+              <div class="text-base sm:text-lg font-black text-slate-900 font-mono leading-tight my-0.5">
+                ${priceFmt}
+              </div>
+              <div class="flex items-center justify-between text-[10px] mt-1 pt-1 border-t border-slate-50">
+                <span class="${isPositive ? 'text-emerald-600' : 'text-rose-600'} font-semibold font-mono">
+                  ${sign}${item.diff ? item.diff.toFixed(2) : '0.00'}
+                </span>
+                <span class="font-bold px-1.5 py-0.5 rounded-full border text-[9px] ${badgeClass}">
+                  ${sign}${item.pct.toFixed(2)}%
+                </span>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      }
+
+      function renderGlobalIndicesTable() {
+        const tbody = document.getElementById('globalIndicesTableBody');
+        if (!tbody || globalIndicesData.length === 0) return;
+
+        let html = '';
+        globalIndicesData.forEach(item => {
+          let isPos = item.pct >= 0;
+          let sign = isPos ? '+' : '';
+          let cls = isPos ? 'positive' : 'negative';
+          let priceStr = item.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          if (item.id === 'USDTHB') priceStr = item.price.toFixed(4) + ' ฿';
+
+          html += `
+            <tr class="hover:bg-purple-50/40 transition-colors">
+              <td class="text-left font-bold text-slate-800">
+                <div class="flex items-center gap-2">
+                  <span class="text-base">${item.flag}</span>
+                  <div>
+                    <div>${item.name}</div>
+                    <span class="text-[10px] font-mono text-slate-400 font-normal">${item.symbol.replace('%5E', '^')}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="text-center text-slate-600 font-medium">${item.region}</td>
+              <td class="text-right font-bold text-slate-900 font-mono">${priceStr}</td>
+              <td class="text-right font-mono font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">${sign}${item.diff ? item.diff.toFixed(2) : '0.00'}</td>
+              <td class="text-right"><span class="${cls}">${sign}${item.pct.toFixed(2)}%</span></td>
+              <td class="text-left text-xs text-purple-900 font-medium">
+                <span class="bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md text-[11px]">${item.gpfRef}</span>
+              </td>
+            </tr>
+          `;
+        });
+
+        tbody.innerHTML = html;
+      }
+
+      function renderMarketBarChart() {
+        const ctx = document.getElementById('marketIndicesBarChart');
+        if (!ctx || globalIndicesData.length === 0) return;
+        if (marketBarChartInstance) marketBarChartInstance.destroy();
+
+        const labels = globalIndicesData.map(i => i.name);
+        const dataValues = globalIndicesData.map(i => parseFloat(i.pct.toFixed(2)));
+        const colors = dataValues.map(v => v >= 0 ? '#10b981' : '#f43f5e');
+
+        marketBarChartInstance = new Chart(ctx.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'การเปลี่ยนแปลงวันนี้ (%)',
+              data: dataValues,
+              backgroundColor: colors,
+              borderRadius: 6,
+              borderWidth: 1,
+              borderColor: colors
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) { return ' เปลี่ยนแปลง: ' + (ctx.raw >= 0 ? '+' : '') + ctx.raw + '%'; }
+                }
+              }
+            },
+            scales: {
+              y: {
+                ticks: {
+                  callback: function(v) { return (v >= 0 ? '+' : '') + v + '%'; },
+                  font: { family: 'Prompt', size: 10 }
+                },
+                grid: { color: 'rgba(233, 213, 255, 0.4)' }
+              },
+              x: {
+                ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
       function processThaiStockData(response) {
         try {
-            if (!response || response.error || !response.data) return;
-            var data = response.data.filter(row => row[0] && String(row[0]).trim() !== ''); if(data.length === 0) return;
-            var forecastData = [];
-            for (var i = 0; i < data.length; i++) {
-                if(String(data[i][0]).includes('วันที่') || String(data[i][0]).includes('Date')) continue; 
-                var actualNav = parseFloat(String(data[i][12]).replace(/,/g, '')); var forecastNav = parseFloat(String(data[i][13]).replace(/,/g, '')); var diffVal = parseFloat(String(data[i][14]).replace(/,/g, '')); 
-                forecastData.push({ date: formatShortDate(data[i][0]), actual: isNaN(actualNav) ? null : actualNav, forecast: isNaN(forecastNav) ? null : forecastNav, diff: isNaN(diffVal) ? null : diffVal });
+          if (!response || response.error || !response.data) return;
+          var data = response.data.filter(row => row[0] && String(row[0]).trim() !== '');
+          if (data.length === 0) return;
+
+          // 1. ดึงข้อมูล 10 หุ้นบิ๊กแคปจากแถวน้ำหนักและชื่อคอลัมน์
+          let stockNames = [];
+          let stockWeights = [];
+          const sectorMap = {
+            'DELTA': 'ชิ้นส่วนอิเล็กทรอนิกส์',
+            'PTT': 'พลังงานและสาธารณูปโภค',
+            'KBANK': 'ธนาคารพาณิชย์',
+            'ADVANC': 'เทคโนโลยีสารสนเทศและการสื่อสาร',
+            'KTB': 'ธนาคารพาณิชย์',
+            'SCB': 'ธนาคารพาณิชย์',
+            'BBL': 'ธนาคารพาณิชย์',
+            'GULF': 'พลังงานและสาธารณูปโภค',
+            'PTTEP': 'พลังงานและสาธารณูปโภค',
+            'CPN': 'พัฒนาอสังหาริมทรัพย์'
+          };
+
+          if (data.length >= 2) {
+            let rowWeights = data[0];
+            let rowHeaders = data[1];
+            let lastRow = data[data.length - 1];
+
+            thaiTopStocksRaw = [];
+            for (let c = 1; c <= 10; c++) {
+              if (rowHeaders[c]) {
+                let name = String(rowHeaders[c]).trim();
+                let w = parseFloat(rowWeights[c]) || 0;
+                let price = parseFloat(lastRow[c]) || 0;
+                thaiTopStocksRaw.push({
+                  rank: c,
+                  name: name,
+                  weight: (w * 100).toFixed(2),
+                  price: price,
+                  sector: sectorMap[name] || 'กลุ่มอุตสาหกรรมหลัก'
+                });
+              }
             }
-            thaiStockDataRaw = forecastData; if(!document.getElementById('page-thaistock').classList.contains('hidden')) drawThaiStockDashboard();
-        } catch(e) { console.error(e); }
+
+            // คำนวณค่า SET 100 ล่าสุดจากคอลัมน์ 11
+            if (lastRow[11]) {
+              latestSet100Value = parseFloat(lastRow[11]) || null;
+              if (data.length >= 4) {
+                let prevRow = data[data.length - 2];
+                let prevSet100 = parseFloat(prevRow[11]) || latestSet100Value;
+                latestSet100ChangePct = prevSet100 > 0 ? ((latestSet100Value - prevSet100) / prevSet100) * 100 : 0;
+              }
+            }
+          }
+
+          // 2. ดึงข้อมูลตัวแบบจำลอง Forecast
+          var forecastData = [];
+          for (var i = 0; i < data.length; i++) {
+            if (String(data[i][0]).includes('วันที่') || String(data[i][0]).includes('Date')) continue;
+            var actualNav = parseFloat(String(data[i][12]).replace(/,/g, ''));
+            var forecastNav = parseFloat(String(data[i][13]).replace(/,/g, ''));
+            var diffVal = parseFloat(String(data[i][14]).replace(/,/g, ''));
+            forecastData.push({
+              date: formatShortDate(data[i][0]),
+              actual: isNaN(actualNav) ? null : actualNav,
+              forecast: isNaN(forecastNav) ? null : forecastNav,
+              diff: isNaN(diffVal) ? null : diffVal
+            });
+          }
+          thaiStockDataRaw = forecastData;
+
+          renderThaiTopStocksTable();
+          drawThaiStockDashboard();
+          fetchGlobalMarketIndices();
+
+        } catch (e) {
+          console.error('processThaiStockData error:', e);
+        }
       }
-      
+
+      function renderThaiTopStocksTable() {
+        const tbody = document.getElementById('thaiTopStocksTableBody');
+        if (!tbody) return;
+        if (!thaiTopStocksRaw || thaiTopStocksRaw.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-slate-400">ยังไม่มีข้อมูลหุ้นบิ๊กแคป</td></tr>';
+          return;
+        }
+
+        let html = '';
+        thaiTopStocksRaw.forEach(s => {
+          html += `
+            <tr class="hover:bg-purple-50/30">
+              <td class="text-left font-mono font-bold text-purple-600">${s.rank}</td>
+              <td class="text-left font-bold text-slate-800">${s.name}</td>
+              <td class="text-right font-mono font-bold text-indigo-700">${s.weight}%</td>
+              <td class="text-right font-mono font-bold text-slate-900">${s.price > 0 ? s.price.toFixed(2) : '-'}</td>
+              <td class="text-left text-xs text-slate-500">${s.sector}</td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
+      }
+
       function drawThaiStockDashboard() {
-        if(thaiStockDataRaw.length === 0) return;
-        document.getElementById('thaistock_chart_div').innerHTML = ""; var dt = new google.visualization.DataTable(); dt.addColumn('string', 'วันที่'); dt.addColumn('number', 'NAV จริง'); dt.addColumn('number', 'คาดการณ์');
-        thaiStockDataRaw.forEach(row => { if (row.actual !== null || row.forecast !== null) dt.addRow([row.date, row.actual, row.forecast]); });
-        var options = { fontName: 'Prompt', curveType: 'function', lineWidth: 3, pointsVisible: true, pointSize: 3, colors: ['#10b981', '#f59e0b'], legend: { position: 'top' }, vAxis: { textStyle: {color: '#6b7280'} }, hAxis: { textStyle: {color: '#6b7280'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent' };
-        new google.visualization.LineChart(document.getElementById('thaistock_chart_div')).draw(dt, options);
+        if (thaiStockDataRaw.length === 0) return;
+        const chartDiv = document.getElementById('thaistock_chart_div');
+        if (!chartDiv) return;
+
+        chartDiv.innerHTML = "";
+        var dt = new google.visualization.DataTable();
+        dt.addColumn('string', 'วันที่');
+        dt.addColumn('number', 'NAV จริง');
+        dt.addColumn('number', 'คาดการณ์ (SET 100 Model)');
+
+        thaiStockDataRaw.forEach(row => {
+          if (row.actual !== null || row.forecast !== null) {
+            dt.addRow([row.date, row.actual, row.forecast]);
+          }
+        });
+
+        var options = {
+          fontName: 'Prompt',
+          curveType: 'function',
+          lineWidth: 3,
+          pointsVisible: true,
+          pointSize: 3,
+          colors: ['#10b981', '#f59e0b'],
+          legend: { position: 'top', textStyle: { fontSize: 11 } },
+          vAxis: { textStyle: { color: '#6b7280' }, gridlines: { color: '#f3e8ff' } },
+          hAxis: { textStyle: { color: '#6b7280' }, slantedText: true, slantedTextAngle: 45 },
+          chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 },
+          backgroundColor: 'transparent'
+        };
+
+        new google.visualization.LineChart(chartDiv).draw(dt, options);
+
         var tableHtml = '<table><thead><tr><th>วันที่</th><th>NAV จริง</th><th>คาดการณ์</th><th>ส่วนต่าง</th></tr></thead><tbody>';
         thaiStockDataRaw.slice(-15).reverse().forEach(row => {
-            var diffClass = (row.diff === null) ? '' : (row.diff >= 0 ? 'positive' : 'negative');
-            tableHtml += `<tr><td style="text-align:left">${row.date}</td><td>${row.actual===null?'-':row.actual.toFixed(4)}</td><td style="color:#d97706">${row.forecast===null?'-':row.forecast.toFixed(4)}</td><td><span class="${diffClass}">${row.diff===null?'-':(row.diff>0?'+':'')+row.diff.toFixed(4)}</span></td></tr>`;
+          var diffClass = (row.diff === null) ? '' : (row.diff >= 0 ? 'positive' : 'negative');
+          tableHtml += `<tr><td style="text-align:left">${row.date}</td><td>${row.actual===null?'-':row.actual.toFixed(4)}</td><td style="color:#d97706">${row.forecast===null?'-':row.forecast.toFixed(4)}</td><td><span class="${diffClass}">${row.diff===null?'-':(row.diff>0?'+':'')+row.diff.toFixed(4)}</span></td></tr>`;
         });
         document.getElementById('thaistock_table_div').innerHTML = tableHtml + '</tbody></table>';
+      }
+
+      async function refreshMarketData() {
+        const btn = document.querySelector('button[onclick="refreshMarketData()"]');
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลด...';
+        try {
+          await fetchGlobalMarketIndices();
+          const dataThai = await callBackend('getThaiStockData');
+          processThaiStockData(dataThai);
+          Swal.fire({
+            icon: 'success',
+            title: 'อัปเดตข้อมูลตลาดสำเร็จ',
+            text: 'ดึงข้อมูลดัชนีตลาดหลักทรัพย์ไทยและต่างประเทศล่าสุดเรียบร้อย',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } catch (e) {
+          console.error(e);
+        } finally {
+          if (btn) btn.innerHTML = '<i class="fa-solid fa-rotate"></i> <span>รีเฟรช</span>';
+        }
       }
 
       function processGoldData(response) { 
@@ -1686,7 +2235,10 @@
       window.addEventListener('resize', function() {
         if(!document.getElementById('page-portfolio').classList.contains('hidden') && ytdData.length > 0) updateDashboard(); 
         if(!document.getElementById('page-daily').classList.contains('hidden') && dailyRecords.length > 0) drawDailyDashboard();
-        if(!document.getElementById('page-thaistock').classList.contains('hidden') && thaiStockDataRaw.length > 0) drawThaiStockDashboard();
+        if(!document.getElementById('page-thaistock').classList.contains('hidden')) {
+          if(thaiStockDataRaw.length > 0) drawThaiStockDashboard();
+          if(marketBarChartInstance) marketBarChartInstance.resize();
+        }
         if(!document.getElementById('page-gold').classList.contains('hidden') && goldDataRaw.length > 0) drawGoldDashboard();
         if(!document.getElementById('page-analysis').classList.contains('hidden') && ytdData.length > 0) {
           drawAnalysisDashboard();
