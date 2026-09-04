@@ -1939,8 +1939,15 @@
       }
 
       // 1. ดึงข้อมูลดัชนีตลาดทุนผ่าน Apps Script Backend
+// ===== 1. ฟังก์ชันดึงดัชนีตลาดทุน และการแสดงผลแบบปลอดภัย =====
 async function fetchGlobalMarketIndices() {
-  let updatedIndices = JSON.parse(JSON.stringify(DEFAULT_MARKET_SYMBOLS));
+  let updatedIndices = DEFAULT_MARKET_SYMBOLS.map(item => ({
+    ...item,
+    price: item.price ?? item.defaultPrice ?? 0,
+    diff: item.diff ?? item.defaultChange ?? 0,
+    pct: item.pct ?? item.defaultPct ?? 0
+  }));
+
   let symbolsToFetch = updatedIndices
     .filter(x => x.symbol !== 'SET100')
     .map(x => x.symbol);
@@ -1949,18 +1956,14 @@ async function fetchGlobalMarketIndices() {
     const res = await callBackend('fetchYahooData', { symbols: symbolsToFetch });
     if (res && res.data) {
       updatedIndices.forEach(item => {
-        if (res.data[item.symbol]) {
-          let curPrice = res.data[item.symbol].price || item.defaultPrice;
-          let prevClose = res.data[item.symbol].prevClose || curPrice;
+        if (res.data[item.symbol] && res.data[item.symbol].price !== undefined && res.data[item.symbol].price !== null) {
+          let curPrice = Number(res.data[item.symbol].price);
+          let prevClose = Number(res.data[item.symbol].prevClose) || curPrice;
           let diff = curPrice - prevClose;
           let pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
           item.price = curPrice;
           item.diff = diff;
           item.pct = pct;
-        } else {
-          item.price = item.defaultPrice;
-          item.diff = item.defaultChange;
-          item.pct = item.defaultPct;
         }
       });
     }
@@ -1971,9 +1974,9 @@ async function fetchGlobalMarketIndices() {
   if (latestSet100Value !== null) {
     let s100 = updatedIndices.find(x => x.id === 'SET100');
     if (s100) {
-      s100.price = latestSet100Value;
-      s100.pct = latestSet100ChangePct;
-      s100.diff = (latestSet100Value * latestSet100ChangePct) / 100;
+      s100.price = Number(latestSet100Value) || 0;
+      s100.pct = Number(latestSet100ChangePct) || 0;
+      s100.diff = (s100.price * s100.pct) / 100;
     }
   }
 
@@ -1988,78 +1991,86 @@ async function fetchGlobalMarketIndices() {
   renderMarketBarChart();
 }
 
-      function renderMarketCards() {
-        const container = document.getElementById('marketCardsContainer');
-        if (!container || globalIndicesData.length === 0) return;
+     function renderMarketCards() {
+  const container = document.getElementById('marketCardsContainer');
+  if (!container || globalIndicesData.length === 0) return;
 
-        let html = '';
-        globalIndicesData.forEach(item => {
-          let isPositive = item.pct >= 0;
-          let sign = isPositive ? '+' : '';
-          let badgeClass = isPositive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
-          let priceFmt = item.price >= 1000 ? item.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.price.toFixed(2);
-          if (item.id === 'USDTHB') priceFmt = item.price.toFixed(2) + ' ฿';
+  let html = '';
+  globalIndicesData.forEach(item => {
+    let price = Number(item.price ?? item.defaultPrice ?? 0);
+    let diff = Number(item.diff ?? item.defaultChange ?? 0);
+    let pct = Number(item.pct ?? item.defaultPct ?? 0);
 
-          html += `
-            <div class="pastel-card p-3 border ${isPositive ? 'border-emerald-100 hover:border-emerald-300' : 'border-rose-100 hover:border-rose-300'} bg-white/90 shadow-xs flex flex-col justify-between">
-              <div class="flex items-center justify-between gap-1 mb-1">
-                <span class="text-[11px] font-bold text-slate-800 truncate">${item.flag} ${item.name}</span>
-                <span class="text-[9px] text-slate-400 font-mono">${item.region.split(' ')[0]}</span>
-              </div>
-              <div class="text-base sm:text-lg font-black text-slate-900 font-mono leading-tight my-0.5">
-                ${priceFmt}
-              </div>
-              <div class="flex items-center justify-between text-[10px] mt-1 pt-1 border-t border-slate-50">
-                <span class="${isPositive ? 'text-emerald-600' : 'text-rose-600'} font-semibold font-mono">
-                  ${sign}${item.diff ? item.diff.toFixed(2) : '0.00'}
-                </span>
-                <span class="font-bold px-1.5 py-0.5 rounded-full border text-[9px] ${badgeClass}">
-                  ${sign}${item.pct.toFixed(2)}%
-                </span>
-              </div>
+    let isPositive = pct >= 0;
+    let sign = isPositive ? '+' : '';
+    let badgeClass = isPositive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+    let priceFmt = price >= 1000 ? price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : price.toFixed(2);
+    if (item.id === 'USDTHB') priceFmt = price.toFixed(2) + ' ฿';
+
+    html += `
+      <div class="pastel-card p-3 border ${isPositive ? 'border-emerald-100 hover:border-emerald-300' : 'border-rose-100 hover:border-rose-300'} bg-white/90 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between gap-1 mb-1">
+          <span class="text-[11px] font-bold text-slate-800 truncate">${item.flag} ${item.name}</span>
+          <span class="text-[9px] text-slate-400 font-mono">${item.region.split(' ')[0]}</span>
+        </div>
+        <div class="text-base sm:text-lg font-black text-slate-900 font-mono leading-tight my-0.5">
+          ${priceFmt}
+        </div>
+        <div class="flex items-center justify-between text-[10px] mt-1 pt-1 border-t border-slate-50">
+          <span class="${isPositive ? 'text-emerald-600' : 'text-rose-600'} font-semibold font-mono">
+            ${sign}${diff.toFixed(2)}
+          </span>
+          <span class="font-bold px-1.5 py-0.5 rounded-full border text-[9px] ${badgeClass}">
+            ${sign}${pct.toFixed(2)}%
+          </span>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+    function renderGlobalIndicesTable() {
+  const tbody = document.getElementById('globalIndicesTableBody');
+  if (!tbody || globalIndicesData.length === 0) return;
+
+  let html = '';
+  globalIndicesData.forEach(item => {
+    let price = Number(item.price ?? item.defaultPrice ?? 0);
+    let diff = Number(item.diff ?? item.defaultChange ?? 0);
+    let pct = Number(item.pct ?? item.defaultPct ?? 0);
+
+    let isPos = pct >= 0;
+    let sign = isPos ? '+' : '';
+    let cls = isPos ? 'positive' : 'negative';
+    let priceStr = price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (item.id === 'USDTHB') priceStr = price.toFixed(4) + ' ฿';
+
+    html += `
+      <tr class="hover:bg-purple-50/40 transition-colors">
+        <td class="text-left font-bold text-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="text-base">${item.flag}</span>
+            <div>
+              <div>${item.name}</div>
+              <span class="text-[10px] font-mono text-slate-400 font-normal">${item.symbol.replace('%5E', '^')}</span>
             </div>
-          `;
-        });
+          </div>
+        </td>
+        <td class="text-center text-slate-600 font-medium">${item.region}</td>
+        <td class="text-right font-bold text-slate-900 font-mono">${priceStr}</td>
+        <td class="text-right font-mono font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">${sign}${diff.toFixed(2)}</td>
+        <td class="text-right"><span class="${cls}">${sign}${pct.toFixed(2)}%</span></td>
+        <td class="text-left text-xs text-purple-900 font-medium">
+          <span class="bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md text-[11px]">${item.gpfRef}</span>
+        </td>
+      </tr>
+    `;
+  });
 
-        container.innerHTML = html;
-      }
-
-      function renderGlobalIndicesTable() {
-        const tbody = document.getElementById('globalIndicesTableBody');
-        if (!tbody || globalIndicesData.length === 0) return;
-
-        let html = '';
-        globalIndicesData.forEach(item => {
-          let isPos = item.pct >= 0;
-          let sign = isPos ? '+' : '';
-          let cls = isPos ? 'positive' : 'negative';
-          let priceStr = item.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-          if (item.id === 'USDTHB') priceStr = item.price.toFixed(4) + ' ฿';
-
-          html += `
-            <tr class="hover:bg-purple-50/40 transition-colors">
-              <td class="text-left font-bold text-slate-800">
-                <div class="flex items-center gap-2">
-                  <span class="text-base">${item.flag}</span>
-                  <div>
-                    <div>${item.name}</div>
-                    <span class="text-[10px] font-mono text-slate-400 font-normal">${item.symbol.replace('%5E', '^')}</span>
-                  </div>
-                </div>
-              </td>
-              <td class="text-center text-slate-600 font-medium">${item.region}</td>
-              <td class="text-right font-bold text-slate-900 font-mono">${priceStr}</td>
-              <td class="text-right font-mono font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">${sign}${item.diff ? item.diff.toFixed(2) : '0.00'}</td>
-              <td class="text-right"><span class="${cls}">${sign}${item.pct.toFixed(2)}%</span></td>
-              <td class="text-left text-xs text-purple-900 font-medium">
-                <span class="bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md text-[11px]">${item.gpfRef}</span>
-              </td>
-            </tr>
-          `;
-        });
-
-        tbody.innerHTML = html;
-      }
+  tbody.innerHTML = html;
+}
 
       function renderMarketBarChart() {
         const ctx = document.getElementById('marketIndicesBarChart');
@@ -2307,26 +2318,29 @@ async function fetchGlobalMarketIndices() {
       }
 
       // 2. ดึงข้อมูลทองคำ Real-time ผ่าน Apps Script Backend
+// ===== 2. ฟังก์ชันดึงราคาทองคำ Real-time และการแสดงผลแบบปลอดภัย =====
 async function fetchRealTimeGoldData() {
-  let symbols = JSON.parse(JSON.stringify(DEFAULT_GOLD_SYMBOLS));
+  let symbols = DEFAULT_GOLD_SYMBOLS.map(item => ({
+    ...item,
+    price: item.price ?? item.defaultPrice ?? 0,
+    diff: item.diff ?? item.defaultChange ?? 0,
+    pct: item.pct ?? item.defaultPct ?? 0
+  }));
+
   let symbolsToFetch = symbols.map(x => x.symbol);
 
   try {
     const res = await callBackend('fetchYahooData', { symbols: symbolsToFetch });
     if (res && res.data) {
       symbols.forEach(item => {
-        if (res.data[item.symbol]) {
-          let curPrice = res.data[item.symbol].price || item.defaultPrice;
-          let prevClose = res.data[item.symbol].prevClose || curPrice;
+        if (res.data[item.symbol] && res.data[item.symbol].price !== undefined && res.data[item.symbol].price !== null) {
+          let curPrice = Number(res.data[item.symbol].price);
+          let prevClose = Number(res.data[item.symbol].prevClose) || curPrice;
           let diff = curPrice - prevClose;
           let pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
           item.price = curPrice;
           item.diff = diff;
           item.pct = pct;
-        } else {
-          item.price = item.defaultPrice;
-          item.diff = item.defaultChange;
-          item.pct = item.defaultPct;
         }
       });
     }
@@ -2347,89 +2361,102 @@ async function fetchRealTimeGoldData() {
 }
 
       function renderGoldKpiCards() {
-        const container = document.getElementById('goldKpiCardsContainer');
-        if (!container || goldLiveSymbolsData.length === 0) return;
+  const container = document.getElementById('goldKpiCardsContainer');
+  if (!container || goldLiveSymbolsData.length === 0) return;
 
-        let xau = goldLiveSymbolsData.find(x => x.id === 'XAUUSD') || DEFAULT_GOLD_SYMBOLS[0];
-        let gld = goldLiveSymbolsData.find(x => x.id === 'GLD') || DEFAULT_GOLD_SYMBOLS[1];
-        let fx = goldLiveSymbolsData.find(x => x.id === 'USDTHB') || DEFAULT_GOLD_SYMBOLS[2];
+  let xau = goldLiveSymbolsData.find(x => x.id === 'XAUUSD') || DEFAULT_GOLD_SYMBOLS[0];
+  let gld = goldLiveSymbolsData.find(x => x.id === 'GLD') || DEFAULT_GOLD_SYMBOLS[1];
+  let fx = goldLiveSymbolsData.find(x => x.id === 'USDTHB') || DEFAULT_GOLD_SYMBOLS[2];
 
-        // คำนวณราคาทองคำต่อกรัม (บาท) = (XAU/USD * USD/THB) / 31.1035
-        let goldPerGram = (xau.price * fx.price) / 31.1035;
-        // คำนวณราคาทองคำแท่งไทย 96.5% (บาท/บาททอง) ≈ (XAU/USD * USD/THB * 0.965 * 15.244) / 31.1035
-        let goldThaiBahtWeight = (xau.price * fx.price * 0.965 * 15.244) / 31.1035;
+  let xauPrice = Number(xau.price ?? xau.defaultPrice ?? 0);
+  let xauPct = Number(xau.pct ?? xau.defaultPct ?? 0);
+  let xauDiff = Number(xau.diff ?? xau.defaultChange ?? 0);
 
-        let items = [
-          { name: 'XAU / USD (ทองคำโลก)', val: '$' + xau.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), pct: xau.pct, diff: '$' + xau.diff.toFixed(2), icon: '🪙', color: 'amber' },
-          { name: 'SPDR GLD (ETF)', val: '$' + gld.price.toFixed(2), pct: gld.pct, diff: '$' + gld.diff.toFixed(2), icon: '📦', color: 'purple' },
-          { name: 'USD / THB (ค่าเงิน)', val: fx.price.toFixed(2) + ' ฿', pct: fx.pct, diff: fx.diff.toFixed(2), icon: '💵', color: 'emerald' },
-          { name: 'ทองคำโลก (บาท/กรัม)', val: goldPerGram.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ฿', pct: xau.pct + fx.pct, diff: 'คำนวณสด', icon: '⚖️', color: 'yellow' },
-          { name: 'ทองคำแท่ง 96.5% (บาท/บาท)', val: goldThaiBahtWeight.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ฿', pct: xau.pct + fx.pct, diff: 'ประมาณการ', icon: '🏆', color: 'orange' }
-        ];
+  let gldPrice = Number(gld.price ?? gld.defaultPrice ?? 0);
+  let gldPct = Number(gld.pct ?? gld.defaultPct ?? 0);
+  let gldDiff = Number(gld.diff ?? gld.defaultChange ?? 0);
 
-        let html = '';
-        items.forEach(item => {
-          let isPos = item.pct >= 0;
-          let sign = isPos ? '+' : '';
-          let badgeCls = isPos ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+  let fxPrice = Number(fx.price ?? fx.defaultPrice ?? 0);
+  let fxPct = Number(fx.pct ?? fx.defaultPct ?? 0);
+  let fxDiff = Number(fx.diff ?? fx.defaultChange ?? 0);
 
-          html += `
-            <div class="pastel-card p-3 border ${isPos ? 'border-amber-200 hover:border-amber-400' : 'border-rose-200 hover:border-rose-400'} bg-white/90 shadow-xs flex flex-col justify-between">
-              <div class="flex items-center justify-between gap-1 mb-1">
-                <span class="text-[11px] font-bold text-slate-800 truncate">${item.icon} ${item.name}</span>
-              </div>
-              <div class="text-base sm:text-lg font-black text-slate-900 font-mono leading-tight my-0.5">
-                ${item.val}
-              </div>
-              <div class="flex items-center justify-between text-[10px] mt-1 pt-1 border-t border-slate-50">
-                <span class="text-slate-500 font-mono">${item.diff}</span>
-                <span class="font-bold px-1.5 py-0.5 rounded-full border text-[9px] ${badgeCls}">
-                  ${sign}${item.pct.toFixed(2)}%
-                </span>
-              </div>
-            </div>
-          `;
-        });
+  let goldPerGram = (xauPrice * fxPrice) / 31.1035;
+  let goldThaiBahtWeight = (xauPrice * fxPrice * 0.965 * 15.244) / 31.1035;
 
-        container.innerHTML = html;
-      }
+  let items = [
+    { name: 'XAU / USD (ทองคำโลก)', val: '$' + xauPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), pct: xauPct, diff: '$' + xauDiff.toFixed(2), icon: '🪙' },
+    { name: 'SPDR GLD (ETF)', val: '$' + gldPrice.toFixed(2), pct: gldPct, diff: '$' + gldDiff.toFixed(2), icon: '📦' },
+    { name: 'USD / THB (ค่าเงิน)', val: fxPrice.toFixed(2) + ' ฿', pct: fxPct, diff: fxDiff.toFixed(2), icon: '💵' },
+    { name: 'ทองคำโลก (บาท/กรัม)', val: goldPerGram.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ฿', pct: xauPct + fxPct, diff: 'คำนวณสด', icon: '⚖️' },
+    { name: 'ทองคำแท่ง 96.5% (บาท/บาท)', val: goldThaiBahtWeight.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ฿', pct: xauPct + fxPct, diff: 'ประมาณการ', icon: '🏆' }
+  ];
+
+  let html = '';
+  items.forEach(item => {
+    let isPos = item.pct >= 0;
+    let sign = isPos ? '+' : '';
+    let badgeCls = isPos ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+
+    html += `
+      <div class="pastel-card p-3 border ${isPos ? 'border-amber-200 hover:border-amber-400' : 'border-rose-200 hover:border-rose-400'} bg-white/90 shadow-xs flex flex-col justify-between">
+        <div class="flex items-center justify-between gap-1 mb-1">
+          <span class="text-[11px] font-bold text-slate-800 truncate">${item.icon} ${item.name}</span>
+        </div>
+        <div class="text-base sm:text-lg font-black text-slate-900 font-mono leading-tight my-0.5">
+          ${item.val}
+        </div>
+        <div class="flex items-center justify-between text-[10px] mt-1 pt-1 border-t border-slate-50">
+          <span class="text-slate-500 font-mono">${item.diff}</span>
+          <span class="font-bold px-1.5 py-0.5 rounded-full border text-[9px] ${badgeCls}">
+            ${sign}${item.pct.toFixed(2)}%
+          </span>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
 
       function renderGoldLiveTable() {
-        const tbody = document.getElementById('goldLiveTableBody');
-        if (!tbody || goldLiveSymbolsData.length === 0) return;
+  const tbody = document.getElementById('goldLiveTableBody');
+  if (!tbody || goldLiveSymbolsData.length === 0) return;
 
-        let html = '';
-        goldLiveSymbolsData.forEach(item => {
-          let isPos = item.pct >= 0;
-          let sign = isPos ? '+' : '';
-          let cls = isPos ? 'positive' : 'negative';
-          let priceStr = item.id === 'USDTHB' ? item.price.toFixed(4) + ' ฿' : '$' + item.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  let html = '';
+  goldLiveSymbolsData.forEach(item => {
+    let price = Number(item.price ?? item.defaultPrice ?? 0);
+    let diff = Number(item.diff ?? item.defaultChange ?? 0);
+    let pct = Number(item.pct ?? item.defaultPct ?? 0);
 
-          html += `
-            <tr class="hover:bg-amber-50/40 transition-colors">
-              <td class="text-left font-bold text-slate-800">
-                <div class="flex items-center gap-2">
-                  <span class="text-base">${item.flag}</span>
-                  <div>
-                    <div>${item.name}</div>
-                    <span class="text-[10px] font-mono text-slate-400 font-normal">${item.symbol}</span>
-                  </div>
-                </div>
-              </td>
-              <td class="text-center text-slate-600 font-medium">${item.type}</td>
-              <td class="text-right font-bold text-slate-900 font-mono">${priceStr}</td>
-              <td class="text-right font-mono font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">${sign}${item.diff ? item.diff.toFixed(2) : '0.00'}</td>
-              <td class="text-right"><span class="${cls}">${sign}${item.pct.toFixed(2)}%</span></td>
-              <td class="text-left text-xs text-amber-900 font-medium">
-                <span class="bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md text-[11px]">${item.gpfRef}</span>
-              </td>
-            </tr>
-          `;
-        });
+    let isPos = pct >= 0;
+    let sign = isPos ? '+' : '';
+    let cls = isPos ? 'positive' : 'negative';
+    let priceStr = item.id === 'USDTHB' ? price.toFixed(4) + ' ฿' : '$' + price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        tbody.innerHTML = html;
-      }
+    html += `
+      <tr class="hover:bg-amber-50/40 transition-colors">
+        <td class="text-left font-bold text-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="text-base">${item.flag}</span>
+            <div>
+              <div>${item.name}</div>
+              <span class="text-[10px] font-mono text-slate-400 font-normal">${item.symbol}</span>
+            </div>
+          </div>
+        </td>
+        <td class="text-center text-slate-600 font-medium">${item.type}</td>
+        <td class="text-right font-bold text-slate-900 font-mono">${priceStr}</td>
+        <td class="text-right font-mono font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">${sign}${diff.toFixed(2)}</td>
+        <td class="text-right"><span class="${cls}">${sign}${pct.toFixed(2)}%</span></td>
+        <td class="text-left text-xs text-amber-900 font-medium">
+          <span class="bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md text-[11px]">${item.gpfRef}</span>
+        </td>
+      </tr>
+    `;
+  });
 
+  tbody.innerHTML = html;
+}
       function renderGoldMomentumBarChart() {
         const ctx = document.getElementById('goldMomentumBarChart');
         if (!ctx || goldLiveSymbolsData.length === 0) return;
@@ -2481,18 +2508,21 @@ async function fetchRealTimeGoldData() {
       }
 
       function updateGoldFormulaSteps() {
-        let xau = goldLiveSymbolsData.find(x => x.id === 'XAUUSD') || DEFAULT_GOLD_SYMBOLS[0];
-        let fx = goldLiveSymbolsData.find(x => x.id === 'USDTHB') || DEFAULT_GOLD_SYMBOLS[2];
+  let xau = goldLiveSymbolsData.find(x => x.id === 'XAUUSD') || DEFAULT_GOLD_SYMBOLS[0];
+  let fx = goldLiveSymbolsData.find(x => x.id === 'USDTHB') || DEFAULT_GOLD_SYMBOLS[2];
 
-        let valStep1 = (xau.price * fx.price).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-        let valStep2 = ((xau.price * fx.price) / 31.1035).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  let xauPrice = Number(xau.price ?? xau.defaultPrice ?? 0);
+  let fxPrice = Number(fx.price ?? fx.defaultPrice ?? 0);
 
-        let step1El = document.getElementById('goldStep1');
-        let step2El = document.getElementById('goldStep2');
+  let valStep1 = (xauPrice * fxPrice).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  let valStep2 = ((xauPrice * fxPrice) / 31.1035).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-        if (step1El) step1El.innerHTML = `$${xau.price.toFixed(0)} × ${fx.price.toFixed(2)} ฿ = ${valStep1} ฿/oz`;
-        if (step2El) step2El.innerHTML = `${valStep1} ÷ 31.1035 = ${valStep2} ฿/g`;
-      }
+  let step1El = document.getElementById('goldStep1');
+  let step2El = document.getElementById('goldStep2');
+
+  if (step1El) step1El.innerHTML = `$${xauPrice.toFixed(0)} × ${fxPrice.toFixed(2)} ฿ = ${valStep1} ฿/oz`;
+  if (step2El) step2El.innerHTML = `${valStep1} ÷ 31.1035 = ${valStep2} ฿/g`;
+}
 
       async function refreshGoldData() {
         const btn = document.querySelector('button[onclick="refreshGoldData()"]');
