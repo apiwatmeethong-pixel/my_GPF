@@ -2073,54 +2073,57 @@ async function fetchGlobalMarketIndices() {
 }
 
       function renderMarketBarChart() {
-        const ctx = document.getElementById('marketIndicesBarChart');
-        if (!ctx || globalIndicesData.length === 0) return;
-        if (marketBarChartInstance) marketBarChartInstance.destroy();
+  const ctx = document.getElementById('marketIndicesBarChart');
+  if (!ctx || globalIndicesData.length === 0) return;
+  if (marketBarChartInstance) marketBarChartInstance.destroy();
 
-        const labels = globalIndicesData.map(i => i.name);
-        const dataValues = globalIndicesData.map(i => parseFloat(i.pct.toFixed(2)));
-        const colors = dataValues.map(v => v >= 0 ? '#10b981' : '#f43f5e');
+  const labels = globalIndicesData.map(i => i.name);
+  const dataValues = globalIndicesData.map(i => parseFloat(i.pct.toFixed(2)));
+  const colors = dataValues.map(v => v >= 0 ? '#10b981' : '#f43f5e');
 
-        marketBarChartInstance = new Chart(ctx.getContext('2d'), {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'การเปลี่ยนแปลงวันนี้ (%)',
-              data: dataValues,
-              backgroundColor: colors,
-              borderRadius: 6,
-              borderWidth: 1,
-              borderColor: colors
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: function(ctx) { return ' เปลี่ยนแปลง: ' + (ctx.raw >= 0 ? '+' : '') + ctx.raw + '%'; }
-                }
-              }
-            },
-            scales: {
-              y: {
-                ticks: {
-                  callback: function(v) { return (v >= 0 ? '+' : '') + v + '%'; },
-                  font: { family: 'Prompt', size: 10 }
-                },
-                grid: { color: 'rgba(233, 213, 255, 0.4)' }
-              },
-              x: {
-                ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
-                grid: { display: false }
-              }
-            }
+  marketBarChartInstance = new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'การเปลี่ยนแปลงวันนี้ (%)',
+        data: dataValues,
+        backgroundColor: colors,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: colors
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ' เปลี่ยนแปลง: ' + (ctx.raw >= 0 ? '+' : '') + Number(ctx.raw.toFixed(2)) + '%'; }
           }
-        });
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            callback: function(v) { 
+              var num = Number(v);
+              return (num >= 0 ? '+' : '') + Number(num.toFixed(2)) + '%'; 
+            },
+            font: { family: 'Prompt', size: 10 }
+          },
+          grid: { color: 'rgba(233, 213, 255, 0.4)' }
+        },
+        x: {
+          ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
+          grid: { display: false }
+        }
       }
+    }
+  });
+}
 
       function processThaiStockData(response) {
         try {
@@ -2458,54 +2461,57 @@ async function fetchRealTimeGoldData() {
   tbody.innerHTML = html;
 }
       function renderGoldMomentumBarChart() {
-        const ctx = document.getElementById('goldMomentumBarChart');
-        if (!ctx || goldLiveSymbolsData.length === 0) return;
-        if (goldMomentumBarChartInstance) goldMomentumBarChartInstance.destroy();
+  const ctx = document.getElementById('goldMomentumBarChart');
+  if (!ctx || goldLiveSymbolsData.length === 0) return;
+  if (goldMomentumBarChartInstance) goldMomentumBarChartInstance.destroy();
 
-        const labels = goldLiveSymbolsData.map(i => i.name.split(' ')[0]);
-        const dataValues = goldLiveSymbolsData.map(i => parseFloat(i.pct.toFixed(2)));
-        const colors = dataValues.map(v => v >= 0 ? '#f59e0b' : '#f43f5e');
+  const labels = goldLiveSymbolsData.map(i => i.name.split(' ')[0]);
+  const dataValues = goldLiveSymbolsData.map(i => parseFloat(i.pct.toFixed(2)));
+  const colors = dataValues.map(v => v >= 0 ? '#f59e0b' : '#f43f5e');
 
-        goldMomentumBarChartInstance = new Chart(ctx.getContext('2d'), {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'เปลี่ยนแปลงวันนี้ (%)',
-              data: dataValues,
-              backgroundColor: colors,
-              borderRadius: 6,
-              borderWidth: 1,
-              borderColor: colors
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: function(ctx) { return ' เปลี่ยนแปลง: ' + (ctx.raw >= 0 ? '+' : '') + ctx.raw + '%'; }
-                }
-              }
-            },
-            scales: {
-              y: {
-                ticks: {
-                  callback: function(v) { return (v >= 0 ? '+' : '') + v + '%'; },
-                  font: { family: 'Prompt', size: 10 }
-                },
-                grid: { color: 'rgba(251, 191, 36, 0.2)' }
-              },
-              x: {
-                ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
-                grid: { display: false }
-              }
-            }
+  goldMomentumBarChartInstance = new Chart(ctx.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'เปลี่ยนแปลงวันนี้ (%)',
+        data: dataValues,
+        backgroundColor: colors,
+        borderRadius: 6,
+        borderWidth: 1,
+        borderColor: colors
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ' เปลี่ยนแปลง: ' + (ctx.raw >= 0 ? '+' : '') + Number(ctx.raw.toFixed(2)) + '%'; }
           }
-        });
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            callback: function(v) { 
+              var num = Number(v);
+              return (num >= 0 ? '+' : '') + Number(num.toFixed(2)) + '%'; 
+            },
+            font: { family: 'Prompt', size: 10 }
+          },
+          grid: { color: 'rgba(251, 191, 36, 0.2)' }
+        },
+        x: {
+          ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
+          grid: { display: false }
+        }
       }
+    }
+  });
+}
 
       function updateGoldFormulaSteps() {
   let xau = goldLiveSymbolsData.find(x => x.id === 'XAUUSD') || DEFAULT_GOLD_SYMBOLS[0];
