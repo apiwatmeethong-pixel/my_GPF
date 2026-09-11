@@ -460,13 +460,15 @@
                     <tr>
                       <th class="text-left">ลำดับ</th>
                       <th class="text-left">ชื่อหุ้น</th>
-                      <th class="text-right">น้ำหนักในโมเดล (%)</th>
-                      <th class="text-right">ราคาล่าสุด (บาท)</th>
+                      <th class="text-right">น้ำหนัก (%)</th>
+                      <th class="text-right">ราคา Real-time (฿)</th>
+                      <th class="text-right">เปลี่ยนแปลง</th>
+                      <th class="text-right">% เปลี่ยนแปลง</th>
                       <th class="text-left">หมวดธุรกิจ</th>
                     </tr>
                   </thead>
                   <tbody id="thaiTopStocksTableBody">
-                    <tr><td colspan="5" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูลหุ้นบิ๊กแคป...</td></tr>
+                    <tr><td colspan="7" class="text-center py-4 text-slate-400">กำลังโหลดข้อมูลหุ้นบิ๊กแคป Real-time...</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -2151,7 +2153,7 @@
             let rowHeaders = data[1];
             let lastRow = data[data.length - 1];
 
-            thaiTopStocksRaw = [];
+              thaiTopStocksRaw = [];
             for (let c = 1; c <= 10; c++) {
               if (rowHeaders[c]) {
                 let name = String(rowHeaders[c]).trim();
@@ -2160,8 +2162,12 @@
                 thaiTopStocksRaw.push({
                   rank: c,
                   name: name,
+                  symbol: name + '.BK',
                   weight: (w * 100).toFixed(2),
                   price: price,
+                  livePrice: price,
+                  diff: 0,
+                  pct: 0,
                   sector: sectorMap[name] || 'กลุ่มอุตสาหกรรมหลัก'
                 });
               }
@@ -2197,28 +2203,70 @@
           renderThaiTopStocksTable();
           drawThaiStockDashboard();
           fetchGlobalMarketIndices();
+          fetchThaiTopStocksLive();
 
         } catch (e) {
           console.error('processThaiStockData error:', e);
         }
       }
 
+      async function fetchThaiTopStocksLive() {
+        if (!thaiTopStocksRaw || thaiTopStocksRaw.length === 0) return;
+
+        const promises = thaiTopStocksRaw.map(async s => {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${s.symbol}?interval=1d&range=5d`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+              const json = await res.json();
+              if (json.chart && json.chart.result && json.chart.result.length > 0) {
+                const meta = json.chart.result[0].meta;
+                const curPrice = meta.regularMarketPrice || s.price;
+                const prevClose = meta.chartPreviousClose || meta.previousClose || curPrice;
+                const diff = curPrice - prevClose;
+                const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+                s.livePrice = curPrice;
+                s.diff = diff;
+                s.pct = pct;
+              }
+            }
+          } catch(e) {
+            // keep fallback
+          }
+          return s;
+        });
+
+        await Promise.all(promises);
+        renderThaiTopStocksTable();
+      }
+
       function renderThaiTopStocksTable() {
         const tbody = document.getElementById('thaiTopStocksTableBody');
         if (!tbody) return;
         if (!thaiTopStocksRaw || thaiTopStocksRaw.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-slate-400">ยังไม่มีข้อมูลหุ้นบิ๊กแคป</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-slate-400">ยังไม่มีข้อมูลหุ้นบิ๊กแคป</td></tr>';
           return;
         }
 
         let html = '';
         thaiTopStocksRaw.forEach(s => {
+          const isUp = s.pct >= 0;
+          const colorClass = isUp ? 'text-emerald-600' : 'text-rose-600';
+          const sign = isUp ? '+' : '';
+          const currentPrice = s.livePrice > 0 ? s.livePrice : s.price;
           html += `
             <tr class="hover:bg-purple-50/30">
               <td class="text-left font-mono font-bold text-purple-600">${s.rank}</td>
-              <td class="text-left font-bold text-slate-800">${s.name}</td>
+              <td class="text-left font-bold text-slate-800 flex items-center gap-1.5">
+                <span>${s.name}</span>
+                <span class="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">.BK</span>
+              </td>
               <td class="text-right font-mono font-bold text-indigo-700">${s.weight}%</td>
-              <td class="text-right font-mono font-bold text-slate-900">${s.price > 0 ? s.price.toFixed(2) : '-'}</td>
+              <td class="text-right font-mono font-bold text-slate-900">${currentPrice > 0 ? currentPrice.toFixed(2) : '-'}</td>
+              <td class="text-right font-mono ${colorClass}">${s.diff !== 0 ? (sign + s.diff.toFixed(2)) : '-'}</td>
+              <td class="text-right font-mono font-bold ${colorClass}">${s.pct !== 0 ? (sign + s.pct.toFixed(2) + '%') : '-'}</td>
               <td class="text-left text-xs text-slate-500">${s.sector}</td>
             </tr>
           `;
