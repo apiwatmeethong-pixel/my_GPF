@@ -1914,12 +1914,12 @@
 
       // รายการดัชนีสากลและอัตราแลกเปลี่ยนที่มีผลต่อ กบข.
       const DEFAULT_MARKET_SYMBOLS = [
-        { id: 'SET', symbol: '%5ESET.BK', name: 'SET Index', region: '🇹🇭 ไทย', flag: '🇹🇭', gpfRef: 'ดัชนีตลาดหุ้นไทย (อิงแผนหุ้นไทย)', defaultPrice: 1588.90, defaultChange: 12.64, defaultPct: 0.80 },
+        { id: 'SET', symbol: '^SET.BK', name: 'SET Index', region: '🇹🇭 ไทย', flag: '🇹🇭', gpfRef: 'ดัชนีตลาดหุ้นไทย (อิงแผนหุ้นไทย)', defaultPrice: 1588.90, defaultChange: 12.64, defaultPct: 0.80 },
         { id: 'SET100', symbol: 'SET100', name: 'SET 100', region: '🇹🇭 ไทย (Top 100)', flag: '🇹🇭', gpfRef: 'Benchmark แผนหุ้นไทย กบข.', defaultPrice: 2093.81, defaultChange: 8.50, defaultPct: 0.41 },
-        { id: 'SP500', symbol: '%5EGSPC', name: 'S&P 500', region: '🇺🇸 สหรัฐฯ', flag: '🇺🇸', gpfRef: 'เกณฑ์มาตรฐานหลัก แผนหุ้นต่างประเทศ', defaultPrice: 7747.71, defaultChange: 16.72, defaultPct: 0.22 },
-        { id: 'NASDAQ', symbol: '%5EIXIC', name: 'NASDAQ 100', region: '🇺🇸 สหรัฐฯ (Tech)', flag: '💻', gpfRef: 'หุ้นเทคโนโลยีในแผนหุ้นต่างประเทศ', defaultPrice: 26584.06, defaultChange: 42.71, defaultPct: 0.16 },
+        { id: 'SP500', symbol: '^GSPC', name: 'S&P 500', region: '🇺🇸 สหรัฐฯ', flag: '🇺🇸', gpfRef: 'เกณฑ์มาตรฐานหลัก แผนหุ้นต่างประเทศ', defaultPrice: 7747.71, defaultChange: 16.72, defaultPct: 0.22 },
+        { id: 'NASDAQ', symbol: '^IXIC', name: 'NASDAQ 100', region: '🇺🇸 สหรัฐฯ (Tech)', flag: '💻', gpfRef: 'หุ้นเทคโนโลยีในแผนหุ้นต่างประเทศ', defaultPrice: 26584.06, defaultChange: 42.71, defaultPct: 0.16 },
         { id: 'MSCI_WORLD', symbol: 'URTH', name: 'MSCI World (URTH)', region: '🌐 หุ้นทั่วโลก', flag: '🌐', gpfRef: 'เกณฑ์มาตรฐานเปรียบเทียบ กบข. สากล', defaultPrice: 210.34, defaultChange: 0.41, defaultPct: 0.20 },
-        { id: 'NIKKEI', symbol: '%5EN225', name: 'Nikkei 225', region: '🇯🇵 ญี่ปุ่น', flag: '🇯🇵', gpfRef: 'ตลาดหุ้นเอเชีย (แผนหุ้นต่างประเทศ)', defaultPrice: 65020.94, defaultChange: -1290.99, defaultPct: -1.95 },
+        { id: 'NIKKEI', symbol: '^N225', name: 'Nikkei 225', region: '🇯🇵 ญี่ปุ่น', flag: '🇯🇵', gpfRef: 'ตลาดหุ้นเอเชีย (แผนหุ้นต่างประเทศ)', defaultPrice: 65020.94, defaultChange: -1290.99, defaultPct: -1.95 },
         { id: 'USDTHB', symbol: 'THB=X', name: 'USD / THB', region: '💵 ค่าเงิน', flag: '💵', gpfRef: 'อัตราแลกเปลี่ยนแปลงมูลค่าสินทรัพย์ต่างประเทศ', defaultPrice: 32.89, defaultChange: -0.18, defaultPct: -0.54 }
       ];
 
@@ -1962,12 +1962,37 @@
           }
         }
 
+        const symbolsToFetch = updatedIndices.filter(i => i.symbol !== 'SET100').map(i => i.symbol);
+
+        // ดึงผ่าน backend (ไม่มีปัญหา CORS)
+        let backendData = null;
+        try {
+          const res = await callBackend('fetchYahooData', { symbols: symbolsToFetch });
+          if (res && res.status === 'success' && res.data) {
+            backendData = res.data;
+          }
+        } catch(e) {
+          console.warn('Backend fetchYahooData failed for global indices, falling back to direct:', e);
+        }
+
         const promises = updatedIndices.map(async item => {
-          if (item.symbol === 'SET100') return item; // ได้จากชีทแล้ว
+          if (item.symbol === 'SET100') return item;
+          if (backendData && backendData[item.symbol]) {
+            const b = backendData[item.symbol];
+            const curPrice = b.price || item.defaultPrice;
+            const prevClose = b.prevClose || curPrice;
+            const diff = curPrice - prevClose;
+            const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+            item.price = curPrice;
+            item.diff = diff;
+            item.pct = pct;
+            return item;
+          }
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
-            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${item.symbol}?interval=1d&range=5d`, { signal: controller.signal });
+            const timeoutId = setTimeout(() => controller.abort(), 3500);
+            const encSym = encodeURIComponent(item.symbol);
+            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encSym}?interval=1d&range=5d`, { signal: controller.signal });
             clearTimeout(timeoutId);
             if (res.ok) {
               const json = await res.json();
@@ -1984,7 +2009,7 @@
               }
             }
           } catch(e) {
-            // fallback gracefully
+            // fallback to default
           }
           item.price = item.defaultPrice;
           item.diff = item.defaultChange;
@@ -2148,39 +2173,40 @@
             'CPN': 'พัฒนาอสังหาริมทรัพย์'
           };
 
-          if (data.length >= 2) {
-            let rowWeights = data[0];
-            let rowHeaders = data[1];
-            let lastRow = data[data.length - 1];
+          // หา rowHeaders (แถวที่มีคำว่า วันที่) และ rowWeights (แถวก่อนหน้า หรือแถว 0 ใน response.data)
+          let rawData = response.data;
+          let headerRowIdx = rawData.findIndex(r => r && (String(r[0]).includes('วันที่') || String(r[0]).includes('Date')));
+          let rowHeaders = headerRowIdx !== -1 ? rawData[headerRowIdx] : (data[0] || []);
+          let rowWeights = headerRowIdx > 0 ? rawData[headerRowIdx - 1] : (rawData[0] || []);
+          let lastRow = data[data.length - 1];
 
-              thaiTopStocksRaw = [];
-            for (let c = 1; c <= 10; c++) {
-              if (rowHeaders[c]) {
-                let name = String(rowHeaders[c]).trim();
-                let w = parseFloat(rowWeights[c]) || 0;
-                let price = parseFloat(lastRow[c]) || 0;
-                thaiTopStocksRaw.push({
-                  rank: c,
-                  name: name,
-                  symbol: name + '.BK',
-                  weight: (w * 100).toFixed(2),
-                  price: price,
-                  livePrice: price,
-                  diff: 0,
-                  pct: 0,
-                  sector: sectorMap[name] || 'กลุ่มอุตสาหกรรมหลัก'
-                });
-              }
+          thaiTopStocksRaw = [];
+          for (let c = 1; c <= 10; c++) {
+            if (rowHeaders[c]) {
+              let name = String(rowHeaders[c]).trim();
+              let w = parseFloat(rowWeights[c]) || 0;
+              let price = parseFloat(lastRow[c]) || 0;
+              thaiTopStocksRaw.push({
+                rank: c,
+                name: name,
+                symbol: name + '.BK',
+                weight: (w * 100).toFixed(2),
+                price: price,
+                livePrice: price,
+                diff: 0,
+                pct: 0,
+                sector: sectorMap[name] || 'กลุ่มอุตสาหกรรมหลัก'
+              });
             }
+          }
 
-            // คำนวณค่า SET 100 ล่าสุดจากคอลัมน์ 11
-            if (lastRow[11]) {
-              latestSet100Value = parseFloat(lastRow[11]) || null;
-              if (data.length >= 4) {
-                let prevRow = data[data.length - 2];
-                let prevSet100 = parseFloat(prevRow[11]) || latestSet100Value;
-                latestSet100ChangePct = prevSet100 > 0 ? ((latestSet100Value - prevSet100) / prevSet100) * 100 : 0;
-              }
+          // คำนวณค่า SET 100 ล่าสุดจากคอลัมน์ 11
+          if (lastRow[11]) {
+            latestSet100Value = parseFloat(lastRow[11]) || null;
+            if (data.length >= 4) {
+              let prevRow = data[data.length - 2];
+              let prevSet100 = parseFloat(prevRow[11]) || latestSet100Value;
+              latestSet100ChangePct = prevSet100 > 0 ? ((latestSet100Value - prevSet100) / prevSet100) * 100 : 0;
             }
           }
 
@@ -2213,11 +2239,34 @@
       async function fetchThaiTopStocksLive() {
         if (!thaiTopStocksRaw || thaiTopStocksRaw.length === 0) return;
 
+        const symbols = thaiTopStocksRaw.map(s => s.symbol);
+        let backendData = null;
+        try {
+          const res = await callBackend('fetchYahooData', { symbols: symbols });
+          if (res && res.status === 'success' && res.data) {
+            backendData = res.data;
+          }
+        } catch(e) {
+          console.warn('Backend fetchYahooData failed for Thai stocks, using direct:', e);
+        }
+
         const promises = thaiTopStocksRaw.map(async s => {
+          if (backendData && backendData[s.symbol]) {
+            const b = backendData[s.symbol];
+            const curPrice = b.price || s.price;
+            const prevClose = b.prevClose || curPrice;
+            const diff = curPrice - prevClose;
+            const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+            s.livePrice = curPrice;
+            s.diff = diff;
+            s.pct = pct;
+            return s;
+          }
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
-            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${s.symbol}?interval=1d&range=5d`, { signal: controller.signal });
+            const timeoutId = setTimeout(() => controller.abort(), 3500);
+            const encSym = encodeURIComponent(s.symbol);
+            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encSym}?interval=1d&range=5d`, { signal: controller.signal });
             clearTimeout(timeoutId);
             if (res.ok) {
               const json = await res.json();
@@ -2375,10 +2424,32 @@
       async function fetchGoldPrices() {
         let updatedList = JSON.parse(JSON.stringify(DEFAULT_GOLD_SYMBOLS));
 
+        const symbols = updatedList.map(item => item.symbol);
+        let backendData = null;
+        try {
+          const res = await callBackend('fetchYahooData', { symbols: symbols });
+          if (res && res.status === 'success' && res.data) {
+            backendData = res.data;
+          }
+        } catch(e) {
+          console.warn('Backend fetchYahooData failed for gold, using direct:', e);
+        }
+
         const promises = updatedList.map(async item => {
+          if (backendData && backendData[item.symbol]) {
+            const b = backendData[item.symbol];
+            const curPrice = b.price || item.defaultPrice;
+            const prevClose = b.prevClose || curPrice;
+            const diff = curPrice - prevClose;
+            const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+            item.price = curPrice;
+            item.diff = diff;
+            item.pct = pct;
+            return item;
+          }
           try {
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const timeoutId = setTimeout(() => controller.abort(), 3500);
             const encodedSym = encodeURIComponent(item.symbol);
             const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodedSym}?interval=1d&range=5d`, { signal: controller.signal });
             clearTimeout(timeoutId);
