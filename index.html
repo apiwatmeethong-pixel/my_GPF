@@ -368,8 +368,9 @@
             </div>
           </div>
 
-          <!-- Top KPI Market Cards Grid -->
+          <!-- Top KPI Market Cards Grid (SET, SET100, S&P 500, NASDAQ, MSCI, Nikkei, USD/THB) -->
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3" id="marketCardsContainer">
+            <!-- Cards injected by JS -->
             <div class="pastel-card p-3 animate-pulse bg-purple-50/30 text-center"><span class="text-xs text-slate-400">กำลังโหลดดัชนี...</span></div>
           </div>
 
@@ -431,7 +432,7 @@
             </div>
           </div>
 
-          <!-- TAB 2: ตัวแบบจำลอง SET 100 & 10 หุ้นไทย -->
+          <!-- TAB 2: ตัวแบบจำลอง SET 100 & 10 หุ้นไทย (Thai Stocks Model) -->
           <div id="subTabSet100Content" class="hidden space-y-6">
             <div class="pastel-card p-5">
               <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
@@ -647,23 +648,23 @@
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-700">
                 <div class="bg-white/80 rounded-xl p-3 border border-amber-200 text-center">
                   <div class="text-amber-700 font-bold mb-1">ขั้นตอนที่ 1</div>
-                  <div class="font-mono text-xs sm:text-sm font-black text-amber-900" id="goldStep1">XAU/USD × USD/THB</div>
+                  <div class="font-mono text-sm font-black text-amber-900" id="goldStep1">XAU/USD × USD/THB</div>
                   <div class="text-[11px] text-slate-500 mt-1">= ราคาทอง (บาท/troy oz)</div>
                 </div>
                 <div class="bg-white/80 rounded-xl p-3 border border-amber-200 text-center">
                   <div class="text-amber-700 font-bold mb-1">ขั้นตอนที่ 2</div>
-                  <div class="font-mono text-xs sm:text-sm font-black text-amber-900" id="goldStep2">÷ 31.1035 g/oz</div>
+                  <div class="font-mono text-sm font-black text-amber-900" id="goldStep2">÷ 31.1035 g/oz</div>
                   <div class="text-[11px] text-slate-500 mt-1">= ราคาทอง (บาท/กรัม)</div>
                 </div>
                 <div class="bg-white/80 rounded-xl p-3 border border-amber-200 text-center">
                   <div class="text-amber-700 font-bold mb-1">ผลลัพธ์ NAV</div>
-                  <div class="font-mono text-xs sm:text-sm font-black text-amber-900" id="goldStep3">× จำนวนหน่วยในพอร์ต</div>
+                  <div class="font-mono text-sm font-black text-amber-900" id="goldStep3">× จำนวนหน่วยในพอร์ต</div>
                   <div class="text-[11px] text-slate-500 mt-1">= มูลค่าพอร์ตแผนทองคำ (฿)</div>
                 </div>
               </div>
               <div class="mt-3 text-[11px] text-amber-800 bg-amber-100/60 rounded-xl p-3 border border-amber-200 leading-relaxed">
                 <i class="fa-solid fa-circle-info mr-1"></i>
-                <b>หมายเหตุ:</b> NAV ทองคำ กบข. ใช้ราคาทองคำ GLD ETF (SPDR Gold Shares) เป็นเกณฑ์หลัก โดยราคา GLD จะสะท้อนมูลค่า ~1/10 troy ounce ของทองคำ และกองทุน กบข. จะป้องกันความเสี่ยงด้านอัตราแลกเปลี่ยนบางส่วนผ่านสัญญา FX Forward ดังนั้นราคา NAV จริงในสกุลเงินบาทอาจผันแปรต่างจากการคำนวณโดยตรงเล็กน้อย
+                <b>หมายเหตุ:</b> NAV ทองคำ กบข. ใช้ราคาทองคำ GLD ETF (SPDR Gold Shares) เป็นเกณฑ์หลัก โดยราคา GLD จะสะท้อนมูลค่า 1/10 troy ounce ของทองคำ และกองทุน กบข. จะป้องกันความเสี่ยงด้านอัตราแลกเปลี่ยนบางส่วนผ่านสัญญา FX Forward ดังนั้นราคา NAV จริงในสกุลเงินบาทอาจผันแปรต่างจากการคำนวณโดยตรงเล็กน้อย
               </div>
             </div>
           </div>
@@ -733,7 +734,7 @@
                 <div class="p-4 rounded-2xl bg-rose-50/80 border border-rose-200 space-y-2">
                   <div class="font-bold text-rose-900 text-sm">⚠️ ความเสี่ยงสำคัญที่ต้องทราบ (ความเสี่ยงระดับ 7)</div>
                   <div class="text-slate-700 leading-relaxed">
-                    แผนทองคำ กบข. จัดอยู่ใน <b>ระดับความเสี่ยงสูงสุด (ระดับ 7)</b> เนื่องจากราคาทองคำโลกมีความผันผวนสูงและไม่มีการจ่ายเงินปันผล รายได้จะได้รับในรูปส่วนต่างของ NAV เท่านั้น เหมาะสำหรับผู้ที่ต้องการกระจายความเสี่ยงพอร์ตและรับความเสี่ยงได้สูง โดยกฎหมาย กบข. กำหนดสัดส่วนถือครองทองคำได้ไม่เกิน 25% ของพอร์ตรวม
+                    แผนทองคำ กบข. จัดอยู่ใน <b>ระดับความเสี่ยงสูงสุด (ระดับ 7)</b> เนื่องจากราคาทองคำโลกมีความผันผวนสูงและไม่มีการจ่ายเงินปันผล รายได้จะได้รับในรูปส่วนต่างของ NAV เท่านั้น เหมาะสำหรับผู้ที่ต้องการกระจายความเสี่ยงพอร์ตและรับความเสี่ยงได้สูง ควรจัดสรรเป็นส่วนหนึ่งของพอร์ต ไม่เกิน 15-20% โดยทั่วไป
                   </div>
                 </div>
               </div>
@@ -741,6 +742,7 @@
           </div>
 
         </div>
+
 
         <!-- PAGE 5: AI & COMPREHENSIVE ANALYSIS (วิเคราะห์) -->
         <div id="page-analysis" class="hidden space-y-6">
@@ -787,7 +789,7 @@
 
             <div id="tactical_switch_panel" class="p-4 rounded-2xl bg-amber-50/80 border border-dashed border-amber-300 text-xs"></div>
 
-            <!-- 🟢 กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิ -->
+            <!-- 🟢 กราฟแท่งแสดงผลกำไร/ขาดทุนสุทธิ (Period Profit/Loss Bar Chart) -->
             <div class="pastel-card p-5">
               <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <h3 class="text-xs font-bold text-purple-900 flex items-center gap-2">
@@ -1136,6 +1138,8 @@
         let tbody = document.getElementById('cashflowHistoryBody');
         if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-slate-400">กำลังโหลดประวัติเงินนำส่ง...</td></tr>';
         try {
+          // Backend (Apps Script) ควรมีฟังก์ชัน getCashflowData(user) คืนค่าอาเรย์ของ
+          // { id: <row index หรือรหัสอ้างอิงแถวในชีท cashflow>, date, amount, locked: true/false }
           const res = await callBackend('getCashflowData', { user: currentUser });
           cashflowRecords = (res && res.data) ? res.data : (Array.isArray(res) ? res : []);
           renderCashflowHistory();
@@ -1184,6 +1188,7 @@
         let newAmount = parseFloat(input.value) || 0;
         if (newAmount < 0) { Swal.fire('ข้อผิดพลาด', 'ยอดเงินห้ามติดลบครับ', 'error'); return; }
         try {
+          // Backend ควรมีฟังก์ชัน updateCashflowEntry(id, amount, user) เพื่อแก้ไขค่าในชีท cashflow
           const res = await callBackend('updateCashflowEntry', { id: id, amount: newAmount, user: currentUser });
           if (res && (res.status === 'success' || res.success)) {
             Swal.fire({ icon: 'success', title: 'บันทึกแล้ว', text: 'แก้ไขยอดเงินนำส่งเรียบร้อย', timer: 1200, showConfirmButton: false });
@@ -1200,6 +1205,7 @@
 
       async function toggleLockCashflowRow(id, lockState) {
         try {
+          // Backend ควรมีฟังก์ชัน lockCashflowEntry(id, lockState, user) เพื่ออัปเดตสถานะล็อคในชีท cashflow
           const res = await callBackend('lockCashflowEntry', { id: id, locked: lockState, user: currentUser });
           if (res && (res.status === 'success' || res.success)) {
             await loadCashflowHistory();
@@ -1301,7 +1307,7 @@
           el.classList.add('nav-tab-active'); 
         }
         
-        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🌐 ดัชนีตลาดหุ้นไทยและต่างประเทศ (กบข. Benchmarks)', 'gold': '🪙 สัญญาณราคาทองคำโลก & แผนทองคำ กบข.', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
+        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🌐 ดัชนีตลาดหุ้นไทยและต่างประเทศ (กบข. Benchmarks)', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
         document.getElementById('main_title').innerHTML = titles[pageId] || '';
 
         if(ytdData.length === 0 && currentUser !== "") {
@@ -1320,7 +1326,7 @@
           if(thaiStockDataRaw.length > 0) drawThaiStockDashboard();
         }
         if(pageId === 'gold') {
-          if(goldLiveSymbolsData.length === 0) fetchRealTimeGoldData();
+          if(goldMarketData.length === 0) fetchGoldPrices();
           if(goldDataRaw.length > 0) drawGoldDashboard();
         }
         if(pageId === 'analysis' && ytdData.length > 0) drawAnalysisDashboard();
@@ -1521,34 +1527,34 @@
       }
 
       async function triggerQuantumAiEvaluator() {
-  const resultDiv = document.getElementById('aiEvaluatorResult');
-  const selectedEngine = document.getElementById('aiEngineSelect').value;
-  
-  resultDiv.innerHTML = `<div class="text-center py-6 text-purple-300"><i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i><br/>Quantum AI Engine กำลังประมวลผลวิเคราะห์เชิงลึก...</div>`;
+        const resultDiv = document.getElementById('aiEvaluatorResult');
+        const selectedEngine = document.getElementById('aiEngineSelect').value;
+        
+        resultDiv.innerHTML = `<div class="text-center py-6 text-purple-300"><i class="fa-solid fa-spinner fa-spin fa-2x mb-2"></i><br/>Quantum AI Engine กำลังประมวลผลวิเคราะห์เชิงลึก...</div>`;
 
-  try {
-    const res = await callBackend('generateQuantumAIAnalysis', { username: currentUser, requestedEngine: selectedEngine });
-    if (res && res.status === "success" && res.engineName !== "Local Fallback Engine" && res.analysis) {
-      const engineLabel = res.engineName || selectedEngine;
-      const parsedText = marked.parse(res.analysis);
-      resultDiv.innerHTML = `
-        <div class="text-left space-y-2">
-          <div class="text-[11px] text-purple-400 font-semibold border-b border-slate-800 pb-2 mb-3 flex items-center justify-between">
-            <span><i class="fa-solid fa-cpu mr-1"></i> ประมวลผลสำเร็จโดย: ${engineLabel}</span>
-            <span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> Verified</span>
-          </div>
-          ${parsedText}
-        </div>
-      `;
-      cachedAiAnalysis = parsedText;
-    } else {
-      generateLocalFallbackAnalysis();
-    }
-  } catch(err) {
-    console.error(err);
-    generateLocalFallbackAnalysis();
-  }
-}
+        try {
+          const res = await callBackend('generateQuantumAIAnalysis', { username: currentUser, requestedEngine: selectedEngine });
+          if(res && (res.status === "success" || res.analysis)) {
+            const engineLabel = res.engineName || selectedEngine;
+            const parsedText = marked.parse(res.analysis);
+            resultDiv.innerHTML = `
+              <div class="text-left space-y-2">
+                <div class="text-[11px] text-purple-400 font-semibold border-b border-slate-800 pb-2 mb-3 flex items-center justify-between">
+                  <span><i class="fa-solid fa-cpu mr-1"></i> ประมวลผลสำเร็จโดย: ${engineLabel}</span>
+                  <span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                </div>
+                ${parsedText}
+              </div>
+            `;
+            cachedAiAnalysis = parsedText;
+          } else {
+            generateLocalFallbackAnalysis();
+          }
+        } catch(err) {
+          console.error(err);
+          generateLocalFallbackAnalysis();
+        }
+      }
 
       function generateLocalFallbackAnalysis() {
         const resultDiv = document.getElementById('aiEvaluatorResult');
@@ -1632,6 +1638,7 @@
         document.getElementById('rank_table_div').innerHTML = tableHtml + '</tbody></table>';
       }
 
+      // 'month' หรือ 'week' - โหมดปัจจุบันของกราฟแท่งกำไร/ขาดทุน
       let chartPeriodMode = 'month';
 
       function setChartPeriod(mode) {
@@ -1652,6 +1659,7 @@
         renderMonthlyBarChart();
       }
 
+      // คำนวณเลขสัปดาห์แบบ ISO (สัปดาห์เริ่มวันจันทร์) คืนค่า { year, week, weekStart }
       function getISOWeekInfo(d) {
         let date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
         let dayNum = date.getUTCDay() || 7;
@@ -1902,15 +1910,16 @@
       var latestSet100Value = null;
       var latestSet100ChangePct = 0;
 
+      // รายการดัชนีสากลและอัตราแลกเปลี่ยนที่มีผลต่อ กบข.
       const DEFAULT_MARKET_SYMBOLS = [
-  { id: 'SET', symbol: '%5ESET.BK', name: 'SET Index', region: '🇹🇭 ไทย', flag: '🇹🇭', gpfRef: 'ดัชนีตลาดหุ้นไทย (อิงแผนหุ้นไทย)', defaultPrice: 1588.90, defaultChange: 12.64, defaultPct: 0.80 },
-  { id: 'SET100', symbol: 'SET100', name: 'SET 100', region: '🇹🇭 ไทย (Top 100)', flag: '🇹🇭', gpfRef: 'Benchmark แผนหุ้นไทย กบข.', defaultPrice: 2093.81, defaultChange: 8.50, defaultPct: 0.41 },
-  { id: 'SP500', symbol: '%5EGSPC', name: 'S&P 500', region: '🇺🇸 สหรัฐฯ', flag: '🇺🇸', gpfRef: 'เกณฑ์มาตรฐานหลัก แผนหุ้นต่างประเทศ', defaultPrice: 7747.71, defaultChange: 16.72, defaultPct: 0.22 },
-  { id: 'NASDAQ', symbol: '%5EIXIC', name: 'NASDAQ 100', region: '🇺🇸 สหรัฐฯ (Tech)', flag: '💻', gpfRef: 'หุ้นเทคโนโลยีในแผนหุ้นต่างประเทศ', defaultPrice: 26584.06, defaultChange: 42.71, defaultPct: 0.16 },
-  { id: 'MSCI_WORLD', symbol: 'URTH', name: 'MSCI World (URTH)', region: '🌐 หุ้นทั่วโลก', flag: '🌐', gpfRef: 'เกณฑ์มาตรฐานเปรียบเทียบ กบข. สากล', defaultPrice: 210.34, defaultChange: 0.41, defaultPct: 0.20 },
-  { id: 'MSCI_EM', symbol: 'EEM', name: 'MSCI Emerg (EEM)', region: '🌏 ตลาดเกิดใหม่', flag: '🌏', gpfRef: 'หุ้นกลุ่มตลาดเกิดใหม่ (แผนหุ้นต่างประเทศ)', defaultPrice: 43.50, defaultChange: 0.25, defaultPct: 0.58 },
-  { id: 'USDTHB', symbol: 'THB=X', name: 'USD / THB', region: '💵 ค่าเงิน', flag: '💵', gpfRef: 'อัตราแลกเปลี่ยนแปลงมูลค่าสินทรัพย์ต่างประเทศ', defaultPrice: 32.89, defaultChange: -0.18, defaultPct: -0.54 }
-];
+        { id: 'SET', symbol: '%5ESET.BK', name: 'SET Index', region: '🇹🇭 ไทย', flag: '🇹🇭', gpfRef: 'ดัชนีตลาดหุ้นไทย (อิงแผนหุ้นไทย)', defaultPrice: 1588.90, defaultChange: 12.64, defaultPct: 0.80 },
+        { id: 'SET100', symbol: 'SET100', name: 'SET 100', region: '🇹🇭 ไทย (Top 100)', flag: '🇹🇭', gpfRef: 'Benchmark แผนหุ้นไทย กบข.', defaultPrice: 2093.81, defaultChange: 8.50, defaultPct: 0.41 },
+        { id: 'SP500', symbol: '%5EGSPC', name: 'S&P 500', region: '🇺🇸 สหรัฐฯ', flag: '🇺🇸', gpfRef: 'เกณฑ์มาตรฐานหลัก แผนหุ้นต่างประเทศ', defaultPrice: 7747.71, defaultChange: 16.72, defaultPct: 0.22 },
+        { id: 'NASDAQ', symbol: '%5EIXIC', name: 'NASDAQ 100', region: '🇺🇸 สหรัฐฯ (Tech)', flag: '💻', gpfRef: 'หุ้นเทคโนโลยีในแผนหุ้นต่างประเทศ', defaultPrice: 26584.06, defaultChange: 42.71, defaultPct: 0.16 },
+        { id: 'MSCI_WORLD', symbol: 'URTH', name: 'MSCI World (URTH)', region: '🌐 หุ้นทั่วโลก', flag: '🌐', gpfRef: 'เกณฑ์มาตรฐานเปรียบเทียบ กบข. สากล', defaultPrice: 210.34, defaultChange: 0.41, defaultPct: 0.20 },
+        { id: 'NIKKEI', symbol: '%5EN225', name: 'Nikkei 225', region: '🇯🇵 ญี่ปุ่น', flag: '🇯🇵', gpfRef: 'ตลาดหุ้นเอเชีย (แผนหุ้นต่างประเทศ)', defaultPrice: 65020.94, defaultChange: -1290.99, defaultPct: -1.95 },
+        { id: 'USDTHB', symbol: 'THB=X', name: 'USD / THB', region: '💵 ค่าเงิน', flag: '💵', gpfRef: 'อัตราแลกเปลี่ยนแปลงมูลค่าสินทรัพย์ต่างประเทศ', defaultPrice: 32.89, defaultChange: -0.18, defaultPct: -0.54 }
+      ];
 
       function switchMarketSubTab(tab) {
         document.getElementById('subTabGlobalContent').classList.add('hidden');
@@ -1938,192 +1947,182 @@
         }
       }
 
-      // 1. ดึงข้อมูลดัชนีตลาดทุนผ่าน Apps Script Backend
-// ===== 1. ฟังก์ชันดึงดัชนีตลาดทุน และการแสดงผลแบบปลอดภัย =====
-async function fetchGlobalMarketIndices() {
-  let updatedIndices = DEFAULT_MARKET_SYMBOLS.map(item => ({
-    ...item,
-    price: item.price ?? item.defaultPrice ?? 0,
-    diff: item.diff ?? item.defaultChange ?? 0,
-    pct: item.pct ?? item.defaultPct ?? 0
-  }));
-
-  let symbolsToFetch = updatedIndices
-    .filter(x => x.symbol !== 'SET100')
-    .map(x => x.symbol);
-
-  try {
-    const res = await callBackend('fetchYahooData', { symbols: symbolsToFetch });
-    if (res && res.data) {
-      updatedIndices.forEach(item => {
-        if (res.data[item.symbol] && res.data[item.symbol].price !== undefined && res.data[item.symbol].price !== null) {
-          let curPrice = Number(res.data[item.symbol].price);
-          let prevClose = Number(res.data[item.symbol].prevClose) || curPrice;
-          let diff = curPrice - prevClose;
-          let pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
-          item.price = curPrice;
-          item.diff = diff;
-          item.pct = pct;
-        }
-      });
-    }
-  } catch (e) {
-    console.error('Fetch Yahoo via GAS error:', e);
-  }
-
-  if (latestSet100Value !== null) {
-    let s100 = updatedIndices.find(x => x.id === 'SET100');
-    if (s100) {
-      s100.price = Number(latestSet100Value) || 0;
-      s100.pct = Number(latestSet100ChangePct) || 0;
-      s100.diff = (s100.price * s100.pct) / 100;
-    }
-  }
-
-  globalIndicesData = updatedIndices;
-  
-  const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const timeEl = document.getElementById('market_last_updated');
-  if (timeEl) timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดต ${timeStr} น.`;
-
-  renderMarketCards();
-  renderGlobalIndicesTable();
-  renderMarketBarChart();
-}
-
-     function renderMarketCards() {
-  const container = document.getElementById('marketCardsContainer');
-  if (!container || globalIndicesData.length === 0) return;
-
-  let html = '';
-  globalIndicesData.forEach(item => {
-    let price = Number(item.price ?? item.defaultPrice ?? 0);
-    let diff = Number(item.diff ?? item.defaultChange ?? 0);
-    let pct = Number(item.pct ?? item.defaultPct ?? 0);
-
-    let isPositive = pct >= 0;
-    let sign = isPositive ? '+' : '';
-    let badgeClass = isPositive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
-    let priceFmt = price >= 1000 ? price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : price.toFixed(2);
-    if (item.id === 'USDTHB') priceFmt = price.toFixed(2) + ' ฿';
-
-    html += `
-      <div class="pastel-card p-3 border ${isPositive ? 'border-emerald-100 hover:border-emerald-300' : 'border-rose-100 hover:border-rose-300'} bg-white/90 shadow-xs flex flex-col justify-between">
-        <div class="flex items-center justify-between gap-1 mb-1">
-          <span class="text-[11px] font-bold text-slate-800 truncate">${item.flag} ${item.name}</span>
-          <span class="text-[9px] text-slate-400 font-mono">${item.region.split(' ')[0]}</span>
-        </div>
-        <div class="text-base sm:text-lg font-black text-slate-900 font-mono leading-tight my-0.5">
-          ${priceFmt}
-        </div>
-        <div class="flex items-center justify-between text-[10px] mt-1 pt-1 border-t border-slate-50">
-          <span class="${isPositive ? 'text-emerald-600' : 'text-rose-600'} font-semibold font-mono">
-            ${sign}${diff.toFixed(2)}
-          </span>
-          <span class="font-bold px-1.5 py-0.5 rounded-full border text-[9px] ${badgeClass}">
-            ${sign}${pct.toFixed(2)}%
-          </span>
-        </div>
-      </div>
-    `;
-  });
-
-  container.innerHTML = html;
-}
-
-    function renderGlobalIndicesTable() {
-  const tbody = document.getElementById('globalIndicesTableBody');
-  if (!tbody || globalIndicesData.length === 0) return;
-
-  let html = '';
-  globalIndicesData.forEach(item => {
-    let price = Number(item.price ?? item.defaultPrice ?? 0);
-    let diff = Number(item.diff ?? item.defaultChange ?? 0);
-    let pct = Number(item.pct ?? item.defaultPct ?? 0);
-
-    let isPos = pct >= 0;
-    let sign = isPos ? '+' : '';
-    let cls = isPos ? 'positive' : 'negative';
-    let priceStr = price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    if (item.id === 'USDTHB') priceStr = price.toFixed(4) + ' ฿';
-
-    html += `
-      <tr class="hover:bg-purple-50/40 transition-colors">
-        <td class="text-left font-bold text-slate-800">
-          <div class="flex items-center gap-2">
-            <span class="text-base">${item.flag}</span>
-            <div>
-              <div>${item.name}</div>
-              <span class="text-[10px] font-mono text-slate-400 font-normal">${item.symbol.replace('%5E', '^')}</span>
-            </div>
-          </div>
-        </td>
-        <td class="text-center text-slate-600 font-medium">${item.region}</td>
-        <td class="text-right font-bold text-slate-900 font-mono">${priceStr}</td>
-        <td class="text-right font-mono font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">${sign}${diff.toFixed(2)}</td>
-        <td class="text-right"><span class="${cls}">${sign}${pct.toFixed(2)}%</span></td>
-        <td class="text-left text-xs text-purple-900 font-medium">
-          <span class="bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md text-[11px]">${item.gpfRef}</span>
-        </td>
-      </tr>
-    `;
-  });
-
-  tbody.innerHTML = html;
-}
-
-      function renderMarketBarChart() {
-  const ctx = document.getElementById('marketIndicesBarChart');
-  if (!ctx || globalIndicesData.length === 0) return;
-  if (marketBarChartInstance) marketBarChartInstance.destroy();
-
-  const labels = globalIndicesData.map(i => i.name);
-  const dataValues = globalIndicesData.map(i => parseFloat(i.pct.toFixed(2)));
-  const colors = dataValues.map(v => v >= 0 ? '#10b981' : '#f43f5e');
-
-  marketBarChartInstance = new Chart(ctx.getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'การเปลี่ยนแปลงวันนี้ (%)',
-        data: dataValues,
-        backgroundColor: colors,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: colors
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) { return ' เปลี่ยนแปลง: ' + (ctx.raw >= 0 ? '+' : '') + Number(ctx.raw.toFixed(2)) + '%'; }
+      async function fetchGlobalMarketIndices() {
+        let updatedIndices = JSON.parse(JSON.stringify(DEFAULT_MARKET_SYMBOLS));
+        
+        // ถ้ามีข้อมูล SET 100 จาก Google Sheet ให้อัปเดตใส่เข้าไปด้วย
+        if (latestSet100Value !== null) {
+          let s100 = updatedIndices.find(x => x.id === 'SET100');
+          if (s100) {
+            s100.price = latestSet100Value;
+            s100.pct = latestSet100ChangePct;
+            s100.diff = (latestSet100Value * latestSet100ChangePct) / 100;
           }
         }
-      },
-      scales: {
-        y: {
-          ticks: {
-            callback: function(v) { 
-              var num = Number(v);
-              return (num >= 0 ? '+' : '') + Number(num.toFixed(2)) + '%'; 
-            },
-            font: { family: 'Prompt', size: 10 }
-          },
-          grid: { color: 'rgba(233, 213, 255, 0.4)' }
-        },
-        x: {
-          ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
-          grid: { display: false }
-        }
+
+        const promises = updatedIndices.map(async item => {
+          if (item.symbol === 'SET100') return item; // ได้จากชีทแล้ว
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${item.symbol}?interval=1d&range=5d`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+              const json = await res.json();
+              if (json.chart && json.chart.result && json.chart.result.length > 0) {
+                const meta = json.chart.result[0].meta;
+                const curPrice = meta.regularMarketPrice || item.defaultPrice;
+                const prevClose = meta.chartPreviousClose || meta.previousClose || curPrice;
+                const diff = curPrice - prevClose;
+                const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+                item.price = curPrice;
+                item.diff = diff;
+                item.pct = pct;
+                return item;
+              }
+            }
+          } catch(e) {
+            // fallback gracefully
+          }
+          item.price = item.defaultPrice;
+          item.diff = item.defaultChange;
+          item.pct = item.defaultPct;
+          return item;
+        });
+
+        globalIndicesData = await Promise.all(promises);
+        
+        const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const timeEl = document.getElementById('market_last_updated');
+        if (timeEl) timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดต ${timeStr} น.`;
+
+        renderMarketCards();
+        renderGlobalIndicesTable();
+        renderMarketBarChart();
       }
-    }
-  });
-}
+
+      function renderMarketCards() {
+        const container = document.getElementById('marketCardsContainer');
+        if (!container || globalIndicesData.length === 0) return;
+
+        let html = '';
+        globalIndicesData.forEach(item => {
+          let isPositive = item.pct >= 0;
+          let sign = isPositive ? '+' : '';
+          let badgeClass = isPositive ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+          let priceFmt = item.price >= 1000 ? item.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : item.price.toFixed(2);
+          if (item.id === 'USDTHB') priceFmt = item.price.toFixed(2) + ' ฿';
+
+          html += `
+            <div class="pastel-card p-3 border ${isPositive ? 'border-emerald-100 hover:border-emerald-300' : 'border-rose-100 hover:border-rose-300'} bg-white/90 shadow-xs flex flex-col justify-between">
+              <div class="flex items-center justify-between gap-1 mb-1">
+                <span class="text-[11px] font-bold text-slate-800 truncate">${item.flag} ${item.name}</span>
+                <span class="text-[9px] text-slate-400 font-mono">${item.region.split(' ')[0]}</span>
+              </div>
+              <div class="text-base sm:text-lg font-black text-slate-900 font-mono leading-tight my-0.5">
+                ${priceFmt}
+              </div>
+              <div class="flex items-center justify-between text-[10px] mt-1 pt-1 border-t border-slate-50">
+                <span class="${isPositive ? 'text-emerald-600' : 'text-rose-600'} font-semibold font-mono">
+                  ${sign}${item.diff ? item.diff.toFixed(2) : '0.00'}
+                </span>
+                <span class="font-bold px-1.5 py-0.5 rounded-full border text-[9px] ${badgeClass}">
+                  ${sign}${item.pct.toFixed(2)}%
+                </span>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      }
+
+      function renderGlobalIndicesTable() {
+        const tbody = document.getElementById('globalIndicesTableBody');
+        if (!tbody || globalIndicesData.length === 0) return;
+
+        let html = '';
+        globalIndicesData.forEach(item => {
+          let isPos = item.pct >= 0;
+          let sign = isPos ? '+' : '';
+          let cls = isPos ? 'positive' : 'negative';
+          let priceStr = item.price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          if (item.id === 'USDTHB') priceStr = item.price.toFixed(4) + ' ฿';
+
+          html += `
+            <tr class="hover:bg-purple-50/40 transition-colors">
+              <td class="text-left font-bold text-slate-800">
+                <div class="flex items-center gap-2">
+                  <span class="text-base">${item.flag}</span>
+                  <div>
+                    <div>${item.name}</div>
+                    <span class="text-[10px] font-mono text-slate-400 font-normal">${item.symbol.replace('%5E', '^')}</span>
+                  </div>
+                </div>
+              </td>
+              <td class="text-center text-slate-600 font-medium">${item.region}</td>
+              <td class="text-right font-bold text-slate-900 font-mono">${priceStr}</td>
+              <td class="text-right font-mono font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">${sign}${item.diff ? item.diff.toFixed(2) : '0.00'}</td>
+              <td class="text-right"><span class="${cls}">${sign}${item.pct.toFixed(2)}%</span></td>
+              <td class="text-left text-xs text-purple-900 font-medium">
+                <span class="bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-md text-[11px]">${item.gpfRef}</span>
+              </td>
+            </tr>
+          `;
+        });
+
+        tbody.innerHTML = html;
+      }
+
+      function renderMarketBarChart() {
+        const ctx = document.getElementById('marketIndicesBarChart');
+        if (!ctx || globalIndicesData.length === 0) return;
+        if (marketBarChartInstance) marketBarChartInstance.destroy();
+
+        const labels = globalIndicesData.map(i => i.name);
+        const dataValues = globalIndicesData.map(i => parseFloat(i.pct.toFixed(2)));
+        const colors = dataValues.map(v => v >= 0 ? '#10b981' : '#f43f5e');
+
+        marketBarChartInstance = new Chart(ctx.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'การเปลี่ยนแปลงวันนี้ (%)',
+              data: dataValues,
+              backgroundColor: colors,
+              borderRadius: 6,
+              borderWidth: 1,
+              borderColor: colors
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) { return ' เปลี่ยนแปลง: ' + (ctx.raw >= 0 ? '+' : '') + ctx.raw + '%'; }
+                }
+              }
+            },
+            scales: {
+              y: {
+                ticks: {
+                  callback: function(v) { return (v >= 0 ? '+' : '') + v + '%'; },
+                  font: { family: 'Prompt', size: 10 }
+                },
+                grid: { color: 'rgba(233, 213, 255, 0.4)' }
+              },
+              x: {
+                ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
 
       function processThaiStockData(response) {
         try {
@@ -2131,6 +2130,7 @@ async function fetchGlobalMarketIndices() {
           var data = response.data.filter(row => row[0] && String(row[0]).trim() !== '');
           if (data.length === 0) return;
 
+          // 1. ดึงข้อมูล 10 หุ้นบิ๊กแคปจากแถวน้ำหนักและชื่อคอลัมน์
           let stockNames = [];
           let stockWeights = [];
           const sectorMap = {
@@ -2167,6 +2167,7 @@ async function fetchGlobalMarketIndices() {
               }
             }
 
+            // คำนวณค่า SET 100 ล่าสุดจากคอลัมน์ 11
             if (lastRow[11]) {
               latestSet100Value = parseFloat(lastRow[11]) || null;
               if (data.length >= 4) {
@@ -2177,6 +2178,7 @@ async function fetchGlobalMarketIndices() {
             }
           }
 
+          // 2. ดึงข้อมูลตัวแบบจำลอง Forecast
           var forecastData = [];
           for (var i = 0; i < data.length; i++) {
             if (String(data[i][0]).includes('วันที่') || String(data[i][0]).includes('Date')) continue;
@@ -2286,14 +2288,14 @@ async function fetchGlobalMarketIndices() {
         }
       }
 
-      // ===== ศูนย์ข้อมูลราคาทองคำ Real-time & SPDR GLD Model =====
-      var goldLiveSymbolsData = [];
-      var goldMomentumBarChartInstance = null;
+      // ===== ระบบทองคำโลก & ตัวแบบจำลอง SPDR GLD (Gold Market Engine) =====
+      var goldMarketData = [];
+      var goldMomentumChartInstance = null;
 
       const DEFAULT_GOLD_SYMBOLS = [
-        { id: 'XAUUSD', symbol: 'GC=F', name: 'XAU / USD (ทองคำโลก)', type: 'Spot Gold', flag: '🪙', gpfRef: 'ราคาทองคำแท่งสากล (USD/troy oz)', defaultPrice: 2750.00, defaultChange: 15.50, defaultPct: 0.57 },
-        { id: 'GLD', symbol: 'GLD', name: 'SPDR Gold Shares', type: 'ETF (USA)', flag: '📦', gpfRef: 'สินทรัพย์อ้างอิงตรงของแผนทองคำ กบข.', defaultPrice: 252.80, defaultChange: 1.40, defaultPct: 0.56 },
-        { id: 'USDTHB', symbol: 'THB=X', name: 'USD / THB', type: 'Exchange Rate', flag: '💵', gpfRef: 'อัตราแลกเปลี่ยนแปลงมูลค่าเป็นเงินบาท', defaultPrice: 32.89, defaultChange: -0.18, defaultPct: -0.54 }
+        { id: 'XAUUSD', symbol: 'GC=F', name: 'XAU / USD', subName: 'Spot Gold / Futures', category: 'ราคาทองคำโลก ($/oz)', icon: 'fa-coins', defaultPrice: 4529.80, defaultChange: 98.70, defaultPct: 2.23, note: 'ราคาทองคำแท่งมาตรฐานโลก (troy oz)' },
+        { id: 'GLD', symbol: 'GLD', name: 'SPDR Gold (GLD)', subName: 'SPDR Gold Shares ETF', category: 'กองทุน ETF ทองคำโลก', icon: 'fa-cubes-stacked', defaultPrice: 410.22, defaultChange: -12.38, defaultPct: -2.93, note: 'สินทรัพย์อ้างอิงหลัก แผนทองคำ กบข.' },
+        { id: 'USDTHB', symbol: 'THB=X', name: 'USD / THB', subName: 'อัตราแลกเปลี่ยน', category: 'ค่าเงินบาท', icon: 'fa-money-bill-wave', defaultPrice: 32.91, defaultChange: -0.16, defaultPct: -0.48, note: 'ใช้แปลงราคาทองคำเป็นสกุลเงินบาท' }
       ];
 
       function switchGoldSubTab(tab) {
@@ -2303,244 +2305,296 @@ async function fetchGlobalMarketIndices() {
 
         ['btnGoldTabLive', 'btnGoldTabModel', 'btnGoldTabInfo'].forEach(id => {
           let b = document.getElementById(id);
-          if (b) b.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-amber-700 transition-all flex items-center justify-center gap-2";
+          if (b) {
+            b.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-amber-700 transition-all flex items-center justify-center gap-2";
+          }
         });
 
         if (tab === 'live') {
           document.getElementById('subGoldTabLive').classList.remove('hidden');
           document.getElementById('btnGoldTabLive').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-amber-700 bg-amber-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
-          renderGoldMomentumBarChart();
+          renderGoldMomentumChart();
         } else if (tab === 'model') {
           document.getElementById('subGoldTabModel').classList.remove('hidden');
           document.getElementById('btnGoldTabModel').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-amber-700 bg-amber-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
-          if (goldDataRaw.length > 0) drawGoldDashboard();
+          drawGoldDashboard();
         } else if (tab === 'info') {
           document.getElementById('subGoldTabInfo').classList.remove('hidden');
           document.getElementById('btnGoldTabInfo').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-amber-700 bg-amber-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
         }
       }
 
-      // 2. ดึงข้อมูลทองคำ Real-time ผ่าน Apps Script Backend
-// ===== 2. ฟังก์ชันดึงราคาทองคำ Real-time และการแสดงผลแบบปลอดภัย =====
-async function fetchRealTimeGoldData() {
-  let symbols = DEFAULT_GOLD_SYMBOLS.map(item => ({
-    ...item,
-    price: item.price ?? item.defaultPrice ?? 0,
-    diff: item.diff ?? item.defaultChange ?? 0,
-    pct: item.pct ?? item.defaultPct ?? 0
-  }));
+      async function fetchGoldPrices() {
+        let updatedList = JSON.parse(JSON.stringify(DEFAULT_GOLD_SYMBOLS));
 
-  let symbolsToFetch = symbols.map(x => x.symbol);
+        const promises = updatedList.map(async item => {
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000);
+            const encodedSym = encodeURIComponent(item.symbol);
+            const res = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${encodedSym}?interval=1d&range=5d`, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            if (res.ok) {
+              const json = await res.json();
+              if (json.chart && json.chart.result && json.chart.result.length > 0) {
+                const meta = json.chart.result[0].meta;
+                const curPrice = meta.regularMarketPrice || item.defaultPrice;
+                const prevClose = meta.chartPreviousClose || meta.previousClose || curPrice;
+                const diff = curPrice - prevClose;
+                const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+                item.price = curPrice;
+                item.diff = diff;
+                item.pct = pct;
+                return item;
+              }
+            }
+          } catch(e) {
+            // fallback to default
+          }
+          item.price = item.defaultPrice;
+          item.diff = item.defaultChange;
+          item.pct = item.defaultPct;
+          return item;
+        });
 
-  try {
-    const res = await callBackend('fetchYahooData', { symbols: symbolsToFetch });
-    if (res && res.data) {
-      symbols.forEach(item => {
-        if (res.data[item.symbol] && res.data[item.symbol].price !== undefined && res.data[item.symbol].price !== null) {
-          let curPrice = Number(res.data[item.symbol].price);
-          let prevClose = Number(res.data[item.symbol].prevClose) || curPrice;
-          let diff = curPrice - prevClose;
-          let pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
-          item.price = curPrice;
-          item.diff = diff;
-          item.pct = pct;
-        }
-      });
-    }
-  } catch (e) {
-    console.error('Fetch Gold via GAS error:', e);
-  }
+        goldMarketData = await Promise.all(promises);
 
-  goldLiveSymbolsData = symbols;
+        const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const timeEl = document.getElementById('gold_last_updated');
+        if (timeEl) timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดต ${timeStr} น.`;
 
-  const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  const timeEl = document.getElementById('gold_last_updated');
-  if (timeEl) timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดต ${timeStr} น.`;
-
-  renderGoldKpiCards();
-  renderGoldLiveTable();
-  renderGoldMomentumBarChart();
-  updateGoldFormulaSteps();
-}
+        renderGoldKpiCards();
+        renderGoldLiveTable();
+        renderGoldMomentumChart();
+      }
 
       function renderGoldKpiCards() {
-  const container = document.getElementById('goldKpiCardsContainer');
-  if (!container || goldLiveSymbolsData.length === 0) return;
+        const container = document.getElementById('goldKpiCardsContainer');
+        if (!container) return;
 
-  let xau = goldLiveSymbolsData.find(x => x.id === 'XAUUSD') || DEFAULT_GOLD_SYMBOLS[0];
-  let gld = goldLiveSymbolsData.find(x => x.id === 'GLD') || DEFAULT_GOLD_SYMBOLS[1];
-  let fx = goldLiveSymbolsData.find(x => x.id === 'USDTHB') || DEFAULT_GOLD_SYMBOLS[2];
+        let xau = goldMarketData.find(x => x.id === 'XAUUSD') || { price: 4529.80, diff: 98.70, pct: 2.23 };
+        let gld = goldMarketData.find(x => x.id === 'GLD') || { price: 410.22, diff: -12.38, pct: -2.93 };
+        let fx = goldMarketData.find(x => x.id === 'USDTHB') || { price: 32.91, diff: -0.16, pct: -0.48 };
 
-  let xauPrice = Number(xau.price ?? xau.defaultPrice ?? 0);
-  let xauPct = Number(xau.pct ?? xau.defaultPct ?? 0);
-  let xauDiff = Number(xau.diff ?? xau.defaultChange ?? 0);
+        // คำนวณราคาทองไทยโดยประมาณ: 1 troy oz = 31.1035 กรัม, 1 บาททองคำ = 15.244 กรัม (ทอง 96.5% ~ 15.16 กรัม)
+        const goldTHBperGram = (xau.price * fx.price) / 31.1035;
+        const goldTHBperBaht = goldTHBperGram * 15.244 * 0.965; // ประมาณการราคาทองแท่ง 96.5% ในไทย
 
-  let gldPrice = Number(gld.price ?? gld.defaultPrice ?? 0);
-  let gldPct = Number(gld.pct ?? gld.defaultPct ?? 0);
-  let gldDiff = Number(gld.diff ?? gld.defaultChange ?? 0);
+        // คำนวณสูตรอธิบาย Step
+        const s1 = document.getElementById('goldStep1');
+        if (s1) s1.innerText = `${xau.price.toLocaleString('en-US', {maximumFractionDigits:1})} × ${fx.price.toFixed(2)} = ${(xau.price * fx.price).toLocaleString('en-US', {maximumFractionDigits:0})} ฿/oz`;
+        const s2 = document.getElementById('goldStep2');
+        if (s2) s2.innerText = `≈ ${goldTHBperGram.toLocaleString('en-US', {maximumFractionDigits:0})} ฿/กรัม`;
 
-  let fxPrice = Number(fx.price ?? fx.defaultPrice ?? 0);
-  let fxPct = Number(fx.pct ?? fx.defaultPct ?? 0);
-  let fxDiff = Number(fx.diff ?? fx.defaultChange ?? 0);
+        // การ์ด 5 ใบ
+        const cards = [
+          {
+            title: 'XAU / USD (ทองโลก)',
+            val: `$${xau.price.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 2})}`,
+            diff: xau.diff,
+            pct: xau.pct,
+            unit: '/ troy oz',
+            icon: 'fa-coins',
+            color: 'amber'
+          },
+          {
+            title: 'SPDR Gold (GLD)',
+            val: `$${gld.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
+            diff: gld.diff,
+            pct: gld.pct,
+            unit: 'USD/share',
+            icon: 'fa-cubes-stacked',
+            color: 'yellow'
+          },
+          {
+            title: 'USD / THB (ค่าเงิน)',
+            val: `${fx.price.toFixed(2)} ฿`,
+            diff: fx.diff,
+            pct: fx.pct,
+            unit: 'บาทต่อดอลลาร์',
+            icon: 'fa-money-bill-wave',
+            color: 'emerald'
+          },
+          {
+            title: 'ราคาทองคำโลก (บาท/กรัม)',
+            val: `${goldTHBperGram.toLocaleString('th-TH', {maximumFractionDigits: 0})} ฿`,
+            diff: xau.diff * fx.price / 31.1035,
+            pct: xau.pct,
+            unit: 'บาท/กรัม',
+            icon: 'fa-scale-balanced',
+            color: 'orange'
+          },
+          {
+            title: 'ประมาณการทองไทย (บาทละ)',
+            val: `${goldTHBperBaht.toLocaleString('th-TH', {maximumFractionDigits: 0})} ฿`,
+            diff: (xau.diff * fx.price / 31.1035) * 15.244 * 0.965,
+            pct: xau.pct,
+            unit: 'บาทละ (ประมาณ)',
+            icon: 'fa-crown',
+            color: 'purple'
+          }
+        ];
 
-  let goldPerGram = (xauPrice * fxPrice) / 31.1035;
-  let goldThaiBahtWeight = (xauPrice * fxPrice * 0.965 * 15.244) / 31.1035;
+        let html = '';
+        cards.forEach(c => {
+          const isUp = c.pct >= 0;
+          const colorClass = isUp ? 'text-emerald-600' : 'text-rose-600';
+          const bgBadge = isUp ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
+          const sign = isUp ? '+' : '';
+          const arrow = isUp ? 'fa-arrow-up' : 'fa-arrow-down';
 
-  let items = [
-    { name: 'XAU / USD (ทองคำโลก)', val: '$' + xauPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), pct: xauPct, diff: '$' + xauDiff.toFixed(2), icon: '🪙' },
-    { name: 'SPDR GLD (ETF)', val: '$' + gldPrice.toFixed(2), pct: gldPct, diff: '$' + gldDiff.toFixed(2), icon: '📦' },
-    { name: 'USD / THB (ค่าเงิน)', val: fxPrice.toFixed(2) + ' ฿', pct: fxPct, diff: fxDiff.toFixed(2), icon: '💵' },
-    { name: 'ทองคำโลก (บาท/กรัม)', val: goldPerGram.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ฿', pct: xauPct + fxPct, diff: 'คำนวณสด', icon: '⚖️' },
-    { name: 'ทองคำแท่ง 96.5% (บาท/บาท)', val: goldThaiBahtWeight.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' ฿', pct: xauPct + fxPct, diff: 'ประมาณการ', icon: '🏆' }
-  ];
-
-  let html = '';
-  items.forEach(item => {
-    let isPos = item.pct >= 0;
-    let sign = isPos ? '+' : '';
-    let badgeCls = isPos ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200';
-
-    html += `
-      <div class="pastel-card p-3 border ${isPos ? 'border-amber-200 hover:border-amber-400' : 'border-rose-200 hover:border-rose-400'} bg-white/90 shadow-xs flex flex-col justify-between">
-        <div class="flex items-center justify-between gap-1 mb-1">
-          <span class="text-[11px] font-bold text-slate-800 truncate">${item.icon} ${item.name}</span>
-        </div>
-        <div class="text-base sm:text-lg font-black text-slate-900 font-mono leading-tight my-0.5">
-          ${item.val}
-        </div>
-        <div class="flex items-center justify-between text-[10px] mt-1 pt-1 border-t border-slate-50">
-          <span class="text-slate-500 font-mono">${item.diff}</span>
-          <span class="font-bold px-1.5 py-0.5 rounded-full border text-[9px] ${badgeCls}">
-            ${sign}${item.pct.toFixed(2)}%
-          </span>
-        </div>
-      </div>
-    `;
-  });
-
-  container.innerHTML = html;
-}
+          html += `
+            <div class="pastel-card p-3 flex flex-col justify-between hover:shadow-md transition-shadow">
+              <div class="flex items-center justify-between text-slate-500 mb-1">
+                <span class="text-[11px] font-semibold text-slate-600 truncate">${c.title}</span>
+                <i class="fa-solid ${c.icon} text-${c.color}-500 text-xs"></i>
+              </div>
+              <div class="text-sm sm:text-base font-extrabold font-mono text-slate-900 leading-tight">
+                ${c.val}
+              </div>
+              <div class="flex items-center justify-between mt-2 pt-1 border-t border-slate-100">
+                <span class="text-[10px] text-slate-400 font-mono">${c.unit}</span>
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${bgBadge} flex items-center gap-0.5">
+                  <i class="fa-solid ${arrow} text-[8px]"></i>
+                  ${sign}${c.pct.toFixed(2)}%
+                </span>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
 
       function renderGoldLiveTable() {
-  const tbody = document.getElementById('goldLiveTableBody');
-  if (!tbody || goldLiveSymbolsData.length === 0) return;
+        const tbody = document.getElementById('goldLiveTableBody');
+        if (!tbody) return;
 
-  let html = '';
-  goldLiveSymbolsData.forEach(item => {
-    let price = Number(item.price ?? item.defaultPrice ?? 0);
-    let diff = Number(item.diff ?? item.defaultChange ?? 0);
-    let pct = Number(item.pct ?? item.defaultPct ?? 0);
+        let xau = goldMarketData.find(x => x.id === 'XAUUSD') || { price: 4529.80, diff: 98.70, pct: 2.23 };
+        let gld = goldMarketData.find(x => x.id === 'GLD') || { price: 410.22, diff: -12.38, pct: -2.93 };
+        let fx = goldMarketData.find(x => x.id === 'USDTHB') || { price: 32.91, diff: -0.16, pct: -0.48 };
 
-    let isPos = pct >= 0;
-    let sign = isPos ? '+' : '';
-    let cls = isPos ? 'positive' : 'negative';
-    let priceStr = item.id === 'USDTHB' ? price.toFixed(4) + ' ฿' : '$' + price.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    html += `
-      <tr class="hover:bg-amber-50/40 transition-colors">
-        <td class="text-left font-bold text-slate-800">
-          <div class="flex items-center gap-2">
-            <span class="text-base">${item.flag}</span>
-            <div>
-              <div>${item.name}</div>
-              <span class="text-[10px] font-mono text-slate-400 font-normal">${item.symbol}</span>
-            </div>
-          </div>
-        </td>
-        <td class="text-center text-slate-600 font-medium">${item.type}</td>
-        <td class="text-right font-bold text-slate-900 font-mono">${priceStr}</td>
-        <td class="text-right font-mono font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">${sign}${diff.toFixed(2)}</td>
-        <td class="text-right"><span class="${cls}">${sign}${pct.toFixed(2)}%</span></td>
-        <td class="text-left text-xs text-amber-900 font-medium">
-          <span class="bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md text-[11px]">${item.gpfRef}</span>
-        </td>
-      </tr>
-    `;
-  });
-
-  tbody.innerHTML = html;
-}
-      function renderGoldMomentumBarChart() {
-  const ctx = document.getElementById('goldMomentumBarChart');
-  if (!ctx || goldLiveSymbolsData.length === 0) return;
-  if (goldMomentumBarChartInstance) goldMomentumBarChartInstance.destroy();
-
-  const labels = goldLiveSymbolsData.map(i => i.name.split(' ')[0]);
-  const dataValues = goldLiveSymbolsData.map(i => parseFloat(i.pct.toFixed(2)));
-  const colors = dataValues.map(v => v >= 0 ? '#f59e0b' : '#f43f5e');
-
-  goldMomentumBarChartInstance = new Chart(ctx.getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: 'เปลี่ยนแปลงวันนี้ (%)',
-        data: dataValues,
-        backgroundColor: colors,
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: colors
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: function(ctx) { return ' เปลี่ยนแปลง: ' + (ctx.raw >= 0 ? '+' : '') + Number(ctx.raw.toFixed(2)) + '%'; }
-          }
-        }
-      },
-      scales: {
-        y: {
-          ticks: {
-            callback: function(v) { 
-              var num = Number(v);
-              return (num >= 0 ? '+' : '') + Number(num.toFixed(2)) + '%'; 
-            },
-            font: { family: 'Prompt', size: 10 }
+        const rows = [
+          {
+            name: 'XAU / USD (Spot Gold Futures)',
+            category: 'Commodity',
+            price: `$${xau.price.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 2})}`,
+            diff: xau.diff,
+            pct: xau.pct,
+            impact: 'เกณฑ์ราคาซื้อขายทองคำแท่งตลาดโลก (ลอนดอน/นิวยอร์ก)'
           },
-          grid: { color: 'rgba(251, 191, 36, 0.2)' }
-        },
-        x: {
-          ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
-          grid: { display: false }
-        }
+          {
+            name: 'SPDR Gold Shares (GLD ETF)',
+            category: 'Global ETF',
+            price: `$${gld.price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`,
+            diff: gld.diff,
+            pct: gld.pct,
+            impact: 'กองทุน ETF ที่ กบข. เลือกลงทุนในแผนทองคำ'
+          },
+          {
+            name: 'USD / THB (บาทเทียบดอลลาร์)',
+            category: 'Forex (FX)',
+            price: `${fx.price.toFixed(2)} ฿`,
+            diff: fx.diff,
+            pct: fx.pct,
+            impact: 'อัตราแลกเปลี่ยน (บาทอ่อน = NAV บวก, บาทแข็ง = NAV ลบ)'
+          },
+          {
+            name: 'ประมาณการผลตอบแทนทองคำสุทธิ (THB)',
+            category: 'Synthetic Net',
+            price: `${((xau.price * fx.price) / 31.1035).toFixed(0)} ฿/g`,
+            diff: (xau.pct + fx.pct),
+            pct: (xau.pct + fx.pct),
+            impact: 'แรงส่งรวมของราคาทองคำในรูปเงินบาท (Gold % + FX %)'
+          }
+        ];
+
+        let html = '';
+        rows.forEach(r => {
+          const isUp = r.pct >= 0;
+          const colorClass = isUp ? 'text-emerald-600' : 'text-rose-600';
+          const sign = isUp ? '+' : '';
+          html += `
+            <tr class="hover:bg-amber-50/40">
+              <td class="text-left font-bold text-slate-800">${r.name}</td>
+              <td class="text-center text-xs text-slate-500"><span class="bg-slate-100 px-2 py-0.5 rounded-full">${r.category}</span></td>
+              <td class="text-right font-mono font-bold text-slate-900">${r.price}</td>
+              <td class="text-right font-mono ${colorClass}">${sign}${r.diff.toFixed(2)}</td>
+              <td class="text-right font-mono font-bold ${colorClass}">${sign}${r.pct.toFixed(2)}%</td>
+              <td class="text-left text-xs text-slate-600">${r.impact}</td>
+            </tr>
+          `;
+        });
+        tbody.innerHTML = html;
       }
-    }
-  });
-}
 
-      function updateGoldFormulaSteps() {
-  let xau = goldLiveSymbolsData.find(x => x.id === 'XAUUSD') || DEFAULT_GOLD_SYMBOLS[0];
-  let fx = goldLiveSymbolsData.find(x => x.id === 'USDTHB') || DEFAULT_GOLD_SYMBOLS[2];
+      function renderGoldMomentumChart() {
+        const ctx = document.getElementById('goldMomentumBarChart');
+        if (!ctx) return;
+        if (goldMomentumChartInstance) goldMomentumChartInstance.destroy();
 
-  let xauPrice = Number(xau.price ?? xau.defaultPrice ?? 0);
-  let fxPrice = Number(fx.price ?? fx.defaultPrice ?? 0);
+        if (goldMarketData.length === 0) return;
 
-  let valStep1 = (xauPrice * fxPrice).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  let valStep2 = ((xauPrice * fxPrice) / 31.1035).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const labels = ['XAU/USD (ทองแท่งโลก)', 'SPDR GLD (ETF)', 'USD/THB (ค่าเงินบาท)'];
+        const values = [
+          goldMarketData.find(x => x.id === 'XAUUSD')?.pct || 0,
+          goldMarketData.find(x => x.id === 'GLD')?.pct || 0,
+          goldMarketData.find(x => x.id === 'USDTHB')?.pct || 0
+        ].map(v => parseFloat(v.toFixed(2)));
 
-  let step1El = document.getElementById('goldStep1');
-  let step2El = document.getElementById('goldStep2');
+        const colors = values.map(v => v >= 0 ? '#10b981' : '#f43f5e');
 
-  if (step1El) step1El.innerHTML = `$${xauPrice.toFixed(0)} × ${fxPrice.toFixed(2)} ฿ = ${valStep1} ฿/oz`;
-  if (step2El) step2El.innerHTML = `${valStep1} ÷ 31.1035 = ${valStep2} ฿/g`;
-}
+        goldMomentumChartInstance = new Chart(ctx.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'การเปลี่ยนแปลงวันนี้ (%)',
+              data: values,
+              backgroundColor: colors,
+              borderRadius: 6,
+              borderWidth: 1,
+              borderColor: colors
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) { return ' เปลี่ยนแปลง: ' + (ctx.raw >= 0 ? '+' : '') + ctx.raw + '%'; }
+                }
+              }
+            },
+            scales: {
+              y: {
+                ticks: {
+                  callback: function(v) { return (v >= 0 ? '+' : '') + v + '%'; },
+                  font: { family: 'Prompt', size: 10 }
+                },
+                grid: { color: 'rgba(251, 191, 36, 0.2)' }
+              },
+              x: {
+                ticks: { font: { family: 'Prompt', size: 11, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
 
       async function refreshGoldData() {
         const btn = document.querySelector('button[onclick="refreshGoldData()"]');
         if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลด...';
         try {
-          await fetchRealTimeGoldData();
+          await fetchGoldPrices();
           const dataGold = await callBackend('getGoldData');
           processGoldData(dataGold);
           Swal.fire({
             icon: 'success',
             title: 'อัปเดตข้อมูลทองคำสำเร็จ',
-            text: 'ดึงข้อมูลราคาทองคำ XAU/USD, SPDR GLD และอัตราแลกเปลี่ยนล่าสุดเรียบร้อย',
+            text: 'ดึงราคาทองคำโลก XAU/USD, SPDR GLD และ USD/THB ล่าสุดเรียบร้อย',
             timer: 1500,
             showConfirmButton: false
           });
@@ -2555,7 +2609,10 @@ async function fetchRealTimeGoldData() {
         try { 
           if (!response || response.error || !response.data) return; 
           goldDataRaw = response.data.filter(row => row[0] && String(row[0]).trim() !== ''); 
-          if(!document.getElementById('page-gold').classList.contains('hidden')) drawGoldDashboard(); 
+          if(!document.getElementById('page-gold').classList.contains('hidden')) {
+            drawGoldDashboard();
+          }
+          fetchGoldPrices();
         } catch(e) { console.error(e); } 
       }
       
@@ -2564,16 +2621,44 @@ async function fetchRealTimeGoldData() {
         const chartDiv = document.getElementById('gold_chart_div');
         if (!chartDiv) return;
 
-        chartDiv.innerHTML = ""; var dt = new google.visualization.DataTable(); dt.addColumn('string', 'วันที่'); dt.addColumn('number', 'NAV จริง'); dt.addColumn('number', 'คาดการณ์');
-        goldDataRaw.forEach(row => { var navReal = parseFloat(row[3]); var navFore = parseFloat(row[4]); if (!isNaN(navReal) || !isNaN(navFore)) dt.addRow([formatShortDate(row[0]), navReal, navFore]); });
-        var options = { fontName: 'Prompt', curveType: 'function', lineWidth: 3, pointsVisible: true, pointSize: 3, colors: ['#f59e0b', '#8b5cf6'], legend: { position: 'top' }, vAxis: { textStyle: {color: '#6b7280'} }, hAxis: { textStyle: {color: '#6b7280'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent' };
-        new google.visualization.LineChart(chartDiv).draw(dt, options);
-        var tableHtml = '<table><thead><tr><th>วันที่</th><th>NAV จริง</th><th>คาดการณ์</th><th>ส่วนต่าง</th></tr></thead><tbody>';
-        goldDataRaw.slice(-15).reverse().forEach(row => {
-            var diffVal = parseFloat(row[5]); var diffClass = isNaN(diffVal) ? '' : (diffVal >= 0 ? 'positive' : 'negative');
-            tableHtml += `<tr><td style="text-align:left">${formatShortDate(row[0])}</td><td>${isNaN(parseFloat(row[3]))?'-':parseFloat(row[3]).toFixed(4)}</td><td style="color:#7c3aed">${isNaN(parseFloat(row[4]))?'-':parseFloat(row[4]).toFixed(4)}</td><td><span class="${diffClass}">${isNaN(diffVal)?'-':(diffVal>0?'+':'')+diffVal.toFixed(4)}</span></td></tr>`;
+        chartDiv.innerHTML = "";
+        var dt = new google.visualization.DataTable();
+        dt.addColumn('string', 'วันที่');
+        dt.addColumn('number', 'NAV จริง');
+        dt.addColumn('number', 'คาดการณ์ (SPDR Model)');
+
+        goldDataRaw.forEach(row => {
+          var navReal = parseFloat(row[3]);
+          var navFore = parseFloat(row[4]);
+          if (!isNaN(navReal) || !isNaN(navFore)) {
+            dt.addRow([formatShortDate(row[0]), navReal, navFore]);
+          }
         });
-        document.getElementById('gold_table_div').innerHTML = tableHtml + '</tbody></table>';
+
+        var options = {
+          fontName: 'Prompt',
+          curveType: 'function',
+          lineWidth: 3,
+          pointsVisible: true,
+          pointSize: 3,
+          colors: ['#f59e0b', '#8b5cf6'],
+          legend: { position: 'top', textStyle: { fontSize: 11 } },
+          vAxis: { textStyle: { color: '#6b7280' }, gridlines: { color: '#fef3c7' } },
+          hAxis: { textStyle: { color: '#6b7280' }, slantedText: true, slantedTextAngle: 45 },
+          chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 },
+          backgroundColor: 'transparent'
+        };
+
+        new google.visualization.LineChart(chartDiv).draw(dt, options);
+
+        var tableHtml = '<table><thead><tr><th>วันที่</th><th>NAV จริง</th><th>คาดการณ์ (SPDR)</th><th>ส่วนต่าง</th></tr></thead><tbody>';
+        goldDataRaw.slice(-15).reverse().forEach(row => {
+          var diffVal = parseFloat(row[5]);
+          var diffClass = isNaN(diffVal) ? '' : (diffVal >= 0 ? 'positive' : 'negative');
+          tableHtml += `<tr><td style="text-align:left">${formatShortDate(row[0])}</td><td>${isNaN(parseFloat(row[3]))?'-':parseFloat(row[3]).toFixed(4)}</td><td style="color:#7c3aed">${isNaN(parseFloat(row[4]))?'-':parseFloat(row[4]).toFixed(4)}</td><td><span class="${diffClass}">${isNaN(diffVal)?'-':(diffVal>0?'+':'')+diffVal.toFixed(4)}</span></td></tr>`;
+        });
+        const tableDiv = document.getElementById('gold_table_div');
+        if (tableDiv) tableDiv.innerHTML = tableHtml + '</tbody></table>';
       }
 
       function openAdminModal() {
@@ -2692,10 +2777,7 @@ async function fetchRealTimeGoldData() {
           if(thaiStockDataRaw.length > 0) drawThaiStockDashboard();
           if(marketBarChartInstance) marketBarChartInstance.resize();
         }
-        if(!document.getElementById('page-gold').classList.contains('hidden')) {
-          if(goldDataRaw.length > 0) drawGoldDashboard();
-          if(goldMomentumBarChartInstance) goldMomentumBarChartInstance.resize();
-        }
+        if(!document.getElementById('page-gold').classList.contains('hidden') && goldDataRaw.length > 0) drawGoldDashboard();
         if(!document.getElementById('page-analysis').classList.contains('hidden') && ytdData.length > 0) {
           drawAnalysisDashboard();
         }
