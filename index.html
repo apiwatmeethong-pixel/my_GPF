@@ -255,14 +255,84 @@
             </div>
           </div>
 
-          <!-- Line Chart NAV YTD -->
-          <div class="pastel-card p-5">
-            <h3 class="text-xs font-bold text-slate-800 mb-3 flex items-center gap-2">
-              <i class="fa-solid fa-chart-line text-indigo-600 text-base"></i>
-              <span>เปรียบเทียบแรงส่งสถิติกราฟ NAV YTD</span>
-            </h3>
-            <div id="checkboxes" class="checkbox-container mb-4"></div>
-            <div id="chart_div" class="h-[320px] w-full"></div>
+          <!-- Line Chart NAV Analysis (Pro Interactive) -->
+          <div class="pastel-card p-5 space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-purple-100">
+              <div>
+                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-chart-line text-indigo-600 text-base"></i>
+                  <span>วิเคราะห์สถิติกราฟ NAV รายแผนการลงทุน (GPF Plan Analytics)</span>
+                </h3>
+                <p class="text-[11px] text-slate-500 mt-0.5">เลือกเปรียบเทียบทุกแผนหรือเจาะลึกเฉพาะแผนเดี่ยว พร้อมเลือกช่วงเวลาและโหมดการแสดงผล</p>
+              </div>
+
+              <!-- Controls Toolbar -->
+              <div class="flex flex-wrap items-center gap-2">
+                <!-- Single/Multi View Switcher -->
+                <div class="flex bg-purple-50 p-1 rounded-xl border border-purple-200 text-xs">
+                  <button id="btnNavViewCompare" onclick="setNavChartDisplayMode('compare')" class="px-2.5 py-1 rounded-lg font-bold bg-white text-purple-700 shadow-xs transition-all">
+                    เปรียบเทียบแผน
+                  </button>
+                  <button id="btnNavViewSingle" onclick="setNavChartDisplayMode('single')" class="px-2.5 py-1 rounded-lg font-semibold text-slate-600 hover:text-purple-700 transition-all">
+                    เจาะลึกรายแผน
+                  </button>
+                </div>
+
+                <!-- Single Plan Dropdown (Shown when in single mode) -->
+                <select id="selectSingleNavPlan" onchange="updateDashboard()" class="hidden bg-white border border-purple-300 text-slate-700 text-xs rounded-xl px-2.5 py-1.5 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-xs">
+                </select>
+
+                <!-- Value Mode: Return % vs Unit NAV (บาท) -->
+                <div class="flex bg-slate-100 p-1 rounded-xl text-xs">
+                  <button id="btnNavMetricPct" onclick="setNavMetricMode('pct')" class="px-2 py-1 rounded-lg font-bold bg-white text-indigo-700 shadow-xs transition-all">
+                    ผลตอบแทน (%)
+                  </button>
+                  <button id="btnNavMetricVal" onclick="setNavMetricMode('val')" class="px-2 py-1 rounded-lg font-semibold text-slate-500 hover:text-indigo-700 transition-all">
+                    มูลค่า NAV (฿)
+                  </button>
+                </div>
+
+                <!-- Timeframe Filters -->
+                <div class="flex bg-purple-100/60 p-1 rounded-xl text-xs font-semibold gap-0.5">
+                  <button onclick="setNavTimeframe('1W')" id="tf_1W" class="px-2 py-1 rounded-lg text-slate-600 hover:bg-white transition-all">1W</button>
+                  <button onclick="setNavTimeframe('1M')" id="tf_1M" class="px-2 py-1 rounded-lg text-slate-600 hover:bg-white transition-all">1M</button>
+                  <button onclick="setNavTimeframe('3M')" id="tf_3M" class="px-2 py-1 rounded-lg text-slate-600 hover:bg-white transition-all">3M</button>
+                  <button onclick="setNavTimeframe('YTD')" id="tf_YTD" class="px-2 py-1 rounded-lg bg-indigo-600 text-white shadow-xs">YTD</button>
+                  <button onclick="setNavTimeframe('ALL')" id="tf_ALL" class="px-2 py-1 rounded-lg text-slate-600 hover:bg-white transition-all">ALL</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Plan Checkboxes (In Compare Mode) -->
+            <div id="compareCheckboxesWrapper" class="transition-all">
+              <div class="text-[11px] font-bold text-slate-500 mb-1.5 flex items-center gap-1.5">
+                <i class="fa-solid fa-filter text-indigo-500"></i> เลือกแผนที่ต้องการเปรียบเทียบ:
+              </div>
+              <div id="checkboxes" class="checkbox-container"></div>
+            </div>
+
+            <!-- Single Plan KPI Summary Card (Shown when in Single Mode) -->
+            <div id="singlePlanSummaryCard" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-gradient-to-r from-purple-50/70 to-indigo-50/70 rounded-2xl border border-purple-100">
+              <div class="text-center">
+                <div class="text-[10px] text-slate-500">NAV ล่าสุด</div>
+                <div id="sp_kpi_nav" class="text-sm font-extrabold text-slate-900 font-mono">-</div>
+              </div>
+              <div class="text-center">
+                <div class="text-[10px] text-slate-500">ขยับงวดล่าสุด</div>
+                <div id="sp_kpi_diff" class="text-sm font-extrabold font-mono">-</div>
+              </div>
+              <div class="text-center">
+                <div class="text-[10px] text-slate-500">ผลตอบแทน YTD</div>
+                <div id="sp_kpi_ytd" class="text-sm font-extrabold font-mono">-</div>
+              </div>
+              <div class="text-center">
+                <div class="text-[10px] text-slate-500">ช่วงต่ำสุด-สูงสุด (Range)</div>
+                <div id="sp_kpi_range" class="text-sm font-extrabold text-slate-700 font-mono">-</div>
+              </div>
+            </div>
+
+            <!-- The Chart Canvas Container -->
+            <div id="chart_div" class="h-[340px] w-full"></div>
           </div>
 
         </div>
@@ -375,18 +445,22 @@
           </div>
 
           <!-- Tab Navigation for Market View -->
-          <div class="flex border-b border-purple-200 bg-white/70 rounded-2xl p-1 shadow-xs">
-            <button id="btnTabGlobal" onclick="switchMarketSubTab('global')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2">
+          <div class="flex flex-wrap border-b border-purple-200 bg-white/70 rounded-2xl p-1 shadow-xs gap-1">
+            <button id="btnTabGlobal" onclick="switchMarketSubTab('global')" class="flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2">
               <i class="fa-solid fa-earth-americas"></i>
-              <span>ดัชนีตลาดโลก & อัตราแลกเปลี่ยน</span>
+              <span>ดัชนีตลาดโลก & FX</span>
             </button>
-            <button id="btnTabSet100" onclick="switchMarketSubTab('set100')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-purple-600 transition-all flex items-center justify-center gap-2">
+            <button id="btnTabSet100" onclick="switchMarketSubTab('set100')" class="flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-purple-600 transition-all flex items-center justify-center gap-2">
               <i class="fa-solid fa-chart-line"></i>
-              <span>ตัวแบบจำลอง SET 100 & หุ้นไทย</span>
+              <span>ตัวแบบจำลอง SET 100</span>
             </button>
-            <button id="btnTabBenchmark" onclick="switchMarketSubTab('benchmark')" class="flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-purple-600 transition-all flex items-center justify-center gap-2">
+            <button id="btnTabHoldings" onclick="switchMarketSubTab('holdings')" class="flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-purple-600 transition-all flex items-center justify-center gap-2">
+              <i class="fa-solid fa-layer-group text-amber-500"></i>
+              <span>เจาะลึก 35 หุ้นที่ กบข. ถือครอง</span>
+            </button>
+            <button id="btnTabBenchmark" onclick="switchMarketSubTab('benchmark')" class="flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-purple-600 transition-all flex items-center justify-center gap-2">
               <i class="fa-solid fa-bullseye"></i>
-              <span>ความเชื่อมโยงกับแผน กบข.</span>
+              <span>เกณฑ์มาตรฐาน กบข.</span>
             </button>
           </div>
 
@@ -543,6 +617,121 @@
 
               </div>
             </div>
+          <!-- TAB 4: เจาะลึก 35 หุ้นที่ กบข. ถือครอง (Look-Through Top Holdings) -->
+          <div id="subTabHoldingsContent" class="hidden space-y-6">
+            
+            <!-- Banner Header -->
+            <div class="pastel-card p-5 bg-gradient-to-r from-indigo-50/80 via-purple-50/60 to-amber-50/60 border border-indigo-200">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group text-indigo-600"></i>
+                    <span>โครงสร้างการถือครองหลักทรัพย์ 35 อันดับแรกของ กบข. (Look-Through)</span>
+                  </h3>
+                  <p class="text-xs text-indigo-800 font-medium mt-0.5">
+                    อ้างอิงตามรายงานสัดส่วนการลงทุนอย่างเป็นทางการของ กบข. (ณ 30 มิถุนายน 2569) เชื่อมต่อราคาตลาด Real-time รายวัน
+                  </p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span id="holdings_last_updated" class="text-[11px] text-slate-500 bg-white/80 px-2.5 py-1 rounded-lg border border-purple-100">
+                    <i class="fa-solid fa-clock mr-1 text-emerald-500"></i> รออัปเดต...
+                  </span>
+                  <button onclick="refreshHoldingsData()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all active:scale-95">
+                    <i class="fa-solid fa-rotate"></i>
+                    <span>รีเฟรชราคาหุ้น</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4 Portfolio Category Filter Pills -->
+            <div class="flex flex-wrap gap-2">
+              <button id="btnHoldingsCat_thai" onclick="switchHoldingsCategory('thai')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-xs transition-all flex items-center gap-1.5">
+                <span>🇹🇭 ตราสารทุนไทย (Top 10)</span>
+                <span class="bg-white/20 px-1.5 py-0.5 rounded-full text-[10px]">61.96%</span>
+              </button>
+              <button id="btnHoldingsCat_developed" onclick="switchHoldingsCategory('developed')" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-slate-600 hover:text-indigo-600 border border-slate-200 transition-all flex items-center gap-1.5">
+                <span>🇺🇸 ตลาดพัฒนาแล้ว (Top 10)</span>
+                <span class="bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded-full text-[10px]">26.79%</span>
+              </button>
+              <button id="btnHoldingsCat_emerging" onclick="switchHoldingsCategory('emerging')" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-slate-600 hover:text-indigo-600 border border-slate-200 transition-all flex items-center gap-1.5">
+                <span>🌏 ตลาดเกิดใหม่ (Top 10)</span>
+                <span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full text-[10px]">23.34%</span>
+              </button>
+              <button id="btnHoldingsCat_reit" onclick="switchHoldingsCategory('reit')" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-slate-600 hover:text-indigo-600 border border-slate-200 transition-all flex items-center gap-1.5">
+                <span>🏢 อสังหาริมทรัพย์ไทย (Top 5)</span>
+                <span class="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full text-[10px]">67.22%</span>
+              </button>
+            </div>
+
+            <!-- Category Summary Banner -->
+            <div id="holdingsCategoryInfoBanner" class="pastel-card p-4 bg-white/90 border border-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <!-- Dynamically populated by JS -->
+            </div>
+
+            <!-- Holdings Table Card -->
+            <div class="pastel-card p-5">
+              <div class="flex justify-between items-center mb-3">
+                <h3 id="holdingsTableTitle" class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-list text-indigo-600"></i>
+                  <span>รายชื่อหลักทรัพย์และการเคลื่อนไหวราคา Real-time</span>
+                </h3>
+                <span class="text-[11px] text-slate-500">
+                  ⚡ ราคาและ % ขยับประจำวัน
+                </span>
+              </div>
+              <div class="table-responsive">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th class="text-left">ลำดับ</th>
+                      <th class="text-left">ชื่อหลักทรัพย์</th>
+                      <th class="text-center">สัญลักษณ์</th>
+                      <th class="text-right">สัดส่วนในพอร์ต (%)</th>
+                      <th class="text-right">ราคา Real-time</th>
+                      <th class="text-right">เปลี่ยนแปลง</th>
+                      <th class="text-right">% เปลี่ยนแปลง</th>
+                      <th class="text-right">ผลกระทบต่อพอร์ต (Impact)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="gpfHoldingsTableBody">
+                    <tr><td colspan="8" class="text-center py-6 text-slate-400">กำลังโหลดข้อมูลหลักทรัพย์...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Institutional Decision Matrix: Impact Analysis & Sector Weights -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              
+              <!-- Left: Weighted Impact Contribution Bar Chart -->
+              <div class="lg:col-span-7 pastel-card p-5 flex flex-col justify-between">
+                <div>
+                  <h3 class="text-xs font-bold text-slate-800 mb-1 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-column text-indigo-600"></i>
+                    <span>แรงส่งขับเคลื่อน NAV รายตัว (Weighted Impact Contribution Points)</span>
+                  </h3>
+                  <p class="text-[11px] text-slate-500 mb-3">คำนวณจาก: สัดส่วนการถือครอง (%) × % การเปลี่ยนแปลงของราคาหุ้นวันนี้</p>
+                </div>
+                <div class="h-[260px] w-full relative">
+                  <canvas id="holdingsImpactChartCanvas"></canvas>
+                </div>
+              </div>
+
+              <!-- Right: Professional Investment Insights -->
+              <div class="lg:col-span-5 pastel-card p-5 space-y-3 bg-gradient-to-br from-white to-purple-50/40">
+                <h3 class="text-xs font-bold text-purple-900 flex items-center gap-2">
+                  <i class="fa-solid fa-brain text-purple-600"></i>
+                  <span>บทวิเคราะห์พอร์ตระดับมืออาชีพ (Institutional Notes)</span>
+                </h3>
+                
+                <div id="holdingsProNotesContent" class="text-xs text-slate-700 space-y-2.5 leading-relaxed">
+                  <!-- Dynamically populated by JS based on current category -->
+                </div>
+              </div>
+
+            </div>
+
           </div>
 
         </div>
@@ -1830,49 +2019,221 @@
         });
       }
 
+      // State variables for Pro Interactive NAV Chart
+      var navChartDisplayMode = 'compare'; // 'compare' or 'single'
+      var navChartMetricMode = 'pct';      // 'pct' (%) or 'val' (฿)
+      var navChartTimeframe = 'YTD';       // '1W', '1M', '3M', 'YTD', 'ALL'
+
+      function setNavChartDisplayMode(mode) {
+        navChartDisplayMode = mode;
+        const btnC = document.getElementById('btnNavViewCompare');
+        const btnS = document.getElementById('btnNavViewSingle');
+        const singleSelect = document.getElementById('selectSingleNavPlan');
+        const cbWrapper = document.getElementById('compareCheckboxesWrapper');
+        const singleKpi = document.getElementById('singlePlanSummaryCard');
+
+        if (mode === 'single') {
+          if (btnS) btnS.className = "px-2.5 py-1 rounded-lg font-bold bg-white text-purple-700 shadow-xs transition-all";
+          if (btnC) btnC.className = "px-2.5 py-1 rounded-lg font-semibold text-slate-600 hover:text-purple-700 transition-all";
+          if (singleSelect) singleSelect.classList.remove('hidden');
+          if (cbWrapper) cbWrapper.classList.add('hidden');
+          if (singleKpi) singleKpi.classList.remove('hidden');
+        } else {
+          if (btnC) btnC.className = "px-2.5 py-1 rounded-lg font-bold bg-white text-purple-700 shadow-xs transition-all";
+          if (btnS) btnS.className = "px-2.5 py-1 rounded-lg font-semibold text-slate-600 hover:text-purple-700 transition-all";
+          if (singleSelect) singleSelect.classList.add('hidden');
+          if (cbWrapper) cbWrapper.classList.remove('hidden');
+          if (singleKpi) singleKpi.classList.add('hidden');
+        }
+        updateDashboard();
+      }
+
+      function setNavMetricMode(mode) {
+        navChartMetricMode = mode;
+        const btnP = document.getElementById('btnNavMetricPct');
+        const btnV = document.getElementById('btnNavMetricVal');
+        if (mode === 'val') {
+          if (btnV) btnV.className = "px-2 py-1 rounded-lg font-bold bg-white text-indigo-700 shadow-xs transition-all";
+          if (btnP) btnP.className = "px-2 py-1 rounded-lg font-semibold text-slate-500 hover:text-indigo-700 transition-all";
+        } else {
+          if (btnP) btnP.className = "px-2 py-1 rounded-lg font-bold bg-white text-indigo-700 shadow-xs transition-all";
+          if (btnV) btnV.className = "px-2 py-1 rounded-lg font-semibold text-slate-500 hover:text-indigo-700 transition-all";
+        }
+        updateDashboard();
+      }
+
+      function setNavTimeframe(tf) {
+        navChartTimeframe = tf;
+        ['1W', '1M', '3M', 'YTD', 'ALL'].forEach(item => {
+          const btn = document.getElementById('tf_' + item);
+          if (btn) {
+            if (item === tf) {
+              btn.className = "px-2 py-1 rounded-lg bg-indigo-600 text-white shadow-xs font-bold";
+            } else {
+              btn.className = "px-2 py-1 rounded-lg text-slate-600 hover:bg-white transition-all font-semibold";
+            }
+          }
+        });
+        updateDashboard();
+      }
+
       function createCheckboxes() {
         var container = document.getElementById('checkboxes');
+        var singleSelect = document.getElementById('selectSingleNavPlan');
         if (!container) return;
+
         var html = '';
+        var selectHtml = '';
         var defaultChecked = [customPlanName, 'แผนหุ้นไทย', 'แผนทองคำ'];
         for (var i = 1; i < globalHeaders.length; i++) {
           var planName = globalHeaders[i];
           var isChecked = defaultChecked.includes(planName) ? 'checked' : '';
-          var labelClass = planName === customPlanName ? 'class="custom-plan-label"' : '';
-          html += `<label ${labelClass}><input type="checkbox" value="${planName}" ${isChecked} onchange="updateDashboard()"> ${planName.replace('แผนการลงทุน','')}</label>`;
+          var labelClass = planName === customPlanName ? 'class="custom-plan-label font-bold"' : '';
+          var displayName = planName.replace('แผนการลงทุน','');
+          html += `<label ${labelClass}><input type="checkbox" value="${planName}" ${isChecked} onchange="updateDashboard()"> ${displayName}</label>`;
+          selectHtml += `<option value="${planName}">${displayName}</option>`;
         }
-        container.innerHTML = html; 
+        container.innerHTML = html;
+        if (singleSelect) {
+          singleSelect.innerHTML = selectHtml;
+          singleSelect.value = customPlanName || (globalHeaders[1] || '');
+        }
         updateDashboard(); 
       }
 
       function updateDashboard() {
         if(ytdData.length === 0) return;
-        var checkboxes = document.querySelectorAll('#checkboxes input:checked');
-        var selectedPlans = Array.from(checkboxes).map(cb => cb.value);
+
+        // 1. กรองช่วงเวลาตาม navChartTimeframe
+        var filteredData = ytdData;
+        var totalRows = ytdData.length;
+        if (navChartTimeframe === '1W') {
+          filteredData = ytdData.slice(Math.max(0, totalRows - 5));
+        } else if (navChartTimeframe === '1M') {
+          filteredData = ytdData.slice(Math.max(0, totalRows - 22));
+        } else if (navChartTimeframe === '3M') {
+          filteredData = ytdData.slice(Math.max(0, totalRows - 66));
+        } else if (navChartTimeframe === 'YTD') {
+          filteredData = ytdData;
+        } else if (navChartTimeframe === 'ALL') {
+          // หากมีข้อมูลปีก่อนหน้าในชีท
+          filteredData = ytdData;
+        }
+
+        if (filteredData.length === 0) filteredData = ytdData;
+
         var chartData = new google.visualization.DataTable();
         chartData.addColumn('string', 'วันที่');
-        var planIndices = [], baseValues = [];
 
-        selectedPlans.forEach(plan => {
-          chartData.addColumn('number', plan.replace('แผนการลงทุน',''));
-          var idx = globalHeaders.indexOf(plan);
+        var planIndices = [], baseValues = [], selectedPlans = [];
+
+        if (navChartDisplayMode === 'single') {
+          var singleSelect = document.getElementById('selectSingleNavPlan');
+          var chosenPlan = singleSelect ? singleSelect.value : (globalHeaders[1] || '');
+          selectedPlans = [chosenPlan];
+          var idx = globalHeaders.indexOf(chosenPlan);
           planIndices.push(idx);
-          baseValues.push(idx !== -1 ? (parseFloat(ytdData[0][idx]) || 0) : 0); 
-        });
+          baseValues.push(idx !== -1 ? (parseFloat(filteredData[0][idx]) || 0) : 0);
 
-        for (var i = 0; i < ytdData.length; i++) {
-          var rowData = [formatShortDate(ytdData[i][0])];
+          chartData.addColumn('number', chosenPlan.replace('แผนการลงทุน',''));
+
+          // อัปเดต Single Plan KPI Card
+          if (idx !== -1 && filteredData.length > 0) {
+            var lastIdx = filteredData.length - 1;
+            var curVal = parseFloat(filteredData[lastIdx][idx]) || 0;
+            var prevVal = filteredData.length > 1 ? (parseFloat(filteredData[lastIdx - 1][idx]) || curVal) : curVal;
+            var diff = curVal - prevVal;
+            var pct = prevVal > 0 ? (diff / prevVal) * 100 : 0;
+            var ytdBase = parseFloat(ytdData[0][idx]) || curVal;
+            var ytdPct = ytdBase > 0 ? ((curVal - ytdBase) / ytdBase) * 100 : 0;
+
+            var allVals = filteredData.map(r => parseFloat(r[idx]) || 0).filter(v => v > 0);
+            var minVal = allVals.length > 0 ? Math.min(...allVals) : curVal;
+            var maxVal = allVals.length > 0 ? Math.max(...allVals) : curVal;
+
+            var kpiNav = document.getElementById('sp_kpi_nav');
+            if (kpiNav) kpiNav.innerText = curVal.toFixed(4) + ' ฿';
+
+            var kpiDiff = document.getElementById('sp_kpi_diff');
+            if (kpiDiff) {
+              var sign = diff >= 0 ? '+' : '';
+              var dClass = diff >= 0 ? 'text-emerald-600' : 'text-rose-600';
+              kpiDiff.innerHTML = `<span class="${dClass}">${sign}${diff.toFixed(4)} (${sign}${pct.toFixed(2)}%)</span>`;
+            }
+
+            var kpiYtd = document.getElementById('sp_kpi_ytd');
+            if (kpiYtd) {
+              var ySign = ytdPct >= 0 ? '+' : '';
+              var yClass = ytdPct >= 0 ? 'text-emerald-600' : 'text-rose-600';
+              kpiYtd.innerHTML = `<span class="${yClass}">${ySign}${ytdPct.toFixed(2)}%</span>`;
+            }
+
+            var kpiRange = document.getElementById('sp_kpi_range');
+            if (kpiRange) kpiRange.innerText = minVal.toFixed(2) + ' - ' + maxVal.toFixed(2);
+          }
+
+        } else {
+          // Compare Mode
+          var checkboxes = document.querySelectorAll('#checkboxes input:checked');
+          selectedPlans = Array.from(checkboxes).map(cb => cb.value);
+          if (selectedPlans.length === 0 && globalHeaders.length > 1) {
+            selectedPlans = [globalHeaders[1]];
+          }
+
+          selectedPlans.forEach(plan => {
+            chartData.addColumn('number', plan.replace('แผนการลงทุน',''));
+            var idx = globalHeaders.indexOf(plan);
+            planIndices.push(idx);
+            baseValues.push(idx !== -1 ? (parseFloat(filteredData[0][idx]) || 0) : 0); 
+          });
+        }
+
+        // เติมข้อมูลลงตาราง DataTable
+        for (var i = 0; i < filteredData.length; i++) {
+          var rowData = [formatShortDate(filteredData[i][0])];
           for (var j = 0; j < selectedPlans.length; j++) {
             var baseVal = baseValues[j];
             var pIdx = planIndices[j];
-            var val = (pIdx !== -1) ? (parseFloat(ytdData[i][pIdx]) || 0) : 0;
-            rowData.push(baseVal > 0 ? (val - baseVal) / baseVal : 0);
+            var val = (pIdx !== -1) ? (parseFloat(filteredData[i][pIdx]) || 0) : 0;
+            if (navChartMetricMode === 'pct') {
+              rowData.push(baseVal > 0 ? (val - baseVal) / baseVal : 0);
+            } else {
+              rowData.push(val);
+            }
           }
           chartData.addRow(rowData);
         }
 
-        var options = { fontName: 'Prompt', lineWidth: 3, pointsVisible: true, pointSize: 3, colors: ['#a78bfa', '#3b82f6', '#f59e0b', '#10b981', '#ec4899', '#06b6d4'], legend: { position: 'top', textStyle: {fontSize: 11} }, vAxis: { format: '#,##0.00%', textStyle: {color: '#6b7280'} }, hAxis: { textStyle: {color: '#6b7280'}, slantedText: true, slantedTextAngle: 45 }, chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 }, backgroundColor: 'transparent' };
-        new google.visualization.LineChart(document.getElementById('chart_div')).draw(chartData, options);
+        var isPct = navChartMetricMode === 'pct';
+        var chartColors = navChartDisplayMode === 'single'
+          ? ['#6366f1']
+          : ['#a78bfa', '#3b82f6', '#f59e0b', '#10b981', '#ec4899', '#06b6d4', '#8b5cf6', '#14b8a6'];
+
+        var options = {
+          fontName: 'Prompt',
+          lineWidth: navChartDisplayMode === 'single' ? 3.5 : 2.5,
+          pointsVisible: filteredData.length <= 25,
+          pointSize: 4,
+          colors: chartColors,
+          legend: { position: 'top', textStyle: { fontSize: 11 } },
+          vAxis: {
+            format: isPct ? '#,##0.00%' : '#,##0.00',
+            textStyle: { color: '#6b7280', fontSize: 10 },
+            gridlines: { color: '#f3e8ff' }
+          },
+          hAxis: {
+            textStyle: { color: '#6b7280', fontSize: 10 },
+            slantedText: true,
+            slantedTextAngle: 45
+          },
+          chartArea: { width: '85%', height: '65%', top: 30, bottom: 50 },
+          backgroundColor: 'transparent'
+        };
+
+        var chartContainer = document.getElementById('chart_div');
+        if (chartContainer) {
+          new google.visualization.LineChart(chartContainer).draw(chartData, options);
+        }
       }
 
       function drawDailyDashboard() {
@@ -1926,26 +2287,31 @@
       function switchMarketSubTab(tab) {
         document.getElementById('subTabGlobalContent').classList.add('hidden');
         document.getElementById('subTabSet100Content').classList.add('hidden');
+        document.getElementById('subTabHoldingsContent').classList.add('hidden');
         document.getElementById('subTabBenchmarkContent').classList.add('hidden');
 
-        ['btnTabGlobal', 'btnTabSet100', 'btnTabBenchmark'].forEach(id => {
+        ['btnTabGlobal', 'btnTabSet100', 'btnTabHoldings', 'btnTabBenchmark'].forEach(id => {
           let b = document.getElementById(id);
           if (b) {
-            b.className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-purple-600 transition-all flex items-center justify-center gap-2";
+            b.className = "flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-500 hover:text-purple-600 transition-all flex items-center justify-center gap-2";
           }
         });
 
         if (tab === 'global') {
           document.getElementById('subTabGlobalContent').classList.remove('hidden');
-          document.getElementById('btnTabGlobal').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
+          document.getElementById('btnTabGlobal').className = "flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
           renderMarketBarChart();
         } else if (tab === 'set100') {
           document.getElementById('subTabSet100Content').classList.remove('hidden');
-          document.getElementById('btnTabSet100').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
+          document.getElementById('btnTabSet100').className = "flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
           drawThaiStockDashboard();
+        } else if (tab === 'holdings') {
+          document.getElementById('subTabHoldingsContent').classList.remove('hidden');
+          document.getElementById('btnTabHoldings').className = "flex-1 min-w-[150px] py-2.5 px-3 rounded-xl text-xs font-bold text-indigo-700 bg-indigo-100/90 shadow-xs transition-all flex items-center justify-center gap-2";
+          initGpfHoldingsDashboard();
         } else if (tab === 'benchmark') {
           document.getElementById('subTabBenchmarkContent').classList.remove('hidden');
-          document.getElementById('btnTabBenchmark').className = "flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
+          document.getElementById('btnTabBenchmark').className = "flex-1 min-w-[120px] py-2.5 px-3 rounded-xl text-xs font-bold text-purple-700 bg-purple-100/80 shadow-xs transition-all flex items-center justify-center gap-2";
         }
       }
 
@@ -2385,7 +2751,338 @@
         }
       }
 
-      // ===== ระบบทองคำโลก & ตัวแบบจำลอง SPDR GLD (Gold Market Engine) =====
+      // ===== ระบบเจาะลึก 35 หลักทรัพย์ที่ กบข. ถือครอง (Look-Through Top Holdings Engine) =====
+      var currentHoldingsCategory = 'thai';
+      var holdingsImpactChartInstance = null;
+      var holdingsLastUpdatedTime = null;
+
+      const GPF_35_HOLDINGS_CONFIG = {
+        thai: {
+          title: 'ตราสารทุนไทย (Thai Equities)',
+          badge: 'สัดส่วน 10 อันดับแรกคิดเป็น 61.96% ของพอร์ตหุ้นไทย',
+          flag: '🇹🇭',
+          desc: '10 หลักทรัพย์แรกที่กองทุน กบข. ถือครองมากที่สุดในตลาดหลักทรัพย์แห่งประเทศไทย (SET)',
+          proNotes: [
+            '<b>Core Driving Engine:</b> 10 หุ้นชุดนี้คุมทิศทางผลตอบแทนของ <b>"แผนหุ้นไทย"</b> และส่งผลอย่างยิ่งต่อ <b>"แผนสมดุลตามอายุ"</b> และ <b>"แผนผสมหุ้นทวี"</b>',
+            '<b>Sector Concentration:</b> เน้นน้ำหนักในกลุ่มอิเล็กทรอนิกส์ส่งออก (DELTA 8.60%), ธนาคารพาณิชย์ขนาดใหญ่ (KBANK, KTB, BBL, SCB รวมกันสูงถึง ~26.44%), สื่อสาร (ADVANC 7.49%) และพลังงานสาธารณูปโภค (PTT, GULF, PTTEP รวม ~15.52%)',
+            '<b>กลยุทธ์การสับเปลี่ยน:</b> หากกลุ่มแบงก์และ DELTA มีโมเมนตัมเป็นบวกพร้อมกัน จะหนุนให้ NAV แผนหุ้นไทยพุ่งทะลุแนวต้านได้ดีเยี่ยม'
+          ],
+          items: [
+            { rank: 1, name: 'DELTA', fullName: 'Delta Electronics (Thailand)', symbol: 'DELTA.BK', weight: 8.60, defaultPrice: 156.50, defaultChange: 2.50, defaultPct: 1.62 },
+            { rank: 2, name: 'KBANK', fullName: 'Kasikornbank', symbol: 'KBANK.BK', weight: 8.32, defaultPrice: 154.50, defaultChange: 1.00, defaultPct: 0.65 },
+            { rank: 3, name: 'ADVANC', fullName: 'Advanced Info Service', symbol: 'ADVANC.BK', weight: 7.49, defaultPrice: 282.00, defaultChange: 3.00, defaultPct: 1.08 },
+            { rank: 4, name: 'KTB', fullName: 'Krungthai Bank', symbol: 'KTB.BK', weight: 6.77, defaultPrice: 21.30, defaultChange: 0.20, defaultPct: 0.95 },
+            { rank: 5, name: 'PTT', fullName: 'PTT Public Company', symbol: 'PTT.BK', weight: 6.47, defaultPrice: 32.75, defaultChange: -0.25, defaultPct: -0.76 },
+            { rank: 6, name: 'GULF', fullName: 'Gulf Development Public', symbol: 'GULF.BK', weight: 6.41, defaultPrice: 62.50, defaultChange: 0.50, defaultPct: 0.81 },
+            { rank: 7, name: 'BBL', fullName: 'Bangkok Bank', symbol: 'BBL.BK', weight: 5.81, defaultPrice: 156.50, defaultChange: 0.50, defaultPct: 0.32 },
+            { rank: 8, name: 'SCB', fullName: 'SCB X Public Company', symbol: 'SCB.BK', weight: 5.54, defaultPrice: 114.00, defaultChange: 0.00, defaultPct: 0.00 },
+            { rank: 9, name: 'CPN', fullName: 'Central Pattana', symbol: 'CPN.BK', weight: 3.91, defaultPrice: 65.25, defaultChange: -0.50, defaultPct: -0.76 },
+            { rank: 10, name: 'PTTEP', fullName: 'PTT Exploration and Production', symbol: 'PTTEP.BK', weight: 2.64, defaultPrice: 130.50, defaultChange: -1.00, defaultPct: -0.76 }
+          ]
+        },
+        developed: {
+          title: 'ตราสารทุนตลาดพัฒนาแล้ว (Developed Markets)',
+          badge: 'สัดส่วน 10 อันดับแรกคิดเป็น 26.79% ของพอร์ตหุ้นตลาดพัฒนาแล้ว',
+          flag: '🇺🇸',
+          desc: '10 หุ้นผู้นำระดับโลก (Global Megacap Leaders) ที่เป็นสินทรัพย์ขับเคลื่อนหลักใน "แผนหุ้นต่างประเทศ"',
+          proNotes: [
+            '<b>US Tech Dominance:</b> พอร์ตตลาดพัฒนาแล้วของ กบข. อิงตามดัชนี MSCI World และ S&P 500 โดยมีหุ้นกลุ่ม Big Tech สหรัฐฯ (Alphabet, Nvidia, Amazon, Microsoft, Apple, Meta, Broadcom) รวมกันเกินกว่า 23% ของพอร์ตส่วนนี้',
+            '<b>AI & Semiconductor Theme:</b> มีสัดส่วนบริษัทชิปและเทคโนโลยีปัญญาประดิษฐ์ระดับโลกสูงมาก เช่น NVDA (4.28%), AVGO (1.69%), AMAT (1.39%)',
+            '<b>Currency Impact (USD/THB):</b> ผลตอบแทนในรูปเงินบาทจะได้รับแรงหนุน 2 ต่อ เมื่อหุ้นเทคโนโลยีสหรัฐฯ ปรับขึ้น และค่าเงินดอลลาร์แข็งค่าเทียบกับบาท'
+          ],
+          items: [
+            { rank: 1, name: 'Alphabet', fullName: 'Alphabet Inc. (Class A)', symbol: 'GOOGL', weight: 5.00, defaultPrice: 178.20, defaultChange: 2.15, defaultPct: 1.22 },
+            { rank: 2, name: 'NVIDIA', fullName: 'NVIDIA Corporation', symbol: 'NVDA', weight: 4.28, defaultPrice: 124.50, defaultChange: 3.40, defaultPct: 2.81 },
+            { rank: 3, name: 'Amazon', fullName: 'Amazon.com Inc.', symbol: 'AMZN', weight: 3.43, defaultPrice: 194.80, defaultChange: 1.90, defaultPct: 0.98 },
+            { rank: 4, name: 'Microsoft', fullName: 'Microsoft Corporation', symbol: 'MSFT', weight: 3.42, defaultPrice: 432.10, defaultChange: -1.20, defaultPct: -0.28 },
+            { rank: 5, name: 'Apple', fullName: 'Apple Inc.', symbol: 'AAPL', weight: 2.99, defaultPrice: 228.40, defaultChange: 1.50, defaultPct: 0.66 },
+            { rank: 6, name: 'Meta Platforms', fullName: 'Meta Platforms Inc.', symbol: 'META', weight: 2.43, defaultPrice: 535.60, defaultChange: 4.80, defaultPct: 0.90 },
+            { rank: 7, name: 'Broadcom', fullName: 'Broadcom Inc.', symbol: 'AVGO', weight: 1.69, defaultPrice: 168.90, defaultChange: 2.70, defaultPct: 1.62 },
+            { rank: 8, name: 'Applied Materials', fullName: 'Applied Materials Inc.', symbol: 'AMAT', weight: 1.39, defaultPrice: 202.40, defaultChange: -2.10, defaultPct: -1.03 },
+            { rank: 9, name: 'Roche Holding', fullName: 'Roche Holding AG (Switzerland)', symbol: 'ROG.SW', weight: 1.08, defaultPrice: 268.00, defaultChange: 1.40, defaultPct: 0.53 },
+            { rank: 10, name: 'Visa', fullName: 'Visa Inc. (Class A)', symbol: 'V', weight: 1.08, defaultPrice: 279.30, defaultChange: 0.80, defaultPct: 0.29 }
+          ]
+        },
+        emerging: {
+          title: 'ตราสารทุนตลาดเกิดใหม่ (Emerging Markets)',
+          badge: 'สัดส่วน 10 อันดับแรกคิดเป็น 23.34% ของพอร์ตหุ้นตลาดเกิดใหม่',
+          flag: '🌏',
+          desc: '10 หุ้นยักษ์ใหญ่ในตลาดเกิดใหม่ เช่น ไต้หวัน เกาหลีใต้ จีน และฮ่องกง',
+          proNotes: [
+            '<b>Asian Foundry & Memory Giants:</b> หัวใจของพอร์ตตลาดเกิดใหม่นำโดย <b>TSMC (9.30%)</b> ผู้ผลิตชิปเบอร์ 1 ของโลก และ <b>SK hynix (5.97%)</b> ผู้นำหน่วยความจำ HBM สำหรับ AI รวมกันกว่า 15.27%',
+            '<b>China & Taiwan Tech Exposure:</b> ประกอบด้วย Tencent, Alibaba, MediaTek และ Delta TW เชื่อมโยงกับกำลังซื้อและห่วงโซ่อุปทานเทคโนโลยีเอเชีย',
+            '<b>High Beta Potential:</b> กลุ่มนี้มักมีความผันผวนสูงกว่าตลาดพัฒนาแล้ว แต่ให้ผลตอบแทนก้าวกระโดดในช่วงวัฏจักรการเติบโตของเซมิคอนดักเตอร์โลก'
+          ],
+          items: [
+            { rank: 1, name: 'TSMC', fullName: 'Taiwan Semiconductor Manufacturing', symbol: 'TSM', weight: 9.30, defaultPrice: 172.50, defaultChange: 3.20, defaultPct: 1.89 },
+            { rank: 2, name: 'SK hynix', fullName: 'SK hynix Inc. (Korea)', symbol: '000660.KS', weight: 5.97, defaultPrice: 185200.0, defaultChange: 4200.0, defaultPct: 2.32 },
+            { rank: 3, name: 'MediaTek', fullName: 'MediaTek Inc. (Taiwan)', symbol: '2454.TW', weight: 1.48, defaultPrice: 1280.0, defaultChange: -15.0, defaultPct: -1.16 },
+            { rank: 4, name: 'Tencent', fullName: 'Tencent Holdings (Hong Kong)', symbol: '0700.HK', weight: 1.42, defaultPrice: 382.40, defaultChange: 4.60, defaultPct: 1.22 },
+            { rank: 5, name: 'China Construction Bank', fullName: 'China Construction Bank', symbol: '0939.HK', weight: 1.25, defaultPrice: 5.62, defaultChange: 0.04, defaultPct: 0.72 },
+            { rank: 6, name: 'Delta Electronics TW', fullName: 'Delta Electronics Inc. (TW)', symbol: '2308.TW', weight: 1.25, defaultPrice: 405.00, defaultChange: 3.50, defaultPct: 0.87 },
+            { rank: 7, name: 'SK Square', fullName: 'SK Square Co., Ltd. (Korea)', symbol: '402340.KS', weight: 0.76, defaultPrice: 84200.0, defaultChange: -600.0, defaultPct: -0.71 },
+            { rank: 8, name: 'Alibaba', fullName: 'Alibaba Group Holding (HK)', symbol: '9988.HK', weight: 0.70, defaultPrice: 84.50, defaultChange: 1.10, defaultPct: 1.32 },
+            { rank: 9, name: 'ICBC', fullName: 'Industrial and Commercial Bank of China', symbol: '1398.HK', weight: 0.62, defaultPrice: 4.58, defaultChange: 0.03, defaultPct: 0.66 },
+            { rank: 10, name: 'ASE Technology', fullName: 'ASE Technology Holding (TW)', symbol: '3711.TW', weight: 0.59, defaultPrice: 154.00, defaultChange: 1.50, defaultPct: 0.98 }
+          ]
+        },
+        reit: {
+          title: 'กองทุนอสังหาริมทรัพย์และ REIT ไทย (Thai Real Estate & REITs)',
+          badge: 'สัดส่วน 5 อันดับแรกคิดเป็น 67.22% ของพอร์ตกองทุนอสังหาริมทรัพย์ไทย',
+          flag: '🏢',
+          desc: '5 กองทรัสต์และกองทุนรวมอสังหาริมทรัพย์ชั้นนำที่มีสภาพคล่องสูงและจ่ายเงินปันผลสม่ำเสมอในไทย',
+          proNotes: [
+            '<b>High Concentration (67.22%):</b> กบข. เลือกลงทุนใน 5 กองทุนอสังหาฯ และ REIT คุณภาพสูง ซึ่งคิดเป็นสัดส่วนกว่า 2 ใน 3 ของพอร์ตอสังหาฯ ทั้งหมด',
+            '<b>Asset Class Breakdown:</b> ศูนย์การค้าพรีเมียม (CPNREIT 17.24%), คลังสินค้าและโรงงานอุตสาหกรรมโลจิสติกส์ (FTREIT 14.80%, WHART 14.63%), อาคารค้าปลีก/สำนักงาน (AXTRART 11.67%) และศูนย์ประชุมนิทรรศการ (IMPACT 8.88%)',
+            '<b>Role in Portfolio:</b> มอบกระแสเงินสดจากเงินปันผล (Dividend Yield) ที่สม่ำเสมอ เป็นสินทรัพย์ป้องกันเงินเฟ้อ และได้ประโยชน์เมื่อวัฏจักรดอกเบี้ยเข้าสู่ช่วงขาลง'
+          ],
+          items: [
+            { rank: 1, name: 'CPNREIT', fullName: 'CPN Retail Growth Leasehold REIT', symbol: 'CPNREIT.BK', weight: 17.24, defaultPrice: 11.40, defaultChange: 0.10, defaultPct: 0.88 },
+            { rank: 2, name: 'FTREIT', fullName: 'Frasers Property Thailand Industrial Freehold & Leasehold REIT', symbol: 'FTREIT.BK', weight: 14.80, defaultPrice: 10.20, defaultChange: 0.00, defaultPct: 0.00 },
+            { rank: 3, name: 'WHART', fullName: 'WHA Premium Growth Freehold & Leasehold REIT', symbol: 'WHART.BK', weight: 14.63, defaultPrice: 9.75, defaultChange: -0.05, defaultPct: -0.51 },
+            { rank: 4, name: 'AXTRART', fullName: 'Axterior Real Estate Investment Trust', symbol: 'AXTRART.BK', weight: 11.67, defaultPrice: 8.90, defaultChange: 0.05, defaultPct: 0.56 },
+            { rank: 5, name: 'IMPACT', fullName: 'IMPACT Growth Real Estate Investment Trust', symbol: 'IMPACT.BK', weight: 8.88, defaultPrice: 12.30, defaultChange: 0.10, defaultPct: 0.82 }
+          ]
+        }
+      };
+
+      var gpfHoldingsLiveState = JSON.parse(JSON.stringify(GPF_35_HOLDINGS_CONFIG));
+
+      function initGpfHoldingsDashboard() {
+        renderGpfHoldings();
+        // ดึงราคา Real-time เบื้องหลัง
+        fetchGpfHoldingsPrices();
+      }
+
+      function switchHoldingsCategory(cat) {
+        if (!gpfHoldingsLiveState[cat]) return;
+        currentHoldingsCategory = cat;
+
+        ['thai', 'developed', 'emerging', 'reit'].forEach(c => {
+          let btn = document.getElementById('btnHoldingsCat_' + c);
+          if (btn) {
+            if (c === cat) {
+              btn.className = "px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-xs transition-all flex items-center gap-1.5";
+            } else {
+              btn.className = "px-3.5 py-2 rounded-xl text-xs font-semibold bg-white text-slate-600 hover:text-indigo-600 border border-slate-200 transition-all flex items-center gap-1.5";
+            }
+          }
+        });
+
+        renderGpfHoldings();
+      }
+
+      function renderGpfHoldings() {
+        const catData = gpfHoldingsLiveState[currentHoldingsCategory];
+        if (!catData) return;
+
+        // 1. Render Category Banner
+        const banner = document.getElementById('holdingsCategoryInfoBanner');
+        if (banner) {
+          const totalTopWeight = catData.items.reduce((sum, item) => sum + item.weight, 0).toFixed(2);
+          banner.innerHTML = `
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">${catData.flag}</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="text-sm font-bold text-slate-800">${catData.title}</h4>
+                  <span class="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full">${catData.badge}</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">${catData.desc}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4 border-t md:border-t-0 md:border-l border-indigo-100 pt-2 md:pt-0 md:pl-4">
+              <div class="text-left md:text-right">
+                <span class="text-[10px] text-slate-400 block font-medium">สัดส่วนรวมหลักทรัพย์ Top</span>
+                <span class="text-base font-extrabold text-indigo-700 font-mono">${totalTopWeight}%</span>
+              </div>
+              <div class="text-left md:text-right">
+                <span class="text-[10px] text-slate-400 block font-medium">จำนวนหลักทรัพย์</span>
+                <span class="text-base font-extrabold text-slate-800 font-mono">${catData.items.length} รายการ</span>
+              </div>
+            </div>
+          `;
+        }
+
+        // 2. Render Holdings Table
+        const tbody = document.getElementById('gpfHoldingsTableBody');
+        if (tbody) {
+          let html = '';
+          catData.items.forEach(item => {
+            const curPrice = item.livePrice !== undefined ? item.livePrice : item.defaultPrice;
+            const diff = item.diff !== undefined ? item.diff : item.defaultChange;
+            const pct = item.pct !== undefined ? item.pct : item.defaultPct;
+            const isPos = pct >= 0;
+            const sign = isPos ? '+' : '';
+            const cls = isPos ? 'positive' : 'negative';
+            const impactVal = ((item.weight * pct) / 100);
+            const impactSign = impactVal >= 0 ? '+' : '';
+            const impactCls = impactVal >= 0 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-rose-700 bg-rose-50 border-rose-200';
+
+            let priceFmt = curPrice.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (currentHoldingsCategory === 'developed' && !item.symbol.includes('.SW')) priceFmt = '$' + priceFmt;
+            if (item.symbol.includes('.KS')) priceFmt = '₩' + Math.round(curPrice).toLocaleString();
+            if (item.symbol.includes('.TW')) priceFmt = 'NT$' + priceFmt;
+            if (item.symbol.includes('.HK')) priceFmt = 'HK$' + priceFmt;
+
+            html += `
+              <tr class="hover:bg-indigo-50/30 transition-colors">
+                <td class="text-left font-bold text-slate-400 font-mono text-xs pl-2">#${item.rank}</td>
+                <td class="text-left">
+                  <div class="font-bold text-slate-800 text-xs">${item.name}</div>
+                  <div class="text-[10px] text-slate-400 truncate max-w-[200px]" title="${item.fullName}">${item.fullName}</div>
+                </td>
+                <td class="text-center font-mono text-[11px] font-semibold text-purple-700 bg-purple-50/50 rounded px-1.5 py-0.5">
+                  ${item.symbol.replace('.BK','')}
+                </td>
+                <td class="text-right font-bold text-slate-800 font-mono text-xs">${item.weight.toFixed(2)}%</td>
+                <td class="text-right font-black text-slate-900 font-mono text-xs">${priceFmt}</td>
+                <td class="text-right font-mono text-xs font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">
+                  ${sign}${diff ? diff.toFixed(2) : '0.00'}
+                </td>
+                <td class="text-right font-mono text-xs">
+                  <span class="${cls} font-bold">${sign}${pct.toFixed(2)}%</span>
+                </td>
+                <td class="text-right font-mono text-xs">
+                  <span class="inline-block px-2 py-0.5 rounded-full border text-[11px] font-bold ${impactCls}">
+                    ${impactSign}${impactVal.toFixed(3)}%
+                  </span>
+                </td>
+              </tr>
+            `;
+          });
+          tbody.innerHTML = html;
+        }
+
+        // 3. Render Impact Bar Chart
+        renderHoldingsImpactChart();
+
+        // 4. Render Pro Investment Insights
+        const notesContainer = document.getElementById('holdingsProNotesContent');
+        if (notesContainer) {
+          notesContainer.innerHTML = catData.proNotes.map(n => `
+            <div class="p-2.5 rounded-xl bg-white border border-purple-100 shadow-2xs flex items-start gap-2">
+              <i class="fa-solid fa-circle-check text-indigo-500 mt-1 text-xs"></i>
+              <span>${n}</span>
+            </div>
+          `).join('');
+        }
+      }
+
+      function renderHoldingsImpactChart() {
+        const canvas = document.getElementById('holdingsImpactChartCanvas');
+        if (!canvas) return;
+        const catData = gpfHoldingsLiveState[currentHoldingsCategory];
+        if (!catData) return;
+
+        if (holdingsImpactChartInstance) {
+          holdingsImpactChartInstance.destroy();
+        }
+
+        const labels = catData.items.map(i => i.name);
+        const impacts = catData.items.map(i => {
+          const pct = i.pct !== undefined ? i.pct : i.defaultPct;
+          return parseFloat(((i.weight * pct) / 100).toFixed(3));
+        });
+        const colors = impacts.map(v => v >= 0 ? '#10b981' : '#f43f5e');
+
+        holdingsImpactChartInstance = new Chart(canvas.getContext('2d'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'แรงส่งต่อพอร์ต (Weighted Contribution %)',
+              data: impacts,
+              backgroundColor: colors,
+              borderRadius: 6,
+              borderWidth: 1,
+              borderColor: colors
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    let v = ctx.raw;
+                    return ' ผลกระทบต่อพอร์ต: ' + (v >= 0 ? '+' : '') + v + '%';
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                ticks: {
+                  callback: function(v) { return (v >= 0 ? '+' : '') + v + '%'; },
+                  font: { family: 'Prompt', size: 10 }
+                },
+                grid: { color: 'rgba(233, 213, 255, 0.4)' }
+              },
+              x: {
+                ticks: { font: { family: 'Prompt', size: 10, weight: '600' } },
+                grid: { display: false }
+              }
+            }
+          }
+        });
+      }
+
+      async function fetchGpfHoldingsPrices() {
+        const catData = gpfHoldingsLiveState[currentHoldingsCategory];
+        if (!catData) return;
+
+        const symbols = catData.items.map(i => i.symbol);
+        let backendData = null;
+
+        try {
+          backendData = await callBackend('fetchYahooData', { symbols: symbols });
+        } catch(e) {
+          console.warn('Backend fetchYahooData for holdings failed:', e);
+        }
+
+        catData.items.forEach(item => {
+          if (backendData && backendData[item.symbol]) {
+            const b = backendData[item.symbol];
+            const curPrice = b.price || item.defaultPrice;
+            const prevClose = b.prevClose || curPrice;
+            const diff = curPrice - prevClose;
+            const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
+            item.livePrice = curPrice;
+            item.diff = diff;
+            item.pct = pct;
+          }
+        });
+
+        holdingsLastUpdatedTime = new Date();
+        const timeEl = document.getElementById('holdings_last_updated');
+        if (timeEl) {
+          timeEl.innerHTML = `<i class="fa-solid fa-clock mr-1 text-emerald-500"></i> อัปเดตล่าสุด: ${holdingsLastUpdatedTime.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.`;
+        }
+
+        renderGpfHoldings();
+      }
+
+      async function refreshHoldingsData() {
+        const btn = document.querySelector('button[onclick="refreshHoldingsData()"]');
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังอัปเดต...';
+        try {
+          await fetchGpfHoldingsPrices();
+          Swal.fire({
+            icon: 'success',
+            title: 'อัปเดตราคาหุ้น 35 ตัวสำเร็จ',
+            text: 'ดึงข้อมูลราคาตลาดล่าสุดของหลักทรัพย์ที่ กบข. ถือครองเรียบร้อย',
+            timer: 1500,
+            showConfirmButton: false
+          });
+        } catch (e) {
+          console.error(e);
+        } finally {
+          if (btn) btn.innerHTML = '<i class="fa-solid fa-rotate mr-1"></i> <span>รีเฟรชราคาหุ้น</span>';
+        }
+      }
       var goldMarketData = [];
       var goldMomentumChartInstance = null;
 
