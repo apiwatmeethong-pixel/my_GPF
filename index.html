@@ -1190,12 +1190,22 @@
           });
         } else {
           try {
+            const body = JSON.stringify({ action: action, ...params });
             const res = await fetch(API_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action: action, ...params })
+              body: body,
+              redirect: 'follow'
             });
-            return await res.json();
+            if (!res.ok) {
+              throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+            const text = await res.text();
+            try {
+              return JSON.parse(text);
+            } catch {
+              throw new Error('ไม่สามารถอ่านข้อมูลจากเซิร์ฟเวอร์ได้: ' + text.substring(0, 200));
+            }
           } catch (e) {
             throw new Error("เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์: " + e.message);
           }
@@ -3044,10 +3054,10 @@
         }
 
         catData.items.forEach(item => {
-          if (backendData && backendData[item.symbol]) {
-            const b = backendData[item.symbol];
-            const curPrice = b.price || item.defaultPrice;
-            const prevClose = b.prevClose || curPrice;
+          const priceInfo = backendData && backendData.data ? backendData.data[item.symbol] : null;
+          if (priceInfo) {
+            const curPrice = priceInfo.price || item.defaultPrice;
+            const prevClose = priceInfo.prevClose || curPrice;
             const diff = curPrice - prevClose;
             const pct = prevClose > 0 ? (diff / prevClose) * 100 : 0;
             item.livePrice = curPrice;

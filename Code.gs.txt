@@ -1,0 +1,757 @@
+/**
+ * ====================================================================
+ * MY GPF DASHBOARD - QUANTUM AI BACKEND
+ * Locked Spreadsheet ID: 1Ly2FYU5oAU-K_axJk739fJR9j9ZXABrh6olFizZQuNk
+ * ====================================================================
+ */
+
+const LOCKED_SPREADSHEET_ID = "1Ly2FYU5oAU-K_axJk739fJR9j9ZXABrh6olFizZQuNk";
+
+function getSS() {
+  try {
+    return SpreadsheetApp.openById(LOCKED_SPREADSHEET_ID);
+  } catch (e) {
+    return SpreadsheetApp.getActiveSpreadsheet();
+  }
+}
+
+function doGet(e) {
+  if (e && e.parameter && e.parameter.action) {
+    var result = handleApiRequest(e.parameter);
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return HtmlService.createTemplateFromFile('index')
+    .evaluate()
+    .setTitle('My GPF Portfolio Management - Quantum AI')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function doPost(e) {
+  try {
+    var contents = e.postData ? e.postData.contents : "";
+    var request = JSON.parse(contents || "{}");
+    var params = {};
+
+    // 1. อ่านพารามิเตอร์จาก URL
+    if (e && e.parameter) {
+      for (var p in e.parameter) { params[p] = e.parameter[p]; }
+    }
+    // 2. อ่านพารามิเตอร์จาก JSON Body
+    for (var k in request) { params[k] = request[k]; }
+    if (request.data && typeof request.data === 'object') {
+      for (var d in request.data) { params[d] = request.data[d]; }
+    }
+
+    var result = handleApiRequest(params);
+
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", error: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function handleApiRequest(params) {
+  var action = params.action || "";
+  var username = params.username || params.user || "";
+  var password = params.password || params.pass || "";
+
+  if (action === "login" || action === "loginUser") {
+    return loginUser(username, password);
+  } else if (action === "getNavData") {
+    return getNavData(username);
+  } else if (action === "getThaiStockData") {
+    return getThaiStockData();
+  } else if (action === "getGoldData") {
+    return getGoldData();
+  } else if (action === "getAiAnalysis" || action === "generateQuantumAIAnalysis") {
+    return generateQuantumAIAnalysis(username, params.requestedEngine);
+  } else if (action === "saveBaseline") {
+    return saveBaseline(username, params.year, params.amount);
+  } else if (action === "savePortfolio") {
+    return savePortfolio(username, params.data || params.planData, params.monthlyCash);
+  } else if (action === "getCashflowData") {
+    return getCashflowData(username);
+  } else if (action === "updateCashflowEntry") {
+    return updateCashflowEntry(params.id, params.amount, username);
+  } else if (action === "lockCashflowEntry") {
+    return lockCashflowEntry(params.id, params.locked, username);
+  } else if (action === "getAdminConfig") {
+    return getAdminConfig();
+  } else if (action === "saveAdminConfig") {
+    return saveAdminConfig(params.configObj || params);
+  } else if (action === "getUsersList") {
+    return getUsersList();
+  } else if (action === "saveUser") {
+    return saveUser(params.userData || params);
+  } else if (action === "deleteUser") {
+    return deleteUser(username);
+  } else if (action === "fetchYahooData") {
+    var symbols = params.symbols || [];
+    return fetchYahooData(symbols);
+  } else {
+    return { status: "error", message: "Invalid Action: " + action };
+  }
+}
+
+function getUsersListInternal(ss) {
+  ss = ss || getSS();
+  var users = [];
+  var usersSheet = ss.getSheetByName("Users");
+  if (usersSheet) {
+    var data = usersSheet.getDataRange().getValues();
+    if (data.length > 1) {
+      var headers = data[0].map(function(h) { return h.toString().trim().toLowerCase(); });
+      var uIdx = headers.indexOf("username");
+      var pIdx = headers.indexOf("password");
+      var fIdx = headers.indexOf("fullname");
+      var rIdx = headers.indexOf("role");
+
+      for (var i = 1; i < data.length; i++) {
+        var row = data[i];
+        if (row[uIdx] !== "" && row[uIdx] !== undefined) {
+          users.push({
+            username: row[uIdx].toString().trim(),
+            password: row[pIdx] !== undefined ? row[pIdx].toString().trim() : "",
+            fullName: row[fIdx] ? row[fIdx].toString().trim() : row[uIdx].toString().trim(),
+            role: (rIdx !== -1 && row[rIdx]) ? row[rIdx].toString().trim().toLowerCase() : "user"
+          });
+        }
+      }
+      return users;
+    }
+  }
+
+  var legacySheet = ss.getSheetByName("user");
+  if (legacySheet) {
+    var lData = legacySheet.getDataRange().getValues();
+    if (lData.length > 1) {
+      for (var j = 1; j < lData.length; j++) {
+        var lRow = lData[j];
+        var uname = lRow[1] ? lRow[1].toString().trim() : "";
+        if (uname) {
+          users.push({
+            username: uname,
+            password: lRow[2] !== undefined ? lRow[2].toString().trim() : "",
+            fullName: lRow[3] ? lRow[3].toString().trim() : uname,
+            role: (uname.toLowerCase() === "admin") ? "admin" : "user"
+          });
+        }
+      }
+    }
+  }
+  return users;
+}
+
+function loginUser(username, password) {
+  try {
+    var ss = getSS();
+    var usersList = getUsersListInternal(ss);
+    var cleanUser = (username !== undefined && username !== null) ? username.toString().trim().toLowerCase() : "";
+    var cleanPass = (password !== undefined && password !== null) ? password.toString().trim() : "";
+
+    for (var i = 0; i < usersList.length; i++) {
+      var u = usersList[i];
+      var dbUser = (u.username || "").toString().trim().toLowerCase();
+      var dbPass = (u.password !== undefined && u.password !== null) ? u.password.toString().trim() : "";
+
+      if (dbUser === cleanUser && dbPass === cleanPass) {
+        return {
+          status: "success",
+          success: true,
+          username: u.username,
+          fname: u.fullName,
+          user: {
+            username: u.username,
+            fullName: u.fullName,
+            role: u.role || "user"
+          }
+        };
+      }
+    }
+    return { status: "error", success: false, message: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" };
+  } catch (e) {
+    return { status: "error", success: false, message: "เกิดข้อผิดพลาดในการล็อกอิน: " + e.toString() };
+  }
+}
+
+function getNavData(username) {
+  var ss = getSS();
+  var cleanUser = (username || "").toString().trim().toLowerCase();
+
+  var usersList = getUsersListInternal(ss);
+  var userFullName = username;
+  for (var u = 0; u < usersList.length; u++) {
+    if (usersList[u].username.toLowerCase() === cleanUser) {
+      userFullName = usersList[u].fullName;
+      break;
+    }
+  }
+
+  var yearlyBaseline = 0;
+  var baselineSheet = ss.getSheetByName("baseline");
+  if (baselineSheet) {
+    var bData = baselineSheet.getDataRange().getValues();
+    for (var b = 1; b < bData.length; b++) {
+      var bUser = bData[b][1] ? bData[b][1].toString().trim().toLowerCase() : "";
+      if (bUser === cleanUser) {
+        yearlyBaseline = parseFloat(bData[b][2]) || 0;
+        break;
+      }
+    }
+  }
+
+  // รวมยอดเงินนำส่งสะสม (นับทุกแถวไม่ว่าจะถูกล็อคหรือไม่ เพราะสถานะล็อคใช้ป้องกันการแก้ไข ไม่ใช่การนับ)
+  var totalContribution = 0;
+  var cashflowSheet = ss.getSheetByName("cashflow");
+  if (cashflowSheet) {
+    var cData = cashflowSheet.getDataRange().getValues();
+    for (var c = 1; c < cData.length; c++) {
+      var cUser = cData[c][1] ? cData[c][1].toString().trim().toLowerCase() : "";
+      if (cUser === cleanUser) {
+        totalContribution += parseFloat(cData[c][2]) || 0;
+      }
+    }
+  }
+
+  var myUnits = {};
+  var mygpfSheet = ss.getSheetByName("mygpf");
+  if (mygpfSheet) {
+    var mData = mygpfSheet.getDataRange().getValues();
+    for (var m = 1; m < mData.length; m++) {
+      var mUser = mData[m][0] ? mData[m][0].toString().trim().toLowerCase() : "";
+      if (mUser === cleanUser) {
+        var planName = mData[m][2] ? mData[m][2].toString().trim() : "";
+        var units = parseFloat(mData[m][3]) || 0;
+        if (planName) {
+          myUnits[planName] = units;
+        }
+      }
+    }
+  }
+
+  var navSheet = ss.getSheetByName("nav");
+  var headers = [];
+  var rows = [];
+
+  if (navSheet) {
+    var nData = navSheet.getDataRange().getValues();
+    if (nData.length > 0) {
+      headers = nData[0].map(function(h) { return h.toString().trim(); });
+      headers[0] = "วันที่";
+
+      for (var r = 1; r < nData.length; r++) {
+        if (!nData[r][0]) continue;
+        var rowArr = [Utilities.formatDate(new Date(nData[r][0]), "GMT+7", "yyyy-MM-dd")];
+        for (var col = 1; col < headers.length; col++) {
+          rowArr.push(parseFloat(nData[r][col]) || 0);
+        }
+        rows.push(rowArr);
+      }
+    }
+  }
+
+  return {
+    status: "success",
+    headers: headers,
+    data: rows,
+    myUnits: myUnits,
+    totalContribution: totalContribution,
+    yearlyBaseline: yearlyBaseline,
+    userFullName: userFullName
+  };
+}
+
+function getThaiStockData() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName("set");
+  if (!sheet) return { status: "error", message: "ไม่พบตาราง set" };
+  return { status: "success", data: sheet.getDataRange().getValues() };
+}
+
+function getGoldData() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName("spdr");
+  if (!sheet) return { status: "error", message: "ไม่พบตาราง spdr" };
+  return { status: "success", data: sheet.getDataRange().getValues() };
+}
+
+function saveBaseline(user, year, amount) {
+  var ss = getSS();
+  var sheet = ss.getSheetByName("baseline");
+  if (!sheet) {
+    sheet = ss.insertSheet("baseline");
+    sheet.appendRow(["ปี ", "User", "เงินยกมาต้นปี"]);
+  }
+
+  var cleanUser = (user || "").toString().trim().toLowerCase();
+  var targetYear = parseInt(year) || new Date().getFullYear();
+  var targetAmt = parseFloat(amount) || 0;
+
+  var data = sheet.getDataRange().getValues();
+  var foundRow = -1;
+
+  for (var i = 1; i < data.length; i++) {
+    var rYear = parseInt(data[i][0]) || 0;
+    var rUser = data[i][1] ? data[i][1].toString().trim().toLowerCase() : "";
+    if (rYear === targetYear && rUser === cleanUser) {
+      foundRow = i + 1;
+      break;
+    }
+  }
+
+  if (foundRow > 0) {
+    sheet.getRange(foundRow, 3).setValue(targetAmt);
+  } else {
+    sheet.appendRow([targetYear, user, targetAmt]);
+  }
+
+  return { status: "success", message: "บันทึกยอดเงินต้นปีเรียบร้อยแล้ว" };
+}
+
+function savePortfolio(user, planData, monthlyCash) {
+  var ss = getSS();
+  var cleanUser = (user || "").toString().trim().toLowerCase();
+  var todayStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd");
+
+  var latestNavMap = {};
+  var navSheet = ss.getSheetByName("nav");
+  if (navSheet) {
+    var nData = navSheet.getDataRange().getValues();
+    if (nData.length > 1) {
+      var navHeaders = nData[0].map(function(h) { return h.toString().trim(); });
+      var lastRow = nData[nData.length - 1];
+      for (var col = 1; col < navHeaders.length; col++) {
+        latestNavMap[navHeaders[col]] = parseFloat(lastRow[col]) || 0;
+      }
+    }
+  }
+
+  var mygpfSheet = ss.getSheetByName("mygpf");
+  if (!mygpfSheet) {
+    mygpfSheet = ss.insertSheet("mygpf");
+    mygpfSheet.appendRow(["User", "วันที่", "แผนลงทุน", "จำนวนหน่วย", "มูลค่าต่อหน่วย", "รวมเงิน"]);
+  }
+
+  var mData = mygpfSheet.getDataRange().getValues();
+
+  if (Array.isArray(planData)) {
+    planData.forEach(function(item) {
+      var pName = item.plan ? item.plan.toString().trim() : "";
+      var pUnits = parseFloat(item.units) || 0;
+      var navUnit = latestNavMap[pName] || 0;
+      var totalMoney = pUnits * navUnit;
+
+      var foundRow = -1;
+      for (var r = 1; r < mData.length; r++) {
+        var rUser = mData[r][0] ? mData[r][0].toString().trim().toLowerCase() : "";
+        var rPlan = mData[r][2] ? mData[r][2].toString().trim() : "";
+        if (rUser === cleanUser && rPlan === pName) {
+          foundRow = r + 1;
+          break;
+        }
+      }
+
+      if (foundRow > 0) {
+        mygpfSheet.getRange(foundRow, 2, 1, 5).setValues([[todayStr, pName, pUnits, navUnit, totalMoney]]);
+      } else if (pUnits > 0) {
+        mygpfSheet.appendRow([user, todayStr, pName, pUnits, navUnit, totalMoney]);
+      }
+    });
+  }
+
+  var mCash = parseFloat(monthlyCash) || 0;
+  if (mCash > 0) {
+    var cashflowSheet = ensureCashflowSheet(ss);
+    // คอลัมน์: วันที่ | User | เงินนำส่ง | Locked
+    cashflowSheet.appendRow([todayStr, user, mCash, false]);
+  }
+
+  return { status: "success", message: "บันทึกข้อมูลพอร์ตและเงินนำส่งสำเร็จ" };
+}
+
+/**
+ * ====================================================================
+ * CASHFLOW: ดู / แก้ไข / ล็อค รายการเงินนำส่งรายบุคคล
+ * ====================================================================
+ */
+
+// ตรวจสอบให้ชีท cashflow มีคอลัมน์ D = "Locked" เสมอ (รองรับชีทเดิมที่มีแค่ 3 คอลัมน์)
+function ensureCashflowSheet(ss) {
+  ss = ss || getSS();
+  var sheet = ss.getSheetByName("cashflow");
+  if (!sheet) {
+    sheet = ss.insertSheet("cashflow");
+    sheet.appendRow(["วันที่", "User", "เงินนำส่ง", "Locked"]);
+    return sheet;
+  }
+
+  var headerRange = sheet.getRange(1, 1, 1, Math.max(4, sheet.getLastColumn()));
+  var headers = headerRange.getValues()[0];
+  if (!headers[3] || headers[3].toString().trim() === "") {
+    sheet.getRange(1, 4).setValue("Locked");
+  }
+
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    var lockedColRange = sheet.getRange(2, 4, lastRow - 1, 1);
+    var lockedVals = lockedColRange.getValues();
+    var changed = false;
+    for (var i = 0; i < lockedVals.length; i++) {
+      if (lockedVals[i][0] === "" || lockedVals[i][0] === undefined || lockedVals[i][0] === null) {
+        lockedVals[i][0] = false;
+        changed = true;
+      }
+    }
+    if (changed) lockedColRange.setValues(lockedVals);
+  }
+
+  return sheet;
+}
+
+function toBool(v) {
+  if (typeof v === "boolean") return v;
+  if (v === undefined || v === null) return false;
+  var s = v.toString().trim().toLowerCase();
+  return s === "true" || s === "1" || s === "yes" || s === "ล็อค" || s === "checked";
+}
+
+// คืนรายการเงินนำส่งทั้งหมดของ user คนที่ล็อกอิน (id = เลขแถวจริงในชีท เพื่อใช้อ้างอิงตอนแก้ไข/ล็อค)
+function getCashflowData(user) {
+  try {
+    var ss = getSS();
+    var sheet = ensureCashflowSheet(ss);
+    var cleanUser = (user || "").toString().trim().toLowerCase();
+
+    var data = sheet.getDataRange().getValues();
+    var records = [];
+
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var rUser = row[1] ? row[1].toString().trim().toLowerCase() : "";
+      if (rUser !== cleanUser) continue;
+      if (!row[0]) continue;
+
+      var dateStr = row[0];
+      try {
+        dateStr = Utilities.formatDate(new Date(row[0]), "GMT+7", "yyyy-MM-dd");
+      } catch (e) {
+        dateStr = row[0].toString();
+      }
+
+      records.push({
+        id: i + 1, // เลขแถวจริงในชีท (1-based) ใช้เป็นตัวอ้างอิงหลักในการแก้ไข/ล็อค
+        date: dateStr,
+        amount: parseFloat(row[2]) || 0,
+        locked: toBool(row[3])
+      });
+    }
+
+    // เรียงจากล่าสุดไปเก่าสุดให้ผู้ใช้เห็นรายการล่าสุดก่อน
+    records.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+
+    return { status: "success", success: true, data: records };
+  } catch (e) {
+    return { status: "error", success: false, message: "โหลดประวัติเงินนำส่งไม่สำเร็จ: " + e.toString() };
+  }
+}
+
+// แก้ไขยอดเงินของแถว id (เฉพาะแถวที่เป็นของ user นั้นและยังไม่ถูกล็อคเท่านั้น)
+function updateCashflowEntry(id, amount, user) {
+  try {
+    var ss = getSS();
+    var sheet = ensureCashflowSheet(ss);
+    var rowIndex = parseInt(id);
+    var newAmount = parseFloat(amount);
+    var cleanUser = (user || "").toString().trim().toLowerCase();
+
+    if (!rowIndex || rowIndex < 2 || rowIndex > sheet.getLastRow()) {
+      return { status: "error", success: false, message: "ไม่พบรายการเงินนำส่งนี้" };
+    }
+    if (isNaN(newAmount) || newAmount < 0) {
+      return { status: "error", success: false, message: "ยอดเงินไม่ถูกต้อง" };
+    }
+
+    var rowVals = sheet.getRange(rowIndex, 1, 1, 4).getValues()[0];
+    var rowUser = rowVals[1] ? rowVals[1].toString().trim().toLowerCase() : "";
+
+    if (rowUser !== cleanUser) {
+      return { status: "error", success: false, message: "ไม่มีสิทธิ์แก้ไขรายการของผู้ใช้อื่น" };
+    }
+    if (toBool(rowVals[3])) {
+      return { status: "error", success: false, message: "รายการนี้ถูกล็อคอยู่ กรุณาปลดล็อคก่อนแก้ไข" };
+    }
+
+    sheet.getRange(rowIndex, 3).setValue(newAmount);
+    return { status: "success", success: true, message: "แก้ไขยอดเงินนำส่งเรียบร้อยแล้ว" };
+  } catch (e) {
+    return { status: "error", success: false, message: "แก้ไขยอดเงินนำส่งไม่สำเร็จ: " + e.toString() };
+  }
+}
+
+// ล็อค / ปลดล็อค แถว id (เฉพาะแถวที่เป็นของ user นั้น)
+function lockCashflowEntry(id, locked, user) {
+  try {
+    var ss = getSS();
+    var sheet = ensureCashflowSheet(ss);
+    var rowIndex = parseInt(id);
+    var cleanUser = (user || "").toString().trim().toLowerCase();
+    var lockState = toBool(locked);
+
+    if (!rowIndex || rowIndex < 2 || rowIndex > sheet.getLastRow()) {
+      return { status: "error", success: false, message: "ไม่พบรายการเงินนำส่งนี้" };
+    }
+
+    var rowVals = sheet.getRange(rowIndex, 1, 1, 4).getValues()[0];
+    var rowUser = rowVals[1] ? rowVals[1].toString().trim().toLowerCase() : "";
+
+    if (rowUser !== cleanUser) {
+      return { status: "error", success: false, message: "ไม่มีสิทธิ์เปลี่ยนสถานะรายการของผู้ใช้อื่น" };
+    }
+
+    sheet.getRange(rowIndex, 4).setValue(lockState);
+    return {
+      status: "success", success: true,
+      message: lockState ? "ล็อครายการเรียบร้อยแล้ว" : "ปลดล็อครายการเรียบร้อยแล้ว"
+    };
+  } catch (e) {
+    return { status: "error", success: false, message: "เปลี่ยนสถานะล็อคไม่สำเร็จ: " + e.toString() };
+  }
+}
+
+function mapConfigKey(keyName) {
+  if (!keyName) return "";
+  var k = keyName.toString().trim().toLowerCase();
+  if (k.includes("gemini")) return "geminiKey";
+  if (k.includes("openai")) return "openaiKey";
+  if (k.includes("deepseek")) return "deepseekKey";
+  if (k.includes("groq")) return "groqKey";
+  if (k.includes("openrouter")) return "openrouterKey";
+  if (k.includes("github")) return "githubKey";
+  if (k.includes("primary")) return "primaryAi";
+  if (k.includes("backup")) return "backupAi";
+  return keyName.toString().trim();
+}
+
+function getAdminConfig() {
+  var ss = getSS();
+  var sheet = ss.getSheetByName("AdminConfig");
+  var config = {
+    geminiKey: "", openaiKey: "", deepseekKey: "",
+    groqKey: "", openrouterKey: "", githubKey: "",
+    primaryAi: "gemini", backupAi: "openai"
+  };
+
+  if (sheet) {
+    var data = sheet.getDataRange().getValues();
+    for (var i = 0; i < data.length; i++) {
+      var rawKey = data[i][0];
+      var val = data[i][1];
+      if (rawKey !== "" && rawKey !== undefined) {
+        var mapped = mapConfigKey(rawKey);
+        config[mapped] = val ? val.toString().trim() : "";
+      }
+    }
+  }
+  return config;
+}
+
+function saveAdminConfig(configObj) {
+  var ss = getSS();
+  var sheet = ss.getSheetByName("AdminConfig");
+  if (!sheet) {
+    sheet = ss.insertSheet("AdminConfig");
+    sheet.appendRow(["Key", "Value"]);
+  }
+
+  var existingData = sheet.getDataRange().getValues();
+  var keyMap = {};
+  for (var i = 0; i < existingData.length; i++) {
+    var k = mapConfigKey(existingData[i][0]);
+    if (k) keyMap[k] = i + 1;
+  }
+
+  var keysToSave = ["geminiKey", "openaiKey", "deepseekKey", "groqKey", "openrouterKey", "githubKey", "primaryAi", "backupAi"];
+  keysToSave.forEach(function(key) {
+    var valueToSave = configObj[key] !== undefined ? configObj[key] : "";
+    if (keyMap[key]) {
+      sheet.getRange(keyMap[key], 2).setValue(valueToSave);
+    } else {
+      sheet.appendRow([key, valueToSave]);
+    }
+  });
+
+  return { status: "success", message: "บันทึกการตั้งค่าระบบเรียบร้อยแล้ว" };
+}
+
+function getUsersList() {
+  return getUsersListInternal(getSS());
+}
+
+function saveUser(userData) {
+  var ss = getSS();
+  var sheet = ss.getSheetByName("Users");
+  if (!sheet) {
+    sheet = ss.insertSheet("Users");
+    sheet.appendRow(["Username", "Password", "FullName", "Role"]);
+  }
+
+  var data = sheet.getDataRange().getValues();
+  var foundRow = -1;
+  var targetUser = (userData.username || "").toString().trim().toLowerCase();
+
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] && data[i][0].toString().trim().toLowerCase() === targetUser) {
+      foundRow = i + 1;
+      break;
+    }
+  }
+
+  if (foundRow > 0) {
+    sheet.getRange(foundRow, 1, 1, 4).setValues([[userData.username, userData.password, userData.fullName, userData.role || "user"]]);
+  } else {
+    sheet.appendRow([userData.username, userData.password, userData.fullName, userData.role || "user"]);
+  }
+  return { status: "success", message: "บันทึกข้อมูลผู้ใช้งานสำเร็จ" };
+}
+
+function deleteUser(username) {
+  var ss = getSS();
+  var sheet = ss.getSheetByName("Users");
+  if (!sheet) return { status: "error", message: "ไม่พบตาราง Users" };
+
+  var data = sheet.getDataRange().getValues();
+  var targetUser = (username || "").toString().trim().toLowerCase();
+
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] && data[i][0].toString().trim().toLowerCase() === targetUser) {
+      sheet.deleteRow(i + 1);
+      return { status: "success", message: "ลบผู้ใช้งานเรียบร้อยแล้ว" };
+    }
+  }
+  return { status: "error", message: "ไม่พบชื่อผู้ใช้งานนี้ในระบบ" };
+}
+
+function generateQuantumAIAnalysis(username, requestedEngine) {
+  try {
+    var navData = getNavData(username);
+    var config = getAdminConfig();
+
+    var prompt = "โปรดวิเคราะห์พอร์ตการลงทุน กบข. (GPF) ต่อไปนี้อย่างมืออาชีพ และกระชับ:\n" +
+      "- ผู้ลงทุน: " + navData.userFullName + " (" + username + ")\n" +
+      "- ยอดทุนยกมาต้นปี (Baseline): " + navData.yearlyBaseline.toLocaleString() + " บาท\n" +
+      "- ยอดนำส่งสะสมปีนี้: " + navData.totalContribution.toLocaleString() + " บาท\n" +
+      "- แผนการลงทุนถือครองปัจจุบัน:\n";
+
+    for (var pName in navData.myUnits) {
+      prompt += "  * " + pName + ": " + navData.myUnits[pName].toLocaleString() + " หน่วย\n";
+    }
+
+    prompt += "\nกรุณาให้คำแนะนำ:\n1. ประเมินความเสี่ยงและโครงสร้างสัดส่วนพอร์ตปัจจุบัน\n2. ข้อแนะนำในการปรับสัดส่วนเพื่อเพิ่มผลตอบแทน (True YTD)\n3. กลยุทธ์การลงทุนระยะยาวสำหรับสมาชิก กบข.";
+
+    var queue = [];
+    if (requestedEngine) queue.push(requestedEngine);
+    if (config.primaryAi && queue.indexOf(config.primaryAi) === -1) queue.push(config.primaryAi);
+    if (config.backupAi && queue.indexOf(config.backupAi) === -1) queue.push(config.backupAi);
+
+    var allEngines = ["gemini", "groq", "openrouter", "github", "deepseek", "openai"];
+    allEngines.forEach(function(eng) {
+      if (queue.indexOf(eng) === -1) queue.push(eng);
+    });
+
+    for (var i = 0; i < queue.length; i++) {
+      var res = callSpecificAI(queue[i], prompt, config);
+      if (res.success) {
+        return { status: "success", analysis: res.text, engineName: res.engineName };
+      }
+    }
+
+    return { status: "success", analysis: "⚠️ ระบบประมวลผล AI ขัดข้องชั่วคราว จึงใช้ Local Engine ในการแปลผลให้แทน", engineName: "Local Fallback Engine" };
+
+  } catch (e) {
+    return { status: "error", message: e.toString() };
+  }
+}
+
+function callSpecificAI(engine, prompt, config) {
+  try {
+    if (engine === "gemini" && config.geminiKey) {
+      var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + config.geminiKey;
+      var res = UrlFetchApp.fetch(url, {
+        method: "post", contentType: "application/json",
+        payload: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+        muteHttpExceptions: true
+      });
+      var json = JSON.parse(res.getContentText());
+      if (json.candidates && json.candidates[0].content.parts[0].text) {
+        return { success: true, engineName: "Google Gemini 1.5 Flash", text: json.candidates[0].content.parts[0].text };
+      }
+    }
+
+    if (engine === "groq" && config.groqKey) {
+      var url = "https://api.groq.com/openai/v1/chat/completions";
+      var res = UrlFetchApp.fetch(url, {
+        method: "post", contentType: "application/json",
+        headers: { "Authorization": "Bearer " + config.groqKey },
+        payload: JSON.stringify({ model: "llama-3.3-70b-versatile", messages: [{ role: "user", content: prompt }] }),
+        muteHttpExceptions: true
+      });
+      var json = JSON.parse(res.getContentText());
+      if (json.choices && json.choices[0].message.content) {
+        return { success: true, engineName: "Groq (Llama 3.3 70B)", text: json.choices[0].message.content };
+      }
+    }
+
+    if (engine === "openai" && config.openaiKey) {
+      var url = "https://api.openai.com/v1/chat/completions";
+      var res = UrlFetchApp.fetch(url, {
+        method: "post", contentType: "application/json",
+        headers: { "Authorization": "Bearer " + config.openaiKey },
+        payload: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }] }),
+        muteHttpExceptions: true
+      });
+      var json = JSON.parse(res.getContentText());
+      if (json.choices && json.choices[0].message.content) {
+        return { success: true, engineName: "OpenAI GPT-4o mini", text: json.choices[0].message.content };
+      }
+    }
+
+    return { success: false };
+  } catch (err) {
+    return { success: false, error: err.toString() };
+  }
+}
+// ฟังก์ชันดึงข้อมูลราคาจาก Yahoo Finance บน Server (หมดปัญหา CORS)
+function fetchYahooData(symbols) {
+  var results = {};
+  if (!symbols || !Array.isArray(symbols)) return { status: 'error', message: 'Invalid symbols' };
+  
+  symbols.forEach(function(symbol) {
+    try {
+      var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?interval=1d&range=5d';
+      var options = {
+        'muteHttpExceptions': true,
+        'headers': { 'User-Agent': 'Mozilla/5.0' }
+      };
+      var response = UrlFetchApp.fetch(url, options);
+      if (response.getResponseCode() === 200) {
+        var json = JSON.parse(response.getContentText());
+        if (json.chart && json.chart.result && json.chart.result.length > 0) {
+          var meta = json.chart.result[0].meta;
+          results[symbol] = {
+            price: meta.regularMarketPrice,
+            prevClose: meta.chartPreviousClose || meta.previousClose || meta.regularMarketPrice
+          };
+        }
+      }
+    } catch (e) {
+      results[symbol] = null;
+    }
+  });
+  
+  return { status: 'success', data: results };
+}
