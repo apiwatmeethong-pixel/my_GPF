@@ -7,6 +7,84 @@
 
 const LOCKED_SPREADSHEET_ID = "1Ly2FYU5oAU-K_axJk739fJR9j9ZXABrh6olFizZQuNk";
 
+
+// ====================================================================
+// SECURITY: signed session token (8 hours) for GitHub Pages -> Apps Script API
+// ====================================================================
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
+
+function getSessionSecret() {
+  var props = PropertiesService.getScriptProperties();
+  var secret = props.getProperty('MY_GPF_SESSION_SECRET');
+  if (!secret) {
+    secret = Utilities.getUuid() + Utilities.getUuid() + Utilities.getUuid();
+    props.setProperty('MY_GPF_SESSION_SECRET', secret);
+  }
+  return secret;
+}
+
+function b64UrlEncodeText(text) {
+  return Utilities.base64EncodeWebSafe(text, Utilities.Charset.UTF_8).replace(/=+$/g, '');
+}
+
+function b64UrlDecodeText(text) {
+  return Utilities.newBlob(Utilities.base64DecodeWebSafe(text)).getDataAsString('UTF-8');
+}
+
+function signSessionPayload(payloadB64) {
+  var sigBytes = Utilities.computeHmacSha256Signature(
+    payloadB64,
+    getSessionSecret(),
+    Utilities.Charset.UTF_8
+  );
+  return Utilities.base64EncodeWebSafe(sigBytes).replace(/=+$/g, '');
+}
+
+function createSessionToken(user) {
+  var payload = {
+    u: (user.username || '').toString(),
+    r: (user.role || 'user').toString().toLowerCase(),
+    exp: Date.now() + SESSION_TTL_MS
+  };
+  var payloadB64 = b64UrlEncodeText(JSON.stringify(payload));
+  return payloadB64 + '.' + signSessionPayload(payloadB64);
+}
+
+function readSessionToken(token) {
+  try {
+    if (!token || typeof token !== 'string') return null;
+    var parts = token.split('.');
+    if (parts.length !== 2) return null;
+    if (signSessionPayload(parts[0]) !== parts[1]) return null;
+    var payload = JSON.parse(b64UrlDecodeText(parts[0]));
+    if (!payload || !payload.u || !payload.exp || Date.now() > Number(payload.exp)) return null;
+    return {
+      username: payload.u.toString(),
+      role: (payload.r || 'user').toString().toLowerCase()
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+function unauthorized(message) {
+  return {
+    status: 'error',
+    success: false,
+    code: 'UNAUTHORIZED',
+    message: message || 'Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+  };
+}
+
+function forbidden(message) {
+  return {
+    status: 'error',
+    success: false,
+    code: 'FORBIDDEN',
+    message: message || 'ไม่มีสิทธิ์ดำเนินการนี้'
+  };
+}
+
 function getSS() {
   try {
     return SpreadsheetApp.openById(LOCKED_SPREADSHEET_ID);
@@ -56,31 +134,57 @@ function doPost(e) {
 }
 
 function handleApiRequest(params) {
+  params = params || {};
   var action = params.action || "";
   var username = params.username || params.user || "";
   var password = params.password || params.pass || "";
 
+  // Public endpoints
   if (action === "login" || action === "loginUser") {
     return loginUser(username, password);
-  } else if (action === "getNavData") {
-    return getNavData(username);
-  } else if (action === "getThaiStockData") {
+  }
+  if (action === "getThaiStockData") {
     return getThaiStockData();
-  } else if (action === "getGoldData") {
+  }
+  if (action === "getGoldData") {
     return getGoldData();
+  }
+  if (action === "fetchYahooData") {
+    return fetchYahooData(params.symbols || []);
+  }
+  if (action === "getPublicConfig") {
+    return getPublicConfig();
+  }
+  if (action === "healthCheck") {
+    return getSystemHealth();
+  }
+
+  // Everything below requires a valid signed session token.
+  var session = readSessionToken(params.token || "");
+  if (!session) return unauthorized();
+
+  // User-scoped endpoints: always trust the username in the signed token,
+  // never the username supplied by the browser.
+  if (action === "getNavData") {
+    return getNavData(session.username);
   } else if (action === "getAiAnalysis" || action === "generateQuantumAIAnalysis") {
-    return generateQuantumAIAnalysis(username, params.requestedEngine);
+    return generateQuantumAIAnalysis(session.username, params.requestedEngine);
   } else if (action === "saveBaseline") {
-    return saveBaseline(username, params.year, params.amount);
+    return saveBaseline(session.username, params.year, params.amount);
   } else if (action === "savePortfolio") {
-    return savePortfolio(username, params.data || params.planData, params.monthlyCash);
+    return savePortfolio(session.username, params.data || params.planData, params.monthlyCash);
   } else if (action === "getCashflowData") {
-    return getCashflowData(username);
+    return getCashflowData(session.username);
   } else if (action === "updateCashflowEntry") {
-    return updateCashflowEntry(params.id, params.amount, username);
+    return updateCashflowEntry(params.id, params.amount, session.username);
   } else if (action === "lockCashflowEntry") {
-    return lockCashflowEntry(params.id, params.locked, username);
-  } else if (action === "getAdminConfig") {
+    return lockCashflowEntry(params.id, params.locked, session.username);
+  }
+
+  // Admin endpoints
+  if (session.role !== 'admin') return forbidden('เมนูนี้สำหรับผู้ดูแลระบบเท่านั้น');
+
+  if (action === "getAdminConfig") {
     return getAdminConfig();
   } else if (action === "saveAdminConfig") {
     return saveAdminConfig(params.configObj || params);
@@ -89,13 +193,10 @@ function handleApiRequest(params) {
   } else if (action === "saveUser") {
     return saveUser(params.userData || params);
   } else if (action === "deleteUser") {
-    return deleteUser(username);
-  } else if (action === "fetchYahooData") {
-    var symbols = params.symbols || [];
-    return fetchYahooData(symbols);
-  } else {
-    return { status: "error", message: "Invalid Action: " + action };
+    return deleteUser(params.username || "");
   }
+
+  return { status: "error", success: false, message: "Invalid Action: " + action };
 }
 
 function getUsersListInternal(ss) {
@@ -169,7 +270,8 @@ function loginUser(username, password) {
             username: u.username,
             fullName: u.fullName,
             role: u.role || "user"
-          }
+          },
+          token: createSessionToken(u)
         };
       }
     }
@@ -537,6 +639,48 @@ function mapConfigKey(keyName) {
   return keyName.toString().trim();
 }
 
+function getSystemHealth() {
+  try {
+    var ss = getSS();
+    var requiredSheets = ['nav', 'set', 'spdr', 'mygpf', 'baseline', 'cashflow'];
+    var sheets = {};
+    requiredSheets.forEach(function(name) {
+      sheets[name] = !!ss.getSheetByName(name);
+    });
+    sheets.Users = !!ss.getSheetByName('Users') || !!ss.getSheetByName('user');
+    sheets.AdminConfig = !!ss.getSheetByName('AdminConfig');
+
+    var yahoo = fetchYahooData(['PTT.BK']);
+    var yahooOk = !!(yahoo && yahoo.status === 'success' && yahoo.data && yahoo.data['PTT.BK']);
+
+    return {
+      status: 'success',
+      success: true,
+      version: '2026-09-19-hotfix-1',
+      spreadsheetIdMatches: ss && ss.getId && ss.getId() === LOCKED_SPREADSHEET_ID,
+      sheets: sheets,
+      yahoo: { ok: yahooOk, count: yahoo && yahoo.count ? yahoo.count : 0 },
+      checkedAt: new Date().toISOString()
+    };
+  } catch (e) {
+    return {
+      status: 'error',
+      success: false,
+      version: '2026-09-19-hotfix-1',
+      message: e.toString()
+    };
+  }
+}
+
+function getPublicConfig() {
+  var cfg = getAdminConfig();
+  return {
+    status: 'success',
+    primaryAi: cfg.primaryAi || 'gemini',
+    backupAi: cfg.backupAi || 'openai'
+  };
+}
+
 function getAdminConfig() {
   var ss = getSS();
   var sheet = ss.getSheetByName("AdminConfig");
@@ -589,7 +733,13 @@ function saveAdminConfig(configObj) {
 }
 
 function getUsersList() {
-  return getUsersListInternal(getSS());
+  return getUsersListInternal(getSS()).map(function(u) {
+    return {
+      username: u.username,
+      fullName: u.fullName,
+      role: u.role || 'user'
+    };
+  });
 }
 
 function saveUser(userData) {
@@ -727,31 +877,83 @@ function callSpecificAI(engine, prompt, config) {
 }
 // ฟังก์ชันดึงข้อมูลราคาจาก Yahoo Finance บน Server (หมดปัญหา CORS)
 function fetchYahooData(symbols) {
-  var results = {};
-  if (!symbols || !Array.isArray(symbols)) return { status: 'error', message: 'Invalid symbols' };
-  
-  symbols.forEach(function(symbol) {
-    try {
-      var url = 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?interval=1d&range=5d';
-      var options = {
-        'muteHttpExceptions': true,
-        'headers': { 'User-Agent': 'Mozilla/5.0' }
-      };
-      var response = UrlFetchApp.fetch(url, options);
-      if (response.getResponseCode() === 200) {
-        var json = JSON.parse(response.getContentText());
-        if (json.chart && json.chart.result && json.chart.result.length > 0) {
-          var meta = json.chart.result[0].meta;
-          results[symbol] = {
-            price: meta.regularMarketPrice,
-            prevClose: meta.chartPreviousClose || meta.previousClose || meta.regularMarketPrice
-          };
+  try {
+    if (!symbols || !Array.isArray(symbols)) {
+      return { status: 'error', success: false, message: 'Invalid symbols' };
+    }
+
+    // Deduplicate, validate, and bound the request. 35 holdings + market symbols fit safely.
+    var seen = {};
+    var cleanSymbols = [];
+    symbols.forEach(function(raw) {
+      var symbol = (raw || '').toString().trim();
+      if (!symbol || seen[symbol]) return;
+      if (!/^[A-Za-z0-9.\^=_-]{1,30}$/.test(symbol)) return;
+      seen[symbol] = true;
+      cleanSymbols.push(symbol);
+    });
+    cleanSymbols = cleanSymbols.slice(0, 40);
+
+    if (cleanSymbols.length === 0) {
+      return { status: 'success', success: true, data: {}, count: 0, fetchedAt: new Date().toISOString() };
+    }
+
+    var requests = cleanSymbols.map(function(symbol) {
+      return {
+        url: 'https://query1.finance.yahoo.com/v8/finance/chart/' + encodeURIComponent(symbol) + '?interval=1d&range=5d',
+        method: 'get',
+        muteHttpExceptions: true,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; MyGPF/1.0)',
+          'Accept': 'application/json'
         }
+      };
+    });
+
+    var responses = UrlFetchApp.fetchAll(requests);
+    var results = {};
+    var okCount = 0;
+
+    for (var i = 0; i < cleanSymbols.length; i++) {
+      var symbol = cleanSymbols[i];
+      try {
+        var response = responses[i];
+        if (response && response.getResponseCode() === 200) {
+          var json = JSON.parse(response.getContentText());
+          if (json && json.chart && json.chart.result && json.chart.result.length > 0) {
+            var meta = json.chart.result[0].meta || {};
+            var price = Number(meta.regularMarketPrice);
+            var prevClose = Number(meta.chartPreviousClose || meta.previousClose || meta.regularMarketPrice);
+            if (isFinite(price) && price > 0) {
+              results[symbol] = {
+                price: price,
+                prevClose: (isFinite(prevClose) && prevClose > 0) ? prevClose : price
+              };
+              okCount++;
+              continue;
+            }
+          }
+        }
+      } catch (innerErr) {
+        // Keep null below; one symbol must never break the whole batch.
       }
-    } catch (e) {
       results[symbol] = null;
     }
-  });
-  
-  return { status: 'success', data: results };
+
+    return {
+      status: 'success',
+      success: true,
+      data: results,
+      count: okCount,
+      requested: cleanSymbols.length,
+      fetchedAt: new Date().toISOString()
+    };
+  } catch (err) {
+    return {
+      status: 'error',
+      success: false,
+      message: 'Yahoo Finance fetch failed: ' + err.toString(),
+      data: {}
+    };
+  }
 }
