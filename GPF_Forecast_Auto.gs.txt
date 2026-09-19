@@ -1,0 +1,156 @@
+/**
+ * GPF automatic market forecast. Add as a NEW .gs file in the same Apps Script
+ * project as Code.gs (the project whose healthCheck succeeded).
+ * Does not overwrite set, spdr, nav, users, or portfolio history.
+ */
+var GPF_AUTO_SYMBOLS = [
+  'DELTA.BK','PTT.BK','KBANK.BK','ADVANC.BK','KTB.BK','SCB.BK',
+  'BBL.BK','GULF.BK','PTTEP.BK','CPN.BK','^SET.BK','GLD','THB=X'
+];
+var GPF_AUTO_TZ = 'Asia/Bangkok';
+var GPF_AUTO_SHEET = 'Forecast_Auto';
+
+function installGpfForecastAuto() {
+  var name = 'refreshGpfForecastAuto';
+  ScriptApp.getProjectTriggers().forEach(function(t) {
+    if (t.getHandlerFunction() === name) ScriptApp.deleteTrigger(t);
+  });
+  [8,19].forEach(function(hour) {
+    ScriptApp.newTrigger(name).timeBased().atHour(hour)
+      .everyDays(1).inTimezone(GPF_AUTO_TZ).create();
+  });
+  return refreshGpfForecastAuto();
+}
+
+function gpfAutoDate_(x, zone) {
+  return Utilities.formatDate(x, zone || GPF_AUTO_TZ, 'yyyy-MM-dd');
+}
+function gpfAutoCellDate_(x) {
+  if (x instanceof Date && !isNaN(x.getTime())) return x;
+  if (typeof x === 'number' && x > 40000 && x < 90000)
+    return new Date(Date.UTC(1899,11,30) + x * 86400000);
+  if (typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x))
+    return new Date(x + 'T12:00:00+07:00');
+  return null;
+}
+function gpfAutoNav_(ss) {
+  var sheet = ss.getSheetByName('nav');
+  if (!sheet) throw new Error('ไม่พบ nav');
+  var rows = sheet.getDataRange().getValues();
+  var best = null;
+  for (var i=1; i<rows.length; i++) {
+    var dt = gpfAutoCellDate_(rows[i][0]);
+    var thai = Number(rows[i][7]), gold = Number(rows[i][11]);
+    if (!dt || !isFinite(thai) || thai<=0 || !isFinite(gold) || gold<=0) continue;
+    if (!best || dt > best.date) best = {date:dt, thai:thai, gold:gold};
+  }
+  if (!best) throw new Error('ยังไม่มี NAV หุ้นไทย/ทองคำจริงที่ครบถ้วน');
+  return best;
+}
+function gpfAutoYahoo_(symbols) {
+  var requests = symbols.map(function(sym) {
+    return {
+      url:'https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)
+        +'?interval=1d&range=1mo',
+      method:'get',muteHttpExceptions:true,
+      headers:{'User-Agent':'Mozilla/5.0 (compatible; MyGPF/1.0)','Accept':'application/json'}
+    };
+  });
+  var responses = UrlFetchApp.fetchAll(requests), out = {};
+  symbols.forEach(function(sym,i) {
+    try {
+      if (responses[i].getResponseCode()!==200) throw new Error('HTTP '+responses[i].getResponseCode());
+      var chart=JSON.parse(responses[i].getContentText()).chart.result[0];
+      var meta=chart.meta || {}, ts=Number(meta.regularMarketTime);
+      var price=Number(meta.regularMarketPrice);
+      var times=chart.timestamp || [];
+      var closes=(chart.indicators.quote[0] || {}).close || [];
+      var zone = sym==='GLD' ? 'America/New_York' : GPF_AUTO_TZ;
+      var daily = [];
+      for (var j=0;j<times.length;j++) {
+        var c=Number(closes[j]);
+        if (isFinite(c) && c>0)
+          daily.push({day:gpfAutoDate_(new Date(times[j]*1000),zone), close:c});
+      }
+      if (!daily.length) throw new Error('No valid history');
+      if (!isFinite(ts)||ts<=0) ts=times[times.length-1];
+      if (!isFinite(price)||price<=0) price=daily[daily.length-1].close;
+      out[sym]={price:price,ts:ts,
+        day:gpfAutoDate_(new Date(ts*1000),zone),daily:daily};
+    } catch (e) { out[sym]={error:String(e)}; }
+  });
+  return out;
+}
+function gpfAutoAnchor_(quote,navDay) {
+  if (!quote || !quote.daily) return null;
+  var matches=quote.daily.filter(function(x){return x.day<=navDay;});
+  if (!matches.length) return null;
+  var point=matches[matches.length-1];
+  var gap=(Date.parse(navDay+'T12:00:00Z')-Date.parse(point.day+'T12:00:00Z'))/86400000;
+  return gap>=0 && gap<=5 ? point.close : null;
+}
+function gpfAutoStatus_(quote, navDay) {
+  if (!quote || quote.error) return 'Yahoo ไม่มีข้อมูล';
+  if ((Date.now()-quote.ts*1000)>7*86400000) return 'ราคาตลาดเก่าเกิน 7 วัน';
+  if (quote.day<navDay) return 'ราคาตลาดเก่ากว่าวัน NAV';
+  if (gpfAutoAnchor_(quote,navDay)===null) return 'ไม่มีราคาอ้างอิงใกล้วัน NAV';
+  return 'Yahoo chart';
+}
+function refreshGpfForecastAuto() {
+  var lock=LockService.getScriptLock();
+  if (!lock.tryLock(1000)) return {status:'busy'};
+  try {
+    var ss=SpreadsheetApp.openById(LOCKED_SPREADSHEET_ID);
+    var sheet=ss.getSheetByName(GPF_AUTO_SHEET);
+    if (!sheet) throw new Error('ไม่พบ Forecast_Auto; สร้างแท็บตามชุดที่เตรียมไว้ก่อน');
+    var nav=gpfAutoNav_(ss), navDay=gpfAutoDate_(nav.date);
+    var data=gpfAutoYahoo_(GPF_AUTO_SYMBOLS);
+    var rows=[], now=new Date(), thaiDay='', thaiOk=0;
+    GPF_AUTO_SYMBOLS.forEach(function(sym,i) {
+      var q=data[sym], status=gpfAutoStatus_(q,navDay);
+      var valid=status==='Yahoo chart';
+      var base=valid?gpfAutoAnchor_(q,navDay):null;
+      if (i<11 && valid) {thaiOk++;if(!thaiDay || q.day>thaiDay)thaiDay=q.day;}
+      var weight=i<10 ? '=set!'+String.fromCharCode(66+i)+'1' :
+        (i===10 ? '=MAX(0,1-SUM(B10:B19))':'');
+      var r=i<11 ? 10+i : 22+(i-11);
+      var link='https://query1.finance.yahoo.com/v8/finance/chart/'+encodeURIComponent(sym)
+        +'?interval=1d&range=1mo';
+      rows.push([sym,weight,base===null?'':base,valid?q.price:'',
+        valid?new Date(q.day+'T12:00:00+07:00'):'',
+        '=IFERROR(D'+r+'/C'+r+'-1,"")',status,
+        q && q.ts ? new Date(q.ts*1000):'',link]);
+    });
+    // Keep row 21 empty to separate Thai equities and gold.
+    rows.splice(11,0,['','','','','','','','','']);
+    sheet.getRange(10,1,14,9).setValues(rows);
+    sheet.getRange('B5:C6').setValues([[nav.date,nav.thai],[nav.date,nav.gold]]);
+    var gold=data['GLD'], fx=data['THB=X'];
+    var goldOk=gpfAutoStatus_(gold,navDay)==='Yahoo chart'
+      && gpfAutoStatus_(fx,navDay)==='Yahoo chart';
+    var sameThai=rows.slice(0,11).every(function(x) {
+      return x[4] instanceof Date && gpfAutoDate_(x[4])===thaiDay;
+    });
+    var thaiReady=thaiOk===11 && sameThai && thaiDay>navDay;
+    var goldReady=goldOk && (gold.day>navDay || fx.day>navDay);
+    sheet.getRange('D5').setValue(thaiReady ? new Date(thaiDay+'T12:00:00+07:00'):'');
+    sheet.getRange('D6').setValue(goldReady ?
+      new Date((gold.day>fx.day?gold.day:fx.day)+'T12:00:00+07:00'):'');
+    sheet.getRange('G5:I7').setValues([
+      [thaiReady?'ราคาครบ 11/11':'ข้อมูลไม่ครบ / ตลาดยังไม่ใหม่กว่า NAV',now,
+        '10 หุ้น + ^SET.BK เป็นตัวแทนส่วนที่เหลือ ไม่ใช่ SET100 / ไม่ใช่ NAV จริง'],
+      [goldReady?'ข้อมูล GLD และ USDTHB พร้อม':'ข้อมูลไม่ครบ / ตลาดยังไม่ใหม่กว่า NAV',now,
+        'GLD เป็น proxy ทอง; วันตลาดสหรัฐและอัตราแลกเปลี่ยนอาจไม่ตรงกัน'],
+      [goldReady?'โมเดลเดิมพร้อม':'รอข้อมูล',now,'สูตรเทียบเดิมจาก spdr']
+    ]);
+    sheet.getRange('B5:B6').setNumberFormat('dd/MM/yyyy');
+    sheet.getRange('D5:D6').setNumberFormat('dd/MM/yyyy');
+    sheet.getRange('E10:E23').setNumberFormat('dd/MM/yyyy');
+    sheet.getRange('H5:H7').setNumberFormat('dd/MM/yyyy HH:mm');
+    sheet.getRange('H10:H23').setNumberFormat('dd/MM/yyyy HH:mm');
+    SpreadsheetApp.flush();
+    return {status:'success',navDate:navDay,thaiSymbols:thaiOk,
+      thaiReady:thaiReady,goldReady:goldReady,updatedAt:now.toISOString()};
+  } finally {lock.releaseLock();}
+}
+

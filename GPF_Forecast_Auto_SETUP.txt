@@ -1,0 +1,17 @@
+GPF FORECAST AUTO - SETUP (19 SEP 2026)
+
+Google Sheet: https://docs.google.com/spreadsheets/d/1Ly2FYU5oAU-K_axJk739fJR9j9ZXABrh6olFizZQuNk/edit#gid=1148393739
+Source file: GPF_Forecast_Auto.gs.txt in this repository.
+
+1) Open the SAME Apps Script project that serves the current /exec endpoint (healthCheck: 2026-09-19-hotfix-1).
+2) Back up the existing Code.gs and verify the project's Code.gs contains LOCKED_SPREADSHEET_ID.
+3) Click + > Script to create a new Apps Script file named GPF_Forecast_Auto.
+4) Open the source file in GitHub, copy ALL of its contents and paste into the NEW file. Save.
+5) In the function selector choose installGpfForecastAuto, then Run and authorize access to Google Sheets, UrlFetchApp and scheduled triggers.
+6) Check the Execution log. A successful result has status=success; thaiReady/goldReady depend on market-source completeness.
+7) Check the Forecast_Auto tab: NAV base date/value, Yahoo prices, quote timestamps, statuses, estimated NAV and the old gold model comparison.
+8) The installer creates two daily time triggers: 08:00-08:59 and 19:00-19:59 Asia/Bangkok. Re-running installer replaces its own two triggers (not other jobs).
+9) To refresh manually, run refreshGpfForecastAuto in Apps Script. Do not edit set/spdr historical source rows for this automation.
+
+IMPORTANT: The estimation is an indicative model, not official GPF NAV or a prediction guarantee. It uses 10 equity weights from set!B1:K1; the unlisted remainder is proxied by ^SET.BK (not SET100). Gold uses GLD ETF and USDTHB proxies. Live prices may be delayed or unavailable; incomplete or stale data leaves forecast blank rather than silently substituting hardcoded prices.
+
