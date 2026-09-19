@@ -15,7 +15,7 @@ function installGpfForecastAuto() {
   ScriptApp.getProjectTriggers().forEach(function(t) {
     if (t.getHandlerFunction() === name) ScriptApp.deleteTrigger(t);
   });
-  [8,19].forEach(function(hour) {
+  [8,14,19].forEach(function(hour) {
     ScriptApp.newTrigger(name).timeBased().atHour(hour)
       .everyDays(1).inTimezone(GPF_AUTO_TZ).create();
   });
