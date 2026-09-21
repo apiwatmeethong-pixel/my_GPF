@@ -617,6 +617,8 @@
 
               </div>
             </div>
+          </div>
+
           <!-- TAB 4: เจาะลึก 35 หุ้นที่ กบข. ถือครอง (Look-Through Top Holdings) -->
           <div id="subTabHoldingsContent" class="hidden space-y-6">
             
@@ -733,8 +735,6 @@
             </div>
 
           </div>
-
-        </div>
 
         <!-- end page-thaistock -->
         </div>
@@ -1039,8 +1039,8 @@
           </button>
 
           <button onclick="switchPage('thaistock', this)" class="nav-item flex flex-col items-center gap-1 transition-all">
-            <i class="fa-solid fa-globe text-lg"></i>
-            <span class="text-[11px]">ดัชนีตลาด</span>
+            <i class="fa-solid fa-layer-group text-lg"></i>
+            <span class="text-[11px]">หุ้น กบข.</span>
           </button>
 
           <button onclick="switchPage('gold', this)" class="nav-item flex flex-col items-center gap-1 transition-all">
@@ -1511,7 +1511,7 @@
           el.classList.add('nav-tab-active'); 
         }
         
-        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '🌐 ดัชนีตลาดหุ้นไทยและต่างประเทศ (กบข. Benchmarks)', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
+        var titles = { 'portfolio': '📈 ภาพรวมพอร์ตลงทุน กบข.', 'daily': '📅 การเคลื่อนไหวรายวัน', 'thaistock': '📊 ราคาหุ้นที่ กบข. ถือครอง', 'gold': '🪙 สัญญาณทองคำสากล', 'analysis': '📊 หน้าต่างวิเคราะห์คัมภีร์ทุน', 'edit': '📝 ตั้งค่าโครงสร้างตัวเลข' };
         document.getElementById('main_title').innerHTML = titles[pageId] || '';
 
         if(ytdData.length === 0 && currentUser !== "") {
@@ -1526,6 +1526,7 @@
         if(pageId === 'portfolio' && ytdData.length > 0) updateDashboard();
         if(pageId === 'daily' && dailyRecords.length > 0) drawDailyDashboard();
         if(pageId === 'thaistock') {
+          switchMarketSubTab('holdings');
           if(globalIndicesData.length === 0) fetchGlobalMarketIndices();
           if(thaiStockDataRaw.length > 0) drawThaiStockDashboard();
         }
