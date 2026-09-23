@@ -220,6 +220,65 @@
 
           </div>
 
+          <!-- Personal Webull portfolio: visible only to the signed-in mithong user -->
+          <section id="personalWebullSection" class="hidden pastel-card p-5 border border-blue-200 bg-gradient-to-br from-white to-blue-50/30">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+              <div>
+                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <i class="fa-solid fa-briefcase text-blue-600"></i>
+                  <span>พอร์ตส่วนตัว Webull</span>
+                  <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">READ ONLY</span>
+                </h3>
+                <p id="personalWebullStatus" class="text-[11px] text-slate-500 mt-1">กำลังรอการเชื่อมต่อบัญชีของ mithong</p>
+              </div>
+              <button id="personalWebullRefreshBtn" onclick="loadPersonalWebullPortfolio(true)" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-sm">
+                <i class="fa-solid fa-rotate"></i>
+                <span>อัปเดตพอร์ต</span>
+              </button>
+            </div>
+
+            <div id="personalWebullMessage" class="hidden mb-4 rounded-xl border px-4 py-3 text-xs"></div>
+
+            <div id="personalWebullContent" class="hidden space-y-4">
+              <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="rounded-2xl border border-blue-100 bg-white/90 p-4">
+                  <div class="text-[10px] font-semibold text-blue-700">สินทรัพย์รวม</div>
+                  <div id="webullTotalAssets" class="text-lg font-black text-slate-900 mt-1">-</div>
+                </div>
+                <div class="rounded-2xl border border-indigo-100 bg-white/90 p-4">
+                  <div class="text-[10px] font-semibold text-indigo-700">มูลค่าหลักทรัพย์</div>
+                  <div id="webullMarketValue" class="text-lg font-black text-slate-900 mt-1">-</div>
+                </div>
+                <div class="rounded-2xl border border-cyan-100 bg-white/90 p-4">
+                  <div class="text-[10px] font-semibold text-cyan-700">เงินสด</div>
+                  <div id="webullCash" class="text-lg font-black text-slate-900 mt-1">-</div>
+                </div>
+                <div class="rounded-2xl border border-emerald-100 bg-white/90 p-4">
+                  <div class="text-[10px] font-semibold text-emerald-700">กำไร/ขาดทุนที่ยังไม่ขาย</div>
+                  <div id="webullUnrealizedPnl" class="text-lg font-black mt-1">-</div>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th class="text-left">หลักทรัพย์</th>
+                      <th class="text-right">จำนวน</th>
+                      <th class="text-right">ต้นทุนเฉลี่ย</th>
+                      <th class="text-right">ราคาล่าสุด</th>
+                      <th class="text-right">มูลค่าปัจจุบัน</th>
+                      <th class="text-right">กำไร/ขาดทุน</th>
+                    </tr>
+                  </thead>
+                  <tbody id="personalWebullPositionsBody">
+                    <tr><td colspan="6" class="text-center py-5 text-slate-400">ยังไม่มีข้อมูลสถานะถือครอง</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
           <!-- Quantum AI Portfolio Evaluator Section -->
           <div class="pastel-card p-6 border-2 border-purple-200">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
@@ -1266,6 +1325,9 @@
           if(!document.getElementById('page-analysis').classList.contains('hidden')) {
             drawAnalysisDashboard();
           }
+        }
+        if (typeof renderPersonalWebullPortfolio === 'function' && cachedPersonalWebullPortfolio) {
+          renderPersonalWebullPortfolio(cachedPersonalWebullPortfolio);
         }
       }
 
@@ -3623,6 +3685,6 @@
       });
     </script>
     
-    <script src="my_GPF_FRONTEND_HOTFIX.js?v=20260921-webull-1"></script>
+    <script src="my_GPF_FRONTEND_HOTFIX.js?v=20260923-personal-webull-1"></script>
 </body>
 </html>

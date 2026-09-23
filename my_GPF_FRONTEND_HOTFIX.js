@@ -1,11 +1,179 @@
 // ============================================================================
-// my_GPF FRONTEND HOTFIX 2026-09-19
+// my_GPF FRONTEND HOTFIX 2026-09-23
 // Paste this entire block AFTER the existing main <script> block, or save as
 // hotfix.js and load it after the existing script.
-// Requires Code.gs_FIXED.js backend deployed first.
+// Requires the matching Code.gs backend deployed first.
 // ============================================================================
 
 let sessionToken = '';
+let cachedPersonalWebullPortfolio = null;
+
+function isMithongSession() {
+  return String(currentUser || '').trim().toLowerCase() === 'mithong';
+}
+
+function escapeWebullText(value) {
+  return String(value === undefined || value === null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function formatWebullMoney(value, currency = 'USD') {
+  const numberValue = Number(value) || 0;
+  const currencyCode = String(currency || 'USD').toUpperCase();
+  if (isMasked) return `${currencyCode} ••••••`;
+  try {
+    return new Intl.NumberFormat('th-TH', {
+      style: 'currency',
+      currency: currencyCode,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(numberValue);
+  } catch (e) {
+    return `${currencyCode} ${numberValue.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+}
+
+function formatWebullNumber(value, digits = 4) {
+  if (isMasked) return '••••';
+  return (Number(value) || 0).toLocaleString('th-TH', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: digits
+  });
+}
+
+function renderPersonalWebullPortfolio(result) {
+  const section = document.getElementById('personalWebullSection');
+  const content = document.getElementById('personalWebullContent');
+  const message = document.getElementById('personalWebullMessage');
+  const status = document.getElementById('personalWebullStatus');
+  if (!section) return;
+
+  if (!isMithongSession()) {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+
+  if (!result || !result.success) {
+    if (content) content.classList.add('hidden');
+    if (message) {
+      message.className = 'mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800';
+      message.textContent = (result && result.message) || 'ยังไม่สามารถโหลดพอร์ต Webull ได้';
+      message.classList.remove('hidden');
+    }
+    if (status) status.textContent = 'เชื่อมต่อ Webull ไม่สำเร็จ · ข้อมูล กบข. ส่วนอื่นยังใช้งานได้ตามปกติ';
+    return;
+  }
+
+  const accounts = Array.isArray(result.accounts) ? result.accounts : [];
+  const primaryCurrency = accounts[0]?.currency || accounts[0]?.balance?.currency || 'USD';
+  const sameCurrencyAccounts = accounts.filter(account =>
+    String(account.currency || account.balance?.currency || primaryCurrency).toUpperCase() === String(primaryCurrency).toUpperCase()
+  );
+  const totals = sameCurrencyAccounts.reduce((sum, account) => {
+    const balance = account.balance || {};
+    sum.totalAssets += Number(balance.totalAssets) || 0;
+    sum.marketValue += Number(balance.marketValue) || 0;
+    sum.cash += Number(balance.cash) || 0;
+    return sum;
+  }, { totalAssets: 0, marketValue: 0, cash: 0 });
+
+  const positions = accounts.flatMap(account =>
+    (Array.isArray(account.positions) ? account.positions : []).map(position => ({
+      ...position,
+      account: account.account,
+      accountType: account.accountType,
+      currency: position.currency || account.currency || primaryCurrency
+    }))
+  );
+  const unrealizedPnl = positions
+    .filter(position => String(position.currency).toUpperCase() === String(primaryCurrency).toUpperCase())
+    .reduce((sum, position) => sum + (Number(position.unrealizedPnl) || 0), 0);
+
+  document.getElementById('webullTotalAssets').textContent = formatWebullMoney(totals.totalAssets, primaryCurrency);
+  document.getElementById('webullMarketValue').textContent = formatWebullMoney(totals.marketValue, primaryCurrency);
+  document.getElementById('webullCash').textContent = formatWebullMoney(totals.cash, primaryCurrency);
+  const pnlElement = document.getElementById('webullUnrealizedPnl');
+  pnlElement.textContent = formatWebullMoney(unrealizedPnl, primaryCurrency);
+  pnlElement.className = `text-lg font-black mt-1 ${unrealizedPnl >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+
+  const tbody = document.getElementById('personalWebullPositionsBody');
+  if (tbody) {
+    tbody.innerHTML = positions.length ? positions.map(position => {
+      const pnl = Number(position.unrealizedPnl) || 0;
+      const pct = Number(position.unrealizedPct) || 0;
+      const pnlClass = pnl >= 0 ? 'text-emerald-600' : 'text-rose-600';
+      const sign = pnl >= 0 ? '+' : '';
+      return `
+        <tr class="hover:bg-blue-50/40">
+          <td class="text-left">
+            <div class="font-black text-slate-900">${escapeWebullText(position.symbol)}</div>
+            <div class="text-[10px] text-slate-500">${escapeWebullText(position.name || position.instrumentType)} · ${escapeWebullText(position.market)} · ${escapeWebullText(position.account)}</div>
+          </td>
+          <td class="text-right font-mono text-slate-700">${formatWebullNumber(position.quantity)}</td>
+          <td class="text-right font-mono text-slate-700">${formatWebullMoney(position.averageCost, position.currency)}</td>
+          <td class="text-right font-mono text-slate-700">${formatWebullMoney(position.lastPrice, position.currency)}</td>
+          <td class="text-right font-bold text-slate-900">${formatWebullMoney(position.marketValue, position.currency)}</td>
+          <td class="text-right font-bold ${pnlClass}">${isMasked ? '••••' : `${sign}${formatWebullMoney(pnl, position.currency)} (${sign}${pct.toFixed(2)}%)`}</td>
+        </tr>`;
+    }).join('') : '<tr><td colspan="6" class="text-center py-5 text-slate-400">บัญชีเชื่อมต่อแล้ว แต่ยังไม่มีสถานะถือครอง</td></tr>';
+  }
+
+  if (message) {
+    const warnings = Array.isArray(result.errors) ? result.errors : [];
+    if (warnings.length) {
+      message.className = 'mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800';
+      message.textContent = 'โหลดข้อมูลได้บางส่วน กรุณากดอัปเดตอีกครั้งหากยอดไม่ครบ';
+      message.classList.remove('hidden');
+    } else {
+      message.classList.add('hidden');
+    }
+  }
+  if (content) content.classList.remove('hidden');
+  if (status) {
+    const updated = result.fetchedAt ? new Date(result.fetchedAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) : '-';
+    status.textContent = `${result.accountCount || accounts.length} บัญชี · ${result.positionCount || positions.length} สถานะถือครอง · ${String(result.environment || '').toUpperCase()} · อัปเดต ${updated} น.`;
+  }
+}
+
+async function loadPersonalWebullPortfolio(forceRefresh = false) {
+  const section = document.getElementById('personalWebullSection');
+  const button = document.getElementById('personalWebullRefreshBtn');
+  const status = document.getElementById('personalWebullStatus');
+  if (!section) return;
+
+  if (!isMithongSession()) {
+    section.classList.add('hidden');
+    cachedPersonalWebullPortfolio = null;
+    return;
+  }
+
+  section.classList.remove('hidden');
+  if (status) status.textContent = 'กำลังดึงยอดบัญชีและสถานะถือครองจาก Webull...';
+  if (button) {
+    button.disabled = true;
+    button.classList.add('opacity-60', 'cursor-wait');
+  }
+
+  try {
+    const result = await callBackend('getWebullPortfolio', { refresh: !!forceRefresh });
+    cachedPersonalWebullPortfolio = result;
+    renderPersonalWebullPortfolio(result);
+  } catch (error) {
+    const result = { success: false, message: error.message || 'เชื่อมต่อ Webull ไม่สำเร็จ' };
+    cachedPersonalWebullPortfolio = result;
+    renderPersonalWebullPortfolio(result);
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.classList.remove('opacity-60', 'cursor-wait');
+    }
+  }
+}
 
 async function callBackend(action, params = {}) {
   const payload = { action: action, ...params };
@@ -110,6 +278,7 @@ async function login() {
 function logout() {
   sessionToken = '';
   currentUser = '';
+  cachedPersonalWebullPortfolio = null;
   document.getElementById('username').value = '';
   document.getElementById('password').value = '';
   document.getElementById('login-msg').innerHTML = '';
@@ -117,6 +286,8 @@ function logout() {
   document.getElementById('login-page').classList.remove('hidden');
   const adminBtn = document.getElementById('btnAdminPanel');
   if (adminBtn) adminBtn.classList.add('hidden');
+  const webullSection = document.getElementById('personalWebullSection');
+  if (webullSection) webullSection.classList.add('hidden');
   cachedAiAnalysis = '';
 }
 
@@ -142,6 +313,7 @@ async function fetchData() {
     processData(results[0]);
     processThaiStockData(results[1]);
     processGoldData(results[2]);
+    await loadPersonalWebullPortfolio(false);
   } catch (err) {
     console.error('Fetch Error:', err);
     const el = document.getElementById('kpi_total_money');
