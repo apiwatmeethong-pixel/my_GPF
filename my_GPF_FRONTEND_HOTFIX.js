@@ -185,10 +185,12 @@ async function fetchGpfHoldingsPrices(category = currentHoldingsCategory) {
 
   const symbols = catData.items.map(i => i.symbol);
   let liveCount = 0;
+  let sourceCounts = { webull: 0, yahoo: 0 };
 
   try {
-    const res = await callBackend('fetchYahooData', { symbols: symbols });
+    const res = await callBackend('fetchMarketData', { symbols: symbols });
     const data = res && res.status === 'success' && res.data ? res.data : {};
+    sourceCounts = res && res.sources ? res.sources : sourceCounts;
 
     catData.items.forEach(item => {
       const priceInfo = data[item.symbol];
@@ -203,6 +205,7 @@ async function fetchGpfHoldingsPrices(category = currentHoldingsCategory) {
       item.pct = (Number.isFinite(prevClose) && prevClose > 0)
         ? (item.diff / prevClose) * 100
         : 0;
+      item.source = priceInfo.source || 'yahoo';
       liveCount++;
     });
   } catch (e) {
@@ -213,15 +216,19 @@ async function fetchGpfHoldingsPrices(category = currentHoldingsCategory) {
     holdingsLastUpdatedTime = new Date();
     if (timeEl) {
       if (liveCount > 0) {
-        timeEl.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-emerald-500"></i> LIVE ${liveCount}/${catData.items.length} · ${holdingsLastUpdatedTime.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.`;
+        const providerSummary = [
+          sourceCounts.webull ? `WEBULL ${sourceCounts.webull}` : '',
+          sourceCounts.yahoo ? `YAHOO ${sourceCounts.yahoo}` : ''
+        ].filter(Boolean).join(' · ') || `LIVE ${liveCount}`;
+        timeEl.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-emerald-500"></i> ${providerSummary} · ${holdingsLastUpdatedTime.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.`;
       } else {
-        timeEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-500"></i> ใช้ราคาสำรอง · Yahoo/API ยังไม่ตอบ';
+        timeEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-500"></i> ใช้ราคาสำรอง · Webull/Yahoo ยังไม่ตอบ';
       }
     }
     renderGpfHoldings();
   }
 
-  return { liveCount: liveCount, total: catData.items.length };
+  return { liveCount: liveCount, total: catData.items.length, sources: sourceCounts };
 }
 
 async function refreshHoldingsData() {
@@ -235,8 +242,9 @@ async function refreshHoldingsData() {
     });
 
     const symbols = [...new Set(allItems.map(i => i.symbol))];
-    const res = await callBackend('fetchYahooData', { symbols: symbols });
+    const res = await callBackend('fetchMarketData', { symbols: symbols });
     const data = res && res.status === 'success' && res.data ? res.data : {};
+    const sourceCounts = res && res.sources ? res.sources : { webull: 0, yahoo: 0 };
 
     let liveCount = 0;
     allItems.forEach(item => {
@@ -252,6 +260,7 @@ async function refreshHoldingsData() {
       item.pct = (Number.isFinite(prevClose) && prevClose > 0)
         ? (item.diff / prevClose) * 100
         : 0;
+      item.source = priceInfo.source || 'yahoo';
       liveCount++;
     });
 
@@ -259,9 +268,13 @@ async function refreshHoldingsData() {
     const timeEl = document.getElementById('holdings_last_updated');
     if (timeEl) {
       if (liveCount > 0) {
-        timeEl.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-emerald-500"></i> LIVE ${liveCount}/${symbols.length} · ${holdingsLastUpdatedTime.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.`;
+        const providerSummary = [
+          sourceCounts.webull ? `WEBULL ${sourceCounts.webull}` : '',
+          sourceCounts.yahoo ? `YAHOO ${sourceCounts.yahoo}` : ''
+        ].filter(Boolean).join(' · ') || `LIVE ${liveCount}`;
+        timeEl.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-emerald-500"></i> ${providerSummary} · ${holdingsLastUpdatedTime.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} น.`;
       } else {
-        timeEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-500"></i> ใช้ราคาสำรอง · Yahoo/API ยังไม่ตอบ';
+        timeEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1 text-amber-500"></i> ใช้ราคาสำรอง · Webull/Yahoo ยังไม่ตอบ';
       }
     }
 
@@ -270,7 +283,9 @@ async function refreshHoldingsData() {
     Swal.fire({
       icon: liveCount > 0 ? 'success' : 'warning',
       title: liveCount > 0 ? `อัปเดตราคาสด ${liveCount}/${symbols.length} รายการ` : 'ยังดึงราคาสดไม่ได้',
-      text: liveCount > 0 ? 'อัปเดตข้อมูลหุ้น/REIT ทั้ง 35 รายการแล้ว' : 'ระบบยังแสดงราคาสำรองเพื่อไม่ให้ตารางว่าง',
+      text: liveCount > 0
+        ? `Webull ${sourceCounts.webull || 0} · Yahoo ${sourceCounts.yahoo || 0} รายการ`
+        : 'ระบบยังแสดงราคาสำรองเพื่อไม่ให้ตารางว่าง',
       timer: 1800,
       showConfirmButton: false
     });

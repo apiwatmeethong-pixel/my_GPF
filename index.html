@@ -2347,12 +2347,12 @@
         // ดึงผ่าน backend (ไม่มีปัญหา CORS)
         let backendData = null;
         try {
-          const res = await callBackend('fetchYahooData', { symbols: symbolsToFetch });
+          const res = await callBackend('fetchMarketData', { symbols: symbolsToFetch });
           if (res && res.status === 'success' && res.data) {
             backendData = res.data;
           }
         } catch(e) {
-          console.warn('Backend fetchYahooData failed for global indices, falling back to direct:', e);
+          console.warn('Backend market data failed for global indices, falling back to direct:', e);
         }
 
         const promises = updatedIndices.map(async item => {
@@ -2622,12 +2622,12 @@
         const symbols = thaiTopStocksRaw.map(s => s.symbol);
         let backendData = null;
         try {
-          const res = await callBackend('fetchYahooData', { symbols: symbols });
+          const res = await callBackend('fetchMarketData', { symbols: symbols });
           if (res && res.status === 'success' && res.data) {
             backendData = res.data;
           }
         } catch(e) {
-          console.warn('Backend fetchYahooData failed for Thai stocks, using direct:', e);
+          console.warn('Backend market data failed for Thai stocks, using direct:', e);
         }
 
         const promises = thaiTopStocksRaw.map(async s => {
@@ -2926,6 +2926,11 @@
             const curPrice = item.livePrice !== undefined ? item.livePrice : item.defaultPrice;
             const diff = item.diff !== undefined ? item.diff : item.defaultChange;
             const pct = item.pct !== undefined ? item.pct : item.defaultPct;
+            const source = item.source || 'fallback';
+            const sourceLabel = source === 'webull' ? 'WEBULL' : (source === 'yahoo' ? 'YAHOO' : 'ราคาสำรอง');
+            const sourceClass = source === 'webull'
+              ? 'text-blue-700 bg-blue-50 border-blue-200'
+              : (source === 'yahoo' ? 'text-purple-700 bg-purple-50 border-purple-200' : 'text-amber-700 bg-amber-50 border-amber-200');
             const isPos = pct >= 0;
             const sign = isPos ? '+' : '';
             const cls = isPos ? 'positive' : 'negative';
@@ -2950,7 +2955,10 @@
                   ${item.symbol.replace('.BK','')}
                 </td>
                 <td class="text-right font-bold text-slate-800 font-mono text-xs">${item.weight.toFixed(2)}%</td>
-                <td class="text-right font-black text-slate-900 font-mono text-xs">${priceFmt}</td>
+                <td class="text-right">
+                  <div class="font-black text-slate-900 font-mono text-xs">${priceFmt}</div>
+                  <span class="inline-block mt-1 px-1.5 py-0.5 rounded border text-[9px] font-bold ${sourceClass}">${sourceLabel}</span>
+                </td>
                 <td class="text-right font-mono text-xs font-semibold ${isPos ? 'text-emerald-600' : 'text-rose-600'}">
                   ${sign}${diff ? diff.toFixed(2) : '0.00'}
                 </td>
@@ -3052,9 +3060,9 @@
         let backendData = null;
 
         try {
-          backendData = await callBackend('fetchYahooData', { symbols: symbols });
+          backendData = await callBackend('fetchMarketData', { symbols: symbols });
         } catch(e) {
-          console.warn('Backend fetchYahooData for holdings failed:', e);
+          console.warn('Backend market data for holdings failed:', e);
         }
 
         catData.items.forEach(item => {
@@ -3067,6 +3075,7 @@
             item.livePrice = curPrice;
             item.diff = diff;
             item.pct = pct;
+            item.source = priceInfo.source || 'yahoo';
           }
         });
 
@@ -3138,12 +3147,12 @@
         const symbols = updatedList.map(item => item.symbol);
         let backendData = null;
         try {
-          const res = await callBackend('fetchYahooData', { symbols: symbols });
+          const res = await callBackend('fetchMarketData', { symbols: symbols });
           if (res && res.status === 'success' && res.data) {
             backendData = res.data;
           }
         } catch(e) {
-          console.warn('Backend fetchYahooData failed for gold, using direct:', e);
+          console.warn('Backend market data failed for gold, using direct:', e);
         }
 
         const promises = updatedList.map(async item => {
@@ -3614,6 +3623,6 @@
       });
     </script>
     
-    <script src="my_GPF_FRONTEND_HOTFIX.js?v=20260919-1"></script>
+    <script src="my_GPF_FRONTEND_HOTFIX.js?v=20260921-webull-1"></script>
 </body>
 </html>
