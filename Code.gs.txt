@@ -179,6 +179,8 @@ function handleApiRequest(params) {
     return updateCashflowEntry(params.id, params.amount, session.username);
   } else if (action === "lockCashflowEntry") {
     return lockCashflowEntry(params.id, params.locked, session.username);
+  } else if (action === "getWebullPortfolio") {
+    return getWebullPortfolio(session.username, params);
   }
 
   // Admin endpoints
@@ -1003,3 +1005,223 @@ function fetchYahooData(symbols) {
     };
   }
 }
+
+// ============================================================================
+// Webull OpenAPI Portfolio Integration
+// ============================================================================
+
+function getWebullPortfolio(username, params) {
+  try {
+    params = params || {};
+    var props = PropertiesService.getScriptProperties().getProperties();
+    var appKey = props.WEBULL_APP_KEY || props.webull_app_key || '';
+    var appSecret = props.WEBULL_APP_SECRET || props.webull_app_secret || '';
+    var accountId = props.WEBULL_ACCOUNT_ID || props.webull_account_id || '';
+    var env = (props.WEBULL_ENV || props.webull_env || 'us').toLowerCase();
+
+    if (!appKey || !appSecret) {
+      return {
+        status: 'error',
+        success: false,
+        message: 'ยังไม่ได้ตั้งค่า WEBULL_APP_KEY หรือ WEBULL_APP_SECRET ใน Script Properties'
+      };
+    }
+
+    var baseUrl = (env === 'hk')
+      ? 'https://quoteapi.webullhk.com'
+      : (env === 'jp')
+        ? 'https://quoteapi.webull.co.jp'
+        : 'https://quoteapi.webullbroker.com';
+
+    // Fallback baseUrl for Global Open API if broker endpoint differs
+    var apiHost = props.WEBULL_API_HOST || baseUrl;
+
+    var accounts = [];
+    var errors = [];
+
+    // Attempt 1: Fetch account details if accountId is present
+    if (accountId) {
+      var targetAccountIds = accountId.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+
+      targetAccountIds.forEach(function(accId) {
+        try {
+          var accountData = fetchWebullAccountDetail(apiHost, appKey, appSecret, accId);
+          if (accountData && accountData.success) {
+            accounts.push(accountData.account);
+          } else {
+            errors.push('Account ' + accId + ': ' + (accountData ? accountData.message : 'ไม่สามารถดึงข้อมูลได้'));
+          }
+        } catch (accErr) {
+          errors.push('Account ' + accId + ' Error: ' + accErr.toString());
+        }
+      });
+    } else {
+      // Attempt 2: Discover accounts list first
+      try {
+        var listRes = fetchWebullAccountList(apiHost, appKey, appSecret);
+        if (listRes && listRes.success && Array.isArray(listRes.accountList)) {
+          listRes.accountList.forEach(function(item) {
+            var accId = item.account_id || item.accountId || item.sec_account_id;
+            if (accId) {
+              var detail = fetchWebullAccountDetail(apiHost, appKey, appSecret, accId);
+              if (detail && detail.success) {
+                accounts.push(detail.account);
+              }
+            }
+          });
+        } else {
+          errors.push(listRes ? listRes.message : 'ไม่พบรายการบัญชี Webull');
+        }
+      } catch (listErr) {
+        errors.push('Account List Error: ' + listErr.toString());
+      }
+    }
+
+    if (accounts.length === 0) {
+      return {
+        status: 'error',
+        success: false,
+        message: errors.length > 0 ? errors.join('; ') : 'ไม่สามารถเชื่อมต่อดึงพอร์ต Webull ได้ กรุณาตรวจสอบสิทธิ์และการตั้งค่า',
+        errors: errors
+      };
+    }
+
+    var totalPositionCount = accounts.reduce(function(sum, acc) {
+      return sum + (acc.positions ? acc.positions.length : 0);
+    }, 0);
+
+    return {
+      status: 'success',
+      success: true,
+      accounts: accounts,
+      accountCount: accounts.length,
+      positionCount: totalPositionCount,
+      environment: env,
+      errors: errors,
+      fetchedAt: new Date().toISOString()
+    };
+
+  } catch (err) {
+    return {
+      status: 'error',
+      success: false,
+      message: 'Webull Integration Error: ' + err.toString()
+    };
+  }
+}
+
+function fetchWebullAccountList(baseUrl, appKey, appSecret) {
+  var path = '/api/trade/account/list';
+  var method = 'GET';
+  var res = callWebullSignedApi(baseUrl, path, method, {}, appKey, appSecret);
+  if (!res.ok) {
+    return { success: false, message: 'HTTP ' + res.status + ': ' + res.text };
+  }
+  var json = JSON.parse(res.text);
+  var list = json.data || json.account_list || json.accountList || json;
+  return { success: true, accountList: Array.isArray(list) ? list : [] };
+}
+
+function fetchWebullAccountDetail(baseUrl, appKey, appSecret, accountId) {
+  // Query balance / asset
+  var assetPath = '/api/trade/account/balance';
+  var posPath = '/api/trade/position/list';
+
+  var assetRes = callWebullSignedApi(baseUrl, assetPath, 'GET', { account_id: accountId }, appKey, appSecret);
+  var posRes = callWebullSignedApi(baseUrl, posPath, 'GET', { account_id: accountId }, appKey, appSecret);
+
+  var assetJson = assetRes.ok ? JSON.parse(assetRes.text) : {};
+  var posJson = posRes.ok ? JSON.parse(posRes.text) : {};
+
+  var assetData = assetJson.data || assetJson;
+  var posListRaw = posJson.data || posJson.position_list || posJson.positions || [];
+  if (!Array.isArray(posListRaw) && posJson.data && Array.isArray(posJson.data.list)) {
+    posListRaw = posJson.data.list;
+  }
+
+  var currency = assetData.currency || assetData.base_currency || 'USD';
+  var totalAssets = Number(assetData.net_liquidation || assetData.total_assets || assetData.totalAssets || assetData.net_asset_value || 0);
+  var marketValue = Number(assetData.market_value || assetData.marketValue || assetData.total_market_value || 0);
+  var cash = Number(assetData.cash_balance || assetData.cashBalance || assetData.cash || assetData.usable_cash || 0);
+
+  var formattedPositions = (Array.isArray(posListRaw) ? posListRaw : []).map(function(p) {
+    var qty = Number(p.quantity || p.position || p.qty || 0);
+    var cost = Number(p.cost_price || p.average_cost || p.avgCost || p.costPrice || 0);
+    var last = Number(p.last_price || p.market_price || p.lastPrice || p.current_price || cost);
+    var mktVal = Number(p.market_value || p.marketValue || (qty * last));
+    var pnl = Number(p.unrealized_profit_loss || p.unrealized_pnl || p.unrealizedPnl || (mktVal - (qty * cost)));
+    var pct = (qty * cost > 0) ? (pnl / (qty * cost)) * 100 : Number(p.unrealized_profit_loss_rate || p.unrealizedPct || 0);
+
+    return {
+      symbol: p.symbol || p.ticker || p.instrument_id || '-',
+      name: p.name || p.symbol || '-',
+      market: p.market || 'US',
+      instrumentType: p.instrument_type || 'EQUITY',
+      quantity: qty,
+      averageCost: cost,
+      lastPrice: last,
+      marketValue: mktVal,
+      unrealizedPnl: pnl,
+      unrealizedPct: pct,
+      currency: p.currency || currency
+    };
+  });
+
+  return {
+    success: true,
+    account: {
+      account: accountId,
+      accountType: assetData.account_type || 'Margin',
+      currency: currency,
+      balance: {
+        totalAssets: totalAssets,
+        marketValue: marketValue,
+        cash: cash,
+        currency: currency
+      },
+      positions: formattedPositions
+    }
+  };
+}
+
+function callWebullSignedApi(baseUrl, path, method, queryParams, appKey, appSecret) {
+  queryParams = queryParams || {};
+  var timestamp = Math.floor(Date.now() / 1000).toString();
+  var nonce = Utilities.getUuid().replace(/-/g, '').substring(0, 16);
+
+  // Build query string sorted
+  var keys = Object.keys(queryParams).sort();
+  var queryString = keys.map(function(k) {
+    return encodeURIComponent(k) + '=' + encodeURIComponent(queryParams[k]);
+  }).join('&');
+
+  var fullUrl = baseUrl + path + (queryString ? '?' + queryString : '');
+
+  // Sign string format: method + path + queryString + timestamp + nonce
+  var signPayload = method.toUpperCase() + path + (queryString ? '?' + queryString : '') + timestamp + nonce;
+  var signatureBytes = Utilities.computeHmacSha256Signature(signPayload, appSecret);
+  var signature = Utilities.base64Encode(signatureBytes);
+
+  var headers = {
+    'app-key': appKey,
+    'timestamp': timestamp,
+    'nonce': nonce,
+    'signature': signature,
+    'Accept': 'application/json',
+    'User-Agent': 'MyGPF/WebullClient-1.0'
+  };
+
+  var options = {
+    method: method.toLowerCase(),
+    headers: headers,
+    muteHttpExceptions: true
+  };
+
+  var res = UrlFetchApp.fetch(fullUrl, options);
+  return {
+    ok: res.getResponseCode() >= 200 && res.getResponseCode() < 300,
+    status: res.getResponseCode(),
+    text: res.getContentText()
+  };
+}
+
