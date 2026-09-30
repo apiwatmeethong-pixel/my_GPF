@@ -3128,7 +3128,8 @@
         }
 
         catData.items.forEach(item => {
-          const priceInfo = backendData && backendData.data ? backendData.data[item.symbol] : null;
+          const dataMap = backendData ? (backendData.data || backendData) : null;
+          const priceInfo = dataMap ? dataMap[item.symbol] : null;
           if (priceInfo) {
             const curPrice = priceInfo.price || item.defaultPrice;
             const prevClose = priceInfo.prevClose || curPrice;

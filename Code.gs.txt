@@ -149,7 +149,7 @@ function handleApiRequest(params) {
   if (action === "getGoldData") {
     return getGoldData();
   }
-  if (action === "fetchYahooData") {
+  if (action === "fetchYahooData" || action === "fetchMarketData") {
     return fetchYahooData(params.symbols || []);
   }
   if (action === "getPublicConfig") {
@@ -867,6 +867,52 @@ function callSpecificAI(engine, prompt, config) {
       var json = JSON.parse(res.getContentText());
       if (json.choices && json.choices[0].message.content) {
         return { success: true, engineName: "OpenAI GPT-4o mini", text: json.choices[0].message.content };
+      }
+    }
+
+    if (engine === "deepseek" && config.deepseekKey) {
+      var url = "https://api.deepseek.com/chat/completions";
+      var res = UrlFetchApp.fetch(url, {
+        method: "post", contentType: "application/json",
+        headers: { "Authorization": "Bearer " + config.deepseekKey },
+        payload: JSON.stringify({ model: "deepseek-chat", messages: [{ role: "user", content: prompt }] }),
+        muteHttpExceptions: true
+      });
+      var json = JSON.parse(res.getContentText());
+      if (json.choices && json.choices[0].message.content) {
+        return { success: true, engineName: "DeepSeek V3", text: json.choices[0].message.content };
+      }
+    }
+
+    if (engine === "openrouter" && config.openrouterKey) {
+      var url = "https://openrouter.ai/api/v1/chat/completions";
+      var res = UrlFetchApp.fetch(url, {
+        method: "post", contentType: "application/json",
+        headers: {
+          "Authorization": "Bearer " + config.openrouterKey,
+          "HTTP-Referer": "https://apiwatmeethong-pixel.github.io/my_GPF/",
+          "X-Title": "My GPF Portfolio"
+        },
+        payload: JSON.stringify({ model: "meta-llama/llama-3.3-70b-instruct:free", messages: [{ role: "user", content: prompt }] }),
+        muteHttpExceptions: true
+      });
+      var json = JSON.parse(res.getContentText());
+      if (json.choices && json.choices[0].message.content) {
+        return { success: true, engineName: "OpenRouter (Llama 3.3 Free)", text: json.choices[0].message.content };
+      }
+    }
+
+    if (engine === "github" && config.githubKey) {
+      var url = "https://models.inference.ai.azure.com/chat/completions";
+      var res = UrlFetchApp.fetch(url, {
+        method: "post", contentType: "application/json",
+        headers: { "Authorization": "Bearer " + config.githubKey },
+        payload: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: prompt }] }),
+        muteHttpExceptions: true
+      });
+      var json = JSON.parse(res.getContentText());
+      if (json.choices && json.choices[0].message.content) {
+        return { success: true, engineName: "GitHub Models (GPT-4o mini)", text: json.choices[0].message.content };
       }
     }
 
