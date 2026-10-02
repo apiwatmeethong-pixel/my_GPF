@@ -1509,10 +1509,12 @@
         let newPlans = [];
         for (let i = 1; i < globalHeaders.length - 1; i++) {
             let planName = globalHeaders[i];
-            let val = parseFloat(document.getElementById('input_plan_' + i).value) || 0;
+            let inputEl = document.getElementById('input_plan_' + i);
+            let val = inputEl ? (parseFloat(inputEl.value) || 0) : (parseFloat(myUnits[planName]) || 0);
             newPlans.push({ plan: planName, units: val });
         }
-        let monthlyCash = parseFloat(document.getElementById('input_monthly_cash').value) || 0;
+        let monthlyCashEl = document.getElementById('input_monthly_cash');
+        let monthlyCash = monthlyCashEl ? (parseFloat(monthlyCashEl.value) || 0) : 0;
 
         try {
           const res = await callBackend('savePortfolio', { user: currentUser, data: newPlans, monthlyCash: monthlyCash });
@@ -2419,7 +2421,8 @@
 
         const promises = updatedIndices.map(async item => {
           if (item.symbol === 'SET100') return item;
-          if (backendData && backendData[item.symbol]) {
+          const b = backendData ? (backendData[item.symbol] || (backendData.data && backendData.data[item.symbol])) : null;
+          if (b && (b.price !== undefined || b.livePrice !== undefined)) {
             const b = backendData[item.symbol];
             const curPrice = b.price || item.defaultPrice;
             const prevClose = b.prevClose || curPrice;
@@ -2693,7 +2696,8 @@
         }
 
         const promises = thaiTopStocksRaw.map(async s => {
-          if (backendData && backendData[s.symbol]) {
+          const b = backendData ? (backendData[s.symbol] || (backendData.data && backendData.data[s.symbol])) : null;
+          if (b && (b.price !== undefined || b.livePrice !== undefined)) {
             const b = backendData[s.symbol];
             const curPrice = b.price || s.price;
             const prevClose = b.prevClose || curPrice;
@@ -3219,7 +3223,8 @@
         }
 
         const promises = updatedList.map(async item => {
-          if (backendData && backendData[item.symbol]) {
+          const b = backendData ? (backendData[item.symbol] || (backendData.data && backendData.data[item.symbol])) : null;
+          if (b && (b.price !== undefined || b.livePrice !== undefined)) {
             const b = backendData[item.symbol];
             const curPrice = b.price || item.defaultPrice;
             const prevClose = b.prevClose || curPrice;
